@@ -189,6 +189,17 @@ export function getDevices(options?: Partial<FilterState>): { devices: DeviceLis
         valA = getDeviceMetrics(a.deviceId)?.dataCompleteness ?? 0
         valB = getDeviceMetrics(b.deviceId)?.dataCompleteness ?? 0
         break
+      case 'ram':
+        valA = a.memoryCapacityGB ?? 0
+        valB = b.memoryCapacityGB ?? 0
+        break
+      case 'ramPerDollar': {
+        const priceA = getLatestPrice(a.deviceId)?.priceUsd
+        const priceB = getLatestPrice(b.deviceId)?.priceUsd
+        valA = priceA && a.memoryCapacityGB ? a.memoryCapacityGB / priceA : 0
+        valB = priceB && b.memoryCapacityGB ? b.memoryCapacityGB / priceB : 0
+        break
+      }
       default:
         valA = a.launchDate
         valB = b.launchDate

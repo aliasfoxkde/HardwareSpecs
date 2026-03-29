@@ -29,6 +29,13 @@ const DEFAULT_VISIBILITY: Record<string, boolean> = {
   familyName: false,
   status: false,
   formFactor: false,
+  tmus: false,
+  rops: false,
+  tensorCores: false,
+  rtCores: false,
+  baseClockMhz: false,
+  boostClockMhz: false,
+  memoryBusWidth: false,
 }
 
 const PRESET_VIEWS: Record<string, Record<string, boolean>> = {
@@ -41,6 +48,8 @@ const PRESET_VIEWS: Record<string, Record<string, boolean>> = {
     memoryCapacityGB: false, memoryType: false, memoryBandwidthGBps: false,
     formFactor: false, status: false, topBenchmarkScore: false, topBenchmarkType: false,
     vendorId: false, familyName: false,
+    tmus: false, rops: false, tensorCores: false, rtCores: false,
+    baseClockMhz: false, boostClockMhz: false, memoryBusWidth: false,
   },
   Compute: {
     deviceId: false, modelName: true, vendorName: true, categoryName: true,
@@ -51,6 +60,8 @@ const PRESET_VIEWS: Record<string, Record<string, boolean>> = {
     memoryCapacityGB: true, memoryType: true, memoryBandwidthGBps: true,
     formFactor: false, status: false, topBenchmarkScore: true, topBenchmarkType: false,
     vendorId: false, familyName: true,
+    tmus: true, rops: true, tensorCores: true, rtCores: true,
+    baseClockMhz: true, boostClockMhz: true, memoryBusWidth: true,
   },
   Value: {
     deviceId: false, modelName: true, vendorName: true, categoryName: true,
@@ -61,6 +72,8 @@ const PRESET_VIEWS: Record<string, Record<string, boolean>> = {
     memoryCapacityGB: false, memoryType: false, memoryBandwidthGBps: false,
     formFactor: false, status: false, topBenchmarkScore: false, topBenchmarkType: false,
     vendorId: false, familyName: false,
+    tmus: false, rops: false, tensorCores: false, rtCores: false,
+    baseClockMhz: false, boostClockMhz: false, memoryBusWidth: false,
   },
   Full: {
     deviceId: true, modelName: true, vendorName: true, categoryName: true,
@@ -71,6 +84,8 @@ const PRESET_VIEWS: Record<string, Record<string, boolean>> = {
     memoryCapacityGB: true, memoryType: true, memoryBandwidthGBps: true,
     formFactor: true, status: true, topBenchmarkScore: true, topBenchmarkType: true,
     vendorId: true, familyName: true,
+    tmus: true, rops: true, tensorCores: true, rtCores: true,
+    baseClockMhz: true, boostClockMhz: true, memoryBusWidth: true,
   },
 }
 
@@ -83,9 +98,14 @@ function fmtNum(n: number | null | undefined, decimals = 2): string {
 }
 
 export function StudioPage() {
-  const [savedState, setSavedState] = useState<StudioState>(() =>
-    getItem<StudioState>(STORAGE_KEY, { columnVisibility: DEFAULT_VISIBILITY, globalFilter: '' })
-  )
+  const [savedState, setSavedState] = useState<StudioState>(() => {
+    const saved = getItem<StudioState>(STORAGE_KEY, { columnVisibility: DEFAULT_VISIBILITY, globalFilter: '' })
+    // Merge with defaults so new columns aren't missing
+    return {
+      ...saved,
+      columnVisibility: { ...DEFAULT_VISIBILITY, ...saved.columnVisibility },
+    }
+  })
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
   const [selectedRows, setSelectedRows] = useState<Set<string>>(new Set())
@@ -109,6 +129,13 @@ export function StudioPage() {
     { accessorKey: 'memoryCapacityGB', header: 'Memory (GB)', size: 90, cell: info => info.getValue() ?? '-' },
     { accessorKey: 'memoryType', header: 'Mem Type', size: 70, cell: info => info.getValue() ?? '-' },
     { accessorKey: 'memoryBandwidthGBps', header: 'Mem BW (GB/s)', size: 100, cell: info => info.getValue() ?? '-' },
+    { accessorKey: 'memoryBusWidth', header: 'Bus Width', size: 80, cell: info => info.getValue() ?? '-' },
+    { accessorKey: 'tmus', header: 'TMUs', size: 70, cell: info => info.getValue() ?? '-' },
+    { accessorKey: 'rops', header: 'ROPs', size: 70, cell: info => info.getValue() ?? '-' },
+    { accessorKey: 'tensorCores', header: 'Tensor Cores', size: 90, cell: info => info.getValue() ?? '-' },
+    { accessorKey: 'rtCores', header: 'RT Cores', size: 80, cell: info => info.getValue() ?? '-' },
+    { accessorKey: 'baseClockMhz', header: 'Base Clock', size: 80, cell: info => { const v = info.getValue(); return v != null ? `${v} MHz` : '-' } },
+    { accessorKey: 'boostClockMhz', header: 'Boost Clock', size: 80, cell: info => { const v = info.getValue(); return v != null ? `${v} MHz` : '-' } },
     { accessorKey: 'tdpWatts', header: 'TDP (W)', size: 80, cell: info => info.getValue() ?? '-' },
     { accessorKey: 'latestPrice', header: 'Price ($)', size: 90, cell: info => info.getValue() != null ? `$${Number(info.getValue()).toLocaleString()}` : '-' },
     { accessorKey: 'effectiveInt8Tops', header: 'INT8 TOPS', size: 100, cell: info => { const v = info.getValue(); return v > 0 ? fmtNum(v) : '-' } },

@@ -63,6 +63,14 @@ export interface DeviceVariant {
   formFactor?: string
   interface?: string
   notes?: string
+  // GPU-specific fields
+  tmus?: number
+  rops?: number
+  tensorCores?: number
+  rtCores?: number
+  baseClockMhz?: number
+  boostClockMhz?: number
+  memoryBusWidth?: string
 }
 
 export interface SourceRegistry {

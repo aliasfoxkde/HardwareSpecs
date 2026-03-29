@@ -1,24 +1,24 @@
 import { useMemo } from 'react'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts'
-import { getAllDeviceMetrics } from '@/lib/api'
+import { getDeviceMetricsTable } from '@/lib/api'
 import { getVendorColor, CHART_STYLES, formatNumber } from './chartUtils'
+
+function truncateName(name: string, max = 20): string {
+  return name.length > max ? name.slice(0, max - 2) + '..' : name
+}
 
 export function TopTopsBarChart({ limit = 20 }: { limit?: number }) {
   const data = useMemo(() => {
-    const metrics = getAllDeviceMetrics()
-    return [...metrics.entries()]
-      .filter(([, m]) => m.effectiveInt8Tops > 0)
-      .sort((a, b) => b[1].effectiveInt8Tops - a[1].effectiveInt8Tops)
+    return getDeviceMetricsTable()
+      .filter(m => m.effectiveInt8Tops > 0)
+      .sort((a, b) => b.effectiveInt8Tops - a.effectiveInt8Tops)
       .slice(0, limit)
-      .map(([id, m]) => {
-        const vendorId = m.vendorId
-        return {
-          deviceId: id,
-          name: m.modelName.length > 20 ? m.modelName.slice(0, 18) + '...' : m.modelName,
-          vendorId,
-          tops: m.effectiveInt8Tops,
-        }
-      })
+      .map(m => ({
+        deviceId: m.deviceId,
+        name: truncateName(m.modelName),
+        vendorId: m.vendorId,
+        tops: m.effectiveInt8Tops,
+      }))
   }, [limit])
 
   if (data.length === 0) return <div className="flex items-center justify-center h-full text-text-muted">No INT8 TOPS data available</div>
@@ -50,14 +50,13 @@ export function TopTopsBarChart({ limit = 20 }: { limit?: number }) {
 
 export function TopTopsPerDollarChart({ limit = 20 }: { limit?: number }) {
   const data = useMemo(() => {
-    const metrics = getAllDeviceMetrics()
-    return [...metrics.entries()]
-      .filter(([, m]) => m.topsPerDollar != null && m.topsPerDollar > 0)
-      .sort((a, b) => (b[1].topsPerDollar ?? 0) - (a[1].topsPerDollar ?? 0))
+    return getDeviceMetricsTable()
+      .filter(m => m.topsPerDollar != null && m.topsPerDollar > 0)
+      .sort((a, b) => (b.topsPerDollar ?? 0) - (a.topsPerDollar ?? 0))
       .slice(0, limit)
-      .map(([id, m]) => ({
-        deviceId: id,
-        name: m.modelName.length > 20 ? m.modelName.slice(0, 18) + '...' : m.modelName,
+      .map(m => ({
+        deviceId: m.deviceId,
+        name: truncateName(m.modelName),
         vendorId: m.vendorId,
         topsPerDollar: m.topsPerDollar,
       }))
@@ -88,14 +87,13 @@ export function TopTopsPerDollarChart({ limit = 20 }: { limit?: number }) {
 
 export function TopTopsPerWattChart({ limit = 20 }: { limit?: number }) {
   const data = useMemo(() => {
-    const metrics = getAllDeviceMetrics()
-    return [...metrics.entries()]
-      .filter(([, m]) => m.topsPerWatt != null && m.topsPerWatt > 0)
-      .sort((a, b) => (b[1].topsPerWatt ?? 0) - (a[1].topsPerWatt ?? 0))
+    return getDeviceMetricsTable()
+      .filter(m => m.topsPerWatt != null && m.topsPerWatt > 0)
+      .sort((a, b) => (b.topsPerWatt ?? 0) - (a.topsPerWatt ?? 0))
       .slice(0, limit)
-      .map(([id, m]) => ({
-        deviceId: id,
-        name: m.modelName.length > 20 ? m.modelName.slice(0, 18) + '...' : m.modelName,
+      .map(m => ({
+        deviceId: m.deviceId,
+        name: truncateName(m.modelName),
         vendorId: m.vendorId,
         topsPerWatt: m.topsPerWatt,
       }))

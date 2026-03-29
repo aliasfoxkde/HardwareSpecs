@@ -97,6 +97,14 @@ export interface DeviceMetricsRow extends DeviceMetrics {
   memoryBandwidthGBps: number | null
   formFactor: string | null
   status: string
+  // GPU-specific fields
+  tmus: number | null
+  rops: number | null
+  tensorCores: number | null
+  rtCores: number | null
+  baseClockMhz: number | null
+  boostClockMhz: number | null
+  memoryBusWidth: string | null
 }
 
 export function getDeviceMetricsTable(): DeviceMetricsRow[] {
@@ -137,6 +145,13 @@ export function getDeviceMetricsTable(): DeviceMetricsRow[] {
       memoryBandwidthGBps: device.memoryBandwidthGBps ?? null,
       formFactor: device.formFactor ?? null,
       status: family?.status ?? 'active',
+      tmus: device.tmus ?? null,
+      rops: device.rops ?? null,
+      tensorCores: device.tensorCores ?? null,
+      rtCores: device.rtCores ?? null,
+      baseClockMhz: device.baseClockMhz ?? null,
+      boostClockMhz: device.boostClockMhz ?? null,
+      memoryBusWidth: device.memoryBusWidth ?? null,
     }
   })
 }
