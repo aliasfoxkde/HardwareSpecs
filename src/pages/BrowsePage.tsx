@@ -150,6 +150,36 @@ export function BrowsePage() {
           className="w-full px-4 py-2 bg-bg-secondary border border-border-subtle rounded-lg text-sm text-text-primary placeholder-text-muted focus:outline-none focus:ring-2 focus:ring-brand-500"
         />
 
+        <div className="flex flex-wrap gap-4 items-center">
+          {/* TDP Range Slider */}
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-medium text-text-secondary whitespace-nowrap">TDP</span>
+            <input type="range" min={0} max={700} step={5} value={filters.minTdp ?? 0}
+              onChange={e => setFilters(f => ({ ...f, minTdp: Number(e.target.value) || undefined, page: 1 }))}
+              className="w-20 h-1.5 accent-brand-500" />
+            <span className="text-xs text-text-muted w-12 text-right">{filters.minTdp ?? 0}W</span>
+            <span className="text-text-muted/40">–</span>
+            <input type="range" min={0} max={700} step={5} value={filters.maxTdp ?? 700}
+              onChange={e => setFilters(f => ({ ...f, maxTdp: Number(e.target.value) < 700 ? Number(e.target.value) : undefined, page: 1 }))}
+              className="w-20 h-1.5 accent-brand-500" />
+            <span className="text-xs text-text-muted w-14 text-right">{filters.maxTdp ? `${filters.maxTdp}W` : '∞'}</span>
+          </div>
+
+          {/* Price Range Slider */}
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-medium text-text-secondary whitespace-nowrap">Price</span>
+            <input type="range" min={0} max={50000} step={50} value={filters.minPrice ?? 0}
+              onChange={e => setFilters(f => ({ ...f, minPrice: Number(e.target.value) || undefined, page: 1 }))}
+              className="w-20 h-1.5 accent-green-500" />
+            <span className="text-xs text-text-muted w-14 text-right">${(filters.minPrice ?? 0).toLocaleString()}</span>
+            <span className="text-text-muted/40">–</span>
+            <input type="range" min={0} max={50000} step={50} value={filters.maxPrice ?? 50000}
+              onChange={e => setFilters(f => ({ ...f, maxPrice: Number(e.target.value) < 50000 ? Number(e.target.value) : undefined, page: 1 }))}
+              className="w-20 h-1.5 accent-green-500" />
+            <span className="text-xs text-text-muted w-14 text-right">{filters.maxPrice ? `$${filters.maxPrice.toLocaleString()}` : '∞'}</span>
+          </div>
+        </div>
+
         <div className="flex flex-wrap gap-2 items-center">
           {/* Category filters */}
           {CATEGORIES.map(cat => (

@@ -138,6 +138,20 @@ export function getDevices(options?: Partial<FilterState>): { devices: DeviceLis
     })
   }
 
+  if (options?.minPrice) {
+    result = result.filter(d => {
+      const price = getLatestPrice(d.deviceId)?.priceUsd
+      return price !== undefined && price >= options.minPrice!
+    })
+  }
+
+  if (options?.maxPrice) {
+    result = result.filter(d => {
+      const price = getLatestPrice(d.deviceId)?.priceUsd
+      return price !== undefined && price <= options.maxPrice!
+    })
+  }
+
   const total = result.length
 
   // Sort

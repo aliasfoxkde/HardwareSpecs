@@ -1,5 +1,5 @@
-import { useState, useMemo } from 'react'
-import { Link } from 'react-router-dom'
+import { useState, useMemo, useEffect } from 'react'
+import { Link, useSearchParams } from 'react-router-dom'
 import { compareDevices, searchDevices, getDeviceMetrics } from '@/lib/api'
 
 function fmtNum(n: number | null | undefined, decimals = 2): string {
@@ -14,9 +14,22 @@ function BestBadge() {
 }
 
 export function ComparePage() {
-  const [selectedIds, setSelectedIds] = useState<string[]>([])
+  const [searchParams, setSearchParams] = useSearchParams()
+  const [selectedIds, setSelectedIds] = useState<string[]>(() => {
+    const param = searchParams.get('devices')
+    return param ? param.split(',').filter(Boolean) : []
+  })
   const [searchQuery, setSearchQuery] = useState('')
   const [showAdd, setShowAdd] = useState(false)
+
+  // Sync selectedIds to URL
+  useEffect(() => {
+    if (selectedIds.length > 0) {
+      setSearchParams({ devices: selectedIds.join(',') }, { replace: true })
+    } else {
+      setSearchParams({}, { replace: true })
+    }
+  }, [selectedIds, setSearchParams])
 
   const searchResults = useMemo(() => {
     if (searchQuery.length < 2) return []
