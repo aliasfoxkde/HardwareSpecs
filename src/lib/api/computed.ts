@@ -28,7 +28,7 @@ function getLatestPrice(deviceId: string): number | null {
   const devicePrices = prices.filter(p => p.deviceId === deviceId)
   if (devicePrices.length === 0) return null
   // Prefer: new > msrp > used
-  const priority = { new: 0, msrp: 1, used: 2 }
+  const priority: Record<string, number> = { new: 0, msrp: 1, used: 2 }
   devicePrices.sort((a, b) => (priority[a.condition] ?? 3) - (priority[b.condition] ?? 3))
   return devicePrices[0].priceUsd
 }
@@ -46,7 +46,7 @@ export function getDeviceMetrics(deviceId: string): DeviceMetrics | null {
   const deviceSpecs = specs.filter(s => s.deviceId === deviceId)
   const price = getLatestPrice(deviceId)
   const topBench = getTopBenchmark(deviceId)
-  const int8Result = computeEffectiveInt8Tops([{ deviceId }], deviceSpecs, specs)
+  const int8Result = computeEffectiveInt8Tops(deviceSpecs)
   const effective = int8Result.get(deviceId)
   const completeness = computeDataCompleteness(device, benchmarks.filter(b => b.deviceId === deviceId), deviceSpecs, prices.filter(p => p.deviceId === deviceId))
 

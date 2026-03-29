@@ -1,11 +1,10 @@
 import { useMemo } from 'react'
-import { getDeviceMetricsTable, getVendors, getFamilies } from '@/lib/api'
+import { getDeviceMetricsTable, getFamilies } from '@/lib/api'
 import { formatNumber } from './chartUtils'
 
 export function InfographicPanel({ category }: { category: string }) {
   const stats = useMemo(() => {
     const table = getDeviceMetricsTable().filter(m => m.categoryName === category)
-    const vendors = getVendors()
     const families = getFamilies().filter(f => f.category === category)
 
     const totalDevices = table.length

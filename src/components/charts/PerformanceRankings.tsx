@@ -3,7 +3,7 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 import { getDeviceMetricsTable, getVendors } from '@/lib/api'
 import { getVendorColor, CHART_STYLES, formatNumber } from './chartUtils'
 
-function shortName(name: string, vendorName: string): string {
+function shortName(name: string, _vendorName: string): string {
   // Strip vendor prefix for brevity, keep the actual model name
   let short = name
   const prefixes = [
@@ -59,7 +59,7 @@ export function TopTopsBarChart({ limit = 20 }: { limit?: number }) {
             color: CHART_STYLES.tooltipText,
           }}
           labelFormatter={(_, payload) => payload?.[0]?.payload?.fullName ?? ''}
-          formatter={(value: number) => [`${formatNumber(value)} TOPS`, 'INT8 TOPS']}
+          formatter={(value) => [`${formatNumber(Number(value ?? 0))} TOPS`, 'INT8 TOPS']}
         />
         <Bar dataKey="tops" name="INT8 TOPS" radius={[0, 4, 4, 0]}>
           {data.map(entry => (
@@ -109,7 +109,7 @@ export function TopTopsPerDollarChart({ limit = 20 }: { limit?: number }) {
             color: CHART_STYLES.tooltipText,
           }}
           labelFormatter={(_, payload) => payload?.[0]?.payload?.fullName ?? ''}
-          formatter={(value: number) => [`${formatNumber(value)} TOPS/$`, 'TOPS/$']}
+          formatter={(value) => [`${formatNumber(Number(value ?? 0))} TOPS/$`, 'TOPS/$']}
         />
         <Bar dataKey="topsPerDollar" name="TOPS/$" fill="#22c55e" radius={[0, 4, 4, 0]} />
       </BarChart>
@@ -155,7 +155,7 @@ export function TopTopsPerWattChart({ limit = 20 }: { limit?: number }) {
             color: CHART_STYLES.tooltipText,
           }}
           labelFormatter={(_, payload) => payload?.[0]?.payload?.fullName ?? ''}
-          formatter={(value: number) => [`${formatNumber(value)} TOPS/W`, 'TOPS/W']}
+          formatter={(value) => [`${formatNumber(Number(value ?? 0))} TOPS/W`, 'TOPS/W']}
         />
         <Bar dataKey="topsPerWatt" name="TOPS/W" fill="#3b82f6" radius={[0, 4, 4, 0]} />
       </BarChart>

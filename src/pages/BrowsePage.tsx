@@ -1,27 +1,13 @@
 import { useState, useEffect, useMemo } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { getDevices, getVendors, getFamilies } from '@/lib/api'
+import { downloadCSV, downloadJSON } from '@/lib/export'
 import type { DeviceCategory, FilterState } from '@/types'
 
 const CATEGORIES: DeviceCategory[] = ['CPU', 'GPU', 'SBC', 'NPU', 'ASIC', 'SoC', 'System']
 
 const SORT_KEYS = ['launchDate', 'name', 'tdp', 'price', 'tops', 'topsPerDollar', 'topsPerWatt', 'perfPerDollar', 'perfPerWatt', 'dataCompleteness', 'ram', 'ramPerDollar'] as const
 type SortKey = typeof SORT_KEYS[number]
-
-const SORT_LABELS: Record<SortKey, string> = {
-  launchDate: 'Launch',
-  name: 'Device',
-  tdp: 'TDP',
-  price: 'Price',
-  tops: 'INT8 TOPS',
-  topsPerDollar: 'TOPS/$',
-  topsPerWatt: 'TOPS/W',
-  perfPerDollar: 'Perf/$',
-  perfPerWatt: 'Perf/W',
-  dataCompleteness: 'Data',
-  ram: 'RAM',
-  ramPerDollar: 'RAM/$',
-}
 
 const COLUMNS: { key: SortKey; label: string; align: 'left' | 'right'; className?: string }[] = [
   { key: 'name', label: 'Device', align: 'left' },
@@ -129,6 +115,38 @@ export function BrowsePage() {
     return <span className="text-brand-400 ml-1">{filters.sortOrder === 'desc' ? '↓' : '↑'}</span>
   }
 
+  const handleExportCSV = () => {
+    const rows = devices.map(item => ({
+      Device: item.device.modelName,
+      Vendor: item.vendor.name,
+      Category: item.family.category,
+      Launch: item.device.launchDate,
+      'RAM (GB)': item.device.memoryCapacityGB,
+      'INT8 TOPS': item.metrics.effectiveInt8Tops || '',
+      'TOPS/$': item.metrics.topsPerDollar || '',
+      'TOPS/W': item.metrics.topsPerWatt || '',
+      TDP: item.device.tdpWatts ? `${item.device.tdpWatts}W` : '',
+      Price: item.latestPrice ? `$${item.latestPrice.priceUsd}` : '',
+    }))
+    downloadCSV(`siliconrank-${filters.categories.join('-') || 'all'}-${total}.csv`, rows)
+  }
+
+  const handleExportJSON = () => {
+    const data = devices.map(item => ({
+      device: item.device.modelName,
+      vendor: item.vendor.name,
+      category: item.family.category,
+      launch: item.device.launchDate,
+      ramGB: item.device.memoryCapacityGB,
+      int8Tops: item.metrics.effectiveInt8Tops,
+      topsPerDollar: item.metrics.topsPerDollar,
+      topsPerWatt: item.metrics.topsPerWatt,
+      tdpW: item.device.tdpWatts,
+      priceUsd: item.latestPrice?.priceUsd,
+    }))
+    downloadJSON(`siliconrank-${filters.categories.join('-') || 'all'}-${total}.json`, data)
+  }
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 animate-fade-in flex flex-col" style={{ height: 'calc(100vh - 4rem)' }}>
       {/* Header — fixed */}
@@ -220,6 +238,22 @@ export function BrowsePage() {
               Clear all filters
             </button>
           )}
+
+          {/* Export buttons */}
+          <div className="flex gap-1 ml-auto">
+            <button
+              onClick={handleExportCSV}
+              className="px-3 py-1.5 text-xs font-medium rounded-lg bg-bg-secondary text-text-secondary hover:text-text-primary border border-border-subtle transition-colors"
+            >
+              CSV
+            </button>
+            <button
+              onClick={handleExportJSON}
+              className="px-3 py-1.5 text-xs font-medium rounded-lg bg-bg-secondary text-text-secondary hover:text-text-primary border border-border-subtle transition-colors"
+            >
+              JSON
+            </button>
+          </div>
         </div>
       </div>
 

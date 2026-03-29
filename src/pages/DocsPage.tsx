@@ -1,6 +1,5 @@
-import { useState, useMemo } from 'react'
+import { useState } from 'react'
 import { getVendors, getFamilies, getDevices, getDevice, getDevicesByCategory, searchDevices, getStats, compareDevices, getBenchmarkTypes, getSources, getDeviceMetrics, getDeviceMetricsTable } from '@/lib/api'
-import type { DeviceMetrics, DeviceMetricsRow } from '@/lib/api'
 
 const API_BASE = 'https://siliconrank.cyopsys.com'
 
@@ -419,16 +418,16 @@ export function DocsPage() {
             <div key={type.name} className="bg-bg-card/30 border border-border-subtle/50 rounded-xl p-6">
               <h3 className="text-lg font-bold text-brand-400 font-mono">{type.name}</h3>
               <p className="text-sm text-text-secondary mt-1">{type.desc}</p>
-              {'values' in type && type.values.length > 0 && (
+              {'values' in type && (type.values?.length ?? 0) > 0 && (
                 <div className="mt-3 flex flex-wrap gap-2">
-                  {type.values.map(t => (
+                  {(type.values ?? []).map(t => (
                     <span key={t} className="px-2 py-1 bg-bg-tertiary rounded text-xs font-mono text-text-primary">{t}</span>
                   ))}
                 </div>
               )}
-              {'fields' in type && type.fields.length > 0 && (
+              {'fields' in type && (type.fields?.length ?? 0) > 0 && (
                 <div className="mt-3 space-y-1">
-                  {type.fields.map(f => (
+                  {(type.fields ?? []).map(f => (
                     <div key={f} className="text-xs font-mono text-text-secondary">
                       <span className="text-text-muted mr-1">-</span> {f}
                     </div>

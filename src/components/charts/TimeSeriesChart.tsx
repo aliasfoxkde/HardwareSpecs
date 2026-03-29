@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts'
 import { getDevicesByCategory, getVendors } from '@/lib/api'
-import { getVendorColor, CHART_STYLES, formatNumber } from './chartUtils'
+import { getVendorColor, CHART_STYLES } from './chartUtils'
 
 export function TdpOverTimeChart({ category }: { category: string }) {
   const { seriesData, vendors, vendorNameMap } = useMemo(() => {
@@ -41,7 +41,7 @@ export function TdpOverTimeChart({ category }: { category: string }) {
       const point: Record<string, string | number> = { year }
       for (const vId of activeVendorIds) {
         const entry = vendorData[vId].get(year)
-        point[vId] = entry ? Math.round(entry.avg) : null
+        point[vId] = entry ? Math.round(entry.avg) : 0
       }
       return point
     })
@@ -130,7 +130,7 @@ export function TopsOverTimeChart({ category }: { category: string }) {
       const point: Record<string, string | number> = { year }
       for (const vId of activeVendorIds) {
         const entry = vendorData[vId].get(year)
-        point[vId] = entry ? Math.round(entry.max) : null
+        point[vId] = entry ? Math.round(entry.max) : 0
       }
       return point
     })
@@ -219,7 +219,7 @@ export function PriceOverTimeChart({ category }: { category: string }) {
       const point: Record<string, string | number> = { year }
       for (const vId of activeVendorIds) {
         const entry = vendorData[vId].get(year)
-        point[vId] = entry ? Math.round(entry.avg) : null
+        point[vId] = entry ? Math.round(entry.avg) : 0
       }
       return point
     })
@@ -251,7 +251,7 @@ export function PriceOverTimeChart({ category }: { category: string }) {
             borderRadius: '8px',
             color: CHART_STYLES.tooltipText,
           }}
-          formatter={(value: number) => [`$${value.toLocaleString()}`, 'Avg Price']}
+          formatter={(value) => [`$${Number(value ?? 0).toLocaleString()}`, 'Avg Price']}
         />
         <Legend />
         {vendors.map(vId => (
@@ -304,7 +304,7 @@ export function ProcessOverTimeChart({ category }: { category: string }) {
       const point: Record<string, string | number> = { year }
       for (const vId of activeVendorIds) {
         const entry = vendorData[vId].get(year)
-        point[vId] = entry ? Math.round(entry.avg) : null
+        point[vId] = entry ? Math.round(entry.avg) : 0
       }
       return point
     })
@@ -337,7 +337,7 @@ export function ProcessOverTimeChart({ category }: { category: string }) {
             borderRadius: '8px',
             color: CHART_STYLES.tooltipText,
           }}
-          formatter={(value: number) => [`${value} nm`, 'Process Node']}
+          formatter={(value) => [`${Number(value ?? 0)} nm`, 'Process Node']}
         />
         <Legend />
         {vendors.map(vId => (

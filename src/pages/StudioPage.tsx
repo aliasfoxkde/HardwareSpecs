@@ -10,7 +10,7 @@ import {
   type ColumnFiltersState,
 } from '@tanstack/react-table'
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, ScatterChart, Scatter, Cell, CartesianGrid, Line, ComposedChart } from 'recharts'
-import { getDeviceMetricsTable, getVendors } from '@/lib/api'
+import { getDeviceMetricsTable } from '@/lib/api'
 import { downloadCSV, downloadJSON } from '@/lib/export'
 import { getItem, setItem } from '@/lib/storage'
 import type { DeviceMetricsRow } from '@/lib/api'
@@ -219,7 +219,7 @@ function ScatterPanel({ data }: { data: DeviceMetricsRow[] }) {
           <YAxis type="number" dataKey="tops" tick={{ fill: CHART_STYLES.axisTick, fontSize: 10 }} name="INT8 TOPS" />
           <Tooltip
             contentStyle={{ backgroundColor: CHART_STYLES.tooltipBg, border: `1px solid ${CHART_STYLES.tooltipBorder}`, borderRadius: '8px', color: CHART_STYLES.tooltipText, fontSize: 12 }}
-            formatter={(value: number, name: string) => name === 'price' ? [`$${Math.round(value).toLocaleString()}`, 'Price'] : [formatNumber(value), 'TOPS']}
+            formatter={(value, name) => name === 'price' ? [`$${Math.round(Number(value ?? 0)).toLocaleString()}`, 'Price'] : [formatNumber(Number(value ?? 0)), 'TOPS']}
             labelFormatter={(_, payload) => payload?.[0]?.payload?.name ?? ''}
           />
           <Scatter data={scatterData}>
@@ -472,9 +472,10 @@ function CorrelationPanel({ data }: { data: DeviceMetricsRow[] }) {
               <YAxis type="number" dataKey="y" tick={{ fill: CHART_STYLES.axisTick, fontSize: 10 }} name="TOPS" />
               <Tooltip
                 contentStyle={tooltipStyle}
-                formatter={(value: number, name: string) => {
-                  if (name === 'x') return [`$${Math.round(value).toLocaleString()}`, 'Price']
-                  return [formatNumber(value), 'TOPS']
+                formatter={(value, name) => {
+                  const num = Number(value ?? 0)
+                  if (name === 'x') return [`$${Math.round(num).toLocaleString()}`, 'Price']
+                  return [formatNumber(num), 'TOPS']
                 }}
                 labelFormatter={(_, payload) => {
                   const pt = payload?.[0]?.payload
@@ -514,9 +515,10 @@ function CorrelationPanel({ data }: { data: DeviceMetricsRow[] }) {
               <YAxis type="number" dataKey="y" tick={{ fill: CHART_STYLES.axisTick, fontSize: 10 }} name="TOPS/W" />
               <Tooltip
                 contentStyle={tooltipStyle}
-                formatter={(value: number, name: string) => {
-                  if (name === 'x') return [`${Math.round(value)}W`, 'TDP']
-                  return [formatNumber(value), 'TOPS/W']
+                formatter={(value, name) => {
+                  const num = Number(value ?? 0)
+                  if (name === 'x') return [`${Math.round(num)}W`, 'TDP']
+                  return [formatNumber(num), 'TOPS/W']
                 }}
                 labelFormatter={(_, payload) => {
                   const pt = payload?.[0]?.payload
@@ -549,7 +551,8 @@ function CorrelationPanel({ data }: { data: DeviceMetricsRow[] }) {
 
 // ─── Mini Bar (for distributions) ────────────────────
 function MiniBar({ data, color }: { data: { range: string; count: number }[]; color: string }) {
-  const max = Math.max(...data.map(d => d.count), 1)
+  const _max = Math.max(...data.map(d => d.count), 1)
+  void _max
   return (
     <ResponsiveContainer width="100%" height={data.length * 22}>
       <BarChart data={data} layout="vertical" margin={{ top: 0, right: 30, bottom: 0, left: 55 }}>
@@ -632,16 +635,16 @@ export function StudioPage() {
     { accessorKey: 'baseClockMhz', header: 'Base Clock', size: 80, cell: info => { const v = info.getValue(); return v != null ? `${v} MHz` : '-' } },
     { accessorKey: 'boostClockMhz', header: 'Boost Clock', size: 80, cell: info => { const v = info.getValue(); return v != null ? `${v} MHz` : '-' } },
     { accessorKey: 'tdpWatts', header: 'TDP (W)', size: 80, cell: info => info.getValue() ?? '-' },
-    { accessorKey: 'latestPrice', header: 'Price ($)', size: 90, cell: info => info.getValue() != null ? `$${Number(info.getValue()).toLocaleString()}` : '-' },
-    { accessorKey: 'effectiveInt8Tops', header: 'INT8 TOPS', size: 100, cell: info => { const v = info.getValue(); return v > 0 ? fmtNum(v) : '-' } },
-    { accessorKey: 'topsPerDollar', header: 'TOPS/$', size: 90, cell: info => { const v = info.getValue(); return v != null && v > 0 ? fmtNum(v) : '-' } },
-    { accessorKey: 'topsPerWatt', header: 'TOPS/W', size: 90, cell: info => { const v = info.getValue(); return v != null && v > 0 ? fmtNum(v) : '-' } },
-    { accessorKey: 'perfPerDollar', header: 'Perf/$', size: 90, cell: info => { const v = info.getValue(); return v != null && v > 0 ? fmtNum(v, 0) : '-' } },
-    { accessorKey: 'perfPerWatt', header: 'Perf/W', size: 90, cell: info => { const v = info.getValue(); return v != null && v > 0 ? fmtNum(v, 0) : '-' } },
+    { accessorKey: 'latestPrice', header: 'Price ($)', size: 90, cell: info => { const v = info.getValue() as number | null; return v != null ? `$${v.toLocaleString()}` : '-' } },
+    { accessorKey: 'effectiveInt8Tops', header: 'INT8 TOPS', size: 100, cell: info => { const v = info.getValue() as number; return v > 0 ? fmtNum(v) : '-' } },
+    { accessorKey: 'topsPerDollar', header: 'TOPS/$', size: 90, cell: info => { const v = info.getValue() as number | null; return v != null && v > 0 ? fmtNum(v) : '-' } },
+    { accessorKey: 'topsPerWatt', header: 'TOPS/W', size: 90, cell: info => { const v = info.getValue() as number | null; return v != null && v > 0 ? fmtNum(v) : '-' } },
+    { accessorKey: 'perfPerDollar', header: 'Perf/$', size: 90, cell: info => { const v = info.getValue() as number | null; return v != null && v > 0 ? fmtNum(v, 0) : '-' } },
+    { accessorKey: 'perfPerWatt', header: 'Perf/W', size: 90, cell: info => { const v = info.getValue() as number | null; return v != null && v > 0 ? fmtNum(v, 0) : '-' } },
     { accessorKey: 'fp16Tflops', header: 'FP16 TFLOPS', size: 100, cell: info => info.getValue() ?? '-' },
     { accessorKey: 'fp32Tflops', header: 'FP32 TFLOPS', size: 100, cell: info => info.getValue() ?? '-' },
-    { accessorKey: 'fp4Tflops', header: 'FP4 TOPS', size: 90, cell: info => { const v = info.getValue(); return v != null && v > 0 ? fmtNum(v) : '-' } },
-    { accessorKey: 'fp8Tflops', header: 'FP8 TOPS', size: 90, cell: info => { const v = info.getValue(); return v != null && v > 0 ? fmtNum(v) : '-' } },
+    { accessorKey: 'fp4Tflops', header: 'FP4 TOPS', size: 90, cell: info => { const v = info.getValue() as number | null; return v != null && v > 0 ? fmtNum(v) : '-' } },
+    { accessorKey: 'fp8Tflops', header: 'FP8 TOPS', size: 90, cell: info => { const v = info.getValue() as number | null; return v != null && v > 0 ? fmtNum(v) : '-' } },
     { accessorKey: 'topBenchmarkScore', header: 'Top Benchmark', size: 110, cell: info => { const v = info.getValue(); return v != null ? Number(v).toLocaleString() : '-' } },
     { accessorKey: 'dataCompleteness', header: 'Data Quality', size: 100, cell: info => {
       const v = info.getValue() as number

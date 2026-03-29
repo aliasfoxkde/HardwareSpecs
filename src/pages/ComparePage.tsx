@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { compareDevices, searchDevices, getDeviceMetrics } from '@/lib/api'
+import { downloadCSV } from '@/lib/export'
 
 function fmtNum(n: number | null | undefined, decimals = 2): string {
   if (n == null) return '-'
@@ -72,6 +73,30 @@ export function ComparePage() {
 
   const removeDevice = (id: string) => {
     setSelectedIds(selectedIds.filter(d => d !== id))
+  }
+
+  const handleExportCSV = () => {
+    const rows = devices.map(d => {
+      const price = d.prices.sort((a, b) => new Date(b.observedAt).getTime() - new Date(a.observedAt).getTime())[0]
+      const m = metricsMap.get(d.device.deviceId)
+      return {
+        Device: d.device.modelName,
+        Vendor: d.vendor.name,
+        Category: d.family.category,
+        Architecture: d.family.architecture,
+        Launch: d.device.launchDate,
+        'Cores/Threads': d.device.cores && d.device.threads ? `${d.device.cores}C/${d.device.threads}T` : '',
+        TDP: d.device.tdpWatts ? `${d.device.tdpWatts}W` : '',
+        Memory: d.device.memoryCapacityGB ? `${d.device.memoryCapacityGB}GB ${d.device.memoryType ?? ''}`.trim() : '',
+        Price: price ? `$${price.priceUsd}` : '',
+        'INT8 TOPS': m?.effectiveInt8Tops ?? '',
+        'TOPS/$': m?.topsPerDollar ?? '',
+        'TOPS/W': m?.topsPerWatt ?? '',
+        'Perf/$': m?.perfPerDollar ?? '',
+        'Perf/W': m?.perfPerWatt ?? '',
+      }
+    })
+    downloadCSV('siliconrank-comparison.csv', rows)
   }
 
   if (devices.length === 0) {
@@ -167,6 +192,12 @@ export function ComparePage() {
             className="px-4 py-2 bg-bg-secondary hover:bg-bg-tertiary text-text-secondary text-sm rounded-lg transition-colors border border-border-subtle"
           >
             Clear
+          </button>
+          <button
+            onClick={handleExportCSV}
+            className="px-4 py-2 bg-bg-secondary hover:bg-bg-tertiary text-text-secondary text-sm rounded-lg transition-colors border border-border-subtle"
+          >
+            Export CSV
           </button>
         </div>
       </div>

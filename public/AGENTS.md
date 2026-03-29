@@ -1,7 +1,7 @@
 # SiliconRank - AI Agent Guide
 
 ## Overview
-SiliconRank is a comprehensive hardware comparison platform for AI accelerators, GPUs, NPUs, SBCs, CPUs, and embedded processors. Compare INT8 TOPS, FP4/FP8/FP16/FP32 compute, power efficiency, pricing, and benchmarks across 270+ devices.
+SiliconRank is a comprehensive hardware comparison platform for AI accelerators, GPUs, NPUs, SBCs, CPUs, and embedded processors. Compare INT8 TOPS, FP4/FP8/FP16/FP32 compute, power efficiency, pricing, and benchmarks across 304 devices.
 
 ## Purpose
 Help engineers, researchers, and enthusiasts find and compare AI hardware by compute performance, power efficiency, and value.
@@ -20,7 +20,7 @@ Help engineers, researchers, and enthusiasts find and compare AI hardware by com
 ## Data Coverage
 - 304 devices across GPU, NPU, SBC, CPU, ASIC, SoC categories
 - 35 vendors: NVIDIA, AMD, Intel, Apple, Qualcomm, Google, Groq, Cerebras, Hailo, Huawei, Rockchip, Broadcom, and more
-- 191 device families, 398 benchmarks, 270 spec snapshots, 223 price points
+- 156 device families, 475+ benchmarks, 304 spec snapshots, 304 price points
 - Metrics: INT8 TOPS (effective, vendor-reported), FP4/FP8/FP16/FP32 compute, TDP, price, memory, benchmarks
 - Enterprise/data-center GPUs: NVIDIA H100/H200/B200/A100, AMD MI300X/MI250X, Intel Arc B580/A770
 - Computed metrics: TOPS/$, TOPS/W, perf/$, perf/W, data completeness score

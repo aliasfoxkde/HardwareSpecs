@@ -117,6 +117,7 @@ export interface SpecSnapshot {
   fp8Tflops?: number
   fp16Tflops?: number
   fp32Tflops?: number
+  fp32Dense?: number
   tdpWatts?: number
   idleWatts?: number
   boostWatts?: number
@@ -129,9 +130,10 @@ export interface PriceSnapshot {
   deviceId: string
   sourceId: string
   priceUsd: number
-  condition: 'new' | 'used' | 'msrp'
+  condition: 'new' | 'used' | 'msrp' | 'cloud-only' | 'estimate' | 'oem'
   region: string
   observedAt: string
+  notes?: string
 }
 
 export interface DerivedMetric {

@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
-import { useEffect, useState, useRef, useCallback } from 'react'
-import { getStats, getDevicesByCategory, getDeviceMetrics } from '@/lib/api'
+import { useEffect, useState, useRef } from 'react'
+import { getStats, getDevicesByCategory } from '@/lib/api'
 
 function useAnimatedCounter(target: number, duration = 1500, startOnMount = false): number {
   const [value, setValue] = useState(0)

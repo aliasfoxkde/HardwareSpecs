@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react'
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, PieChart, Pie, ScatterChart, Scatter, LineChart, Line, ComposedChart, Legend } from 'recharts'
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, PieChart, Pie, ScatterChart, Scatter, LineChart, Line } from 'recharts'
 import { getDevices, getVendors, getFamilies, getAllDeviceMetrics, getDeviceMetricsTable } from '@/lib/api'
 import type { DeviceCategory } from '@/types'
 
@@ -111,7 +111,7 @@ function VendorDistributionChart() {
       <h3 className="text-lg font-semibold text-text-primary">Vendor Distribution (Top 10)</h3>
       <ResponsiveContainer width="100%" height={220}>
         <PieChart>
-          <Pie data={data} cx="50%" cy="50%" outerRadius={80} innerRadius={40} dataKey="count" nameKey="name" label={({ name, percent }: Record<string, unknown>) => `${name} ${((percent as number) * 100).toFixed(0)}%`} labelLine={{ stroke: '#64748b' }}>
+          <Pie data={data} cx="50%" cy="50%" outerRadius={80} innerRadius={40} dataKey="count" nameKey="name" label={({ name, percent }) => `${name} ${((percent ?? 0) * 100).toFixed(0)}%`} labelLine={{ stroke: '#64748b' }}>
             {data.map((_, i) => <Cell key={i} fill={VENDOR_COLORS[i % VENDOR_COLORS.length]} />)}
           </Pie>
           <Tooltip contentStyle={{ backgroundColor: '#1e293b', border: '1px solid #334155', borderRadius: '8px' }} />
@@ -136,7 +136,7 @@ function DataGapsReport() {
       if (m?.effectiveInt8Tops === 0) missing.push('TOPS')
       if (!m?.topBenchmarkScore) missing.push('Benchmarks')
       if (m?.fp16Tflops == null && m?.fp32Tflops == null && m?.fp4Tflops == null) missing.push('Compute Specs')
-      if (m?.dataCompleteness < 0.3) missing.push('Low Completeness')
+      if ((m?.dataCompleteness ?? 0) < 0.3) missing.push('Low Completeness')
       return { name: d.device.modelName, vendor: d.vendor.name, missing, count: missing.length }
     }).filter(g => g.count > 0).sort((a, b) => b.count - a.count)
   }, [devices, metrics])
@@ -273,8 +273,6 @@ function TopPerformersReport() {
 
 function PriceAnalysisReport() {
   const table = useMemo(() => getDeviceMetricsTable(), [])
-  const families = useMemo(() => getFamilies(), [])
-  const familyMap = useMemo(() => new Map(families.map(f => [f.familyId, f])), [families])
 
   const withPrice = useMemo(() => table.filter(r => r.latestPrice != null && r.latestPrice! > 0), [table])
 
@@ -373,7 +371,7 @@ function PriceAnalysisReport() {
           <ScatterChart>
             <XAxis type="number" dataKey="price" name="Price" tick={{ fill: '#94a3b8', fontSize: 12 }} label={{ value: 'Price ($)', position: 'insideBottom', offset: -5, style: { fill: '#64748b', fontSize: 11 } }} />
             <YAxis type="number" dataKey="tops" name="TOPS" tick={{ fill: '#94a3b8', fontSize: 12 }} label={{ value: 'INT8 TOPS', angle: -90, position: 'insideLeft', style: { fill: '#64748b', fontSize: 11 } }} />
-            <Tooltip contentStyle={{ backgroundColor: '#1e293b', border: '1px solid #334155', borderRadius: '8px' }} labelStyle={{ color: '#f1f5f9' }} formatter={(value: number, name: string) => [name === 'price' ? `$${value.toLocaleString()}` : value.toLocaleString(), name === 'price' ? 'Price' : 'INT8 TOPS']} />
+            <Tooltip contentStyle={{ backgroundColor: '#1e293b', border: '1px solid #334155', borderRadius: '8px' }} labelStyle={{ color: '#f1f5f9' }} formatter={(value, name) => [name === 'price' ? `$${Number(value ?? 0).toLocaleString()}` : Number(value ?? 0).toLocaleString(), name === 'price' ? 'Price' : 'INT8 TOPS']} />
             <Scatter data={scatterData} fill="#3b82f6" />
           </ScatterChart>
         </ResponsiveContainer>
@@ -472,8 +470,6 @@ function ProcessNodeReport() {
 
 function MemoryAnalysisReport() {
   const table = useMemo(() => getDeviceMetricsTable(), [])
-  const families = useMemo(() => getFamilies(), [])
-  const familyMap = useMemo(() => new Map(families.map(f => [f.familyId, f])), [families])
 
   const MEMORY_TYPES = ['GDDR6', 'GDDR6X', 'GDDR7', 'HBM2', 'HBM2e', 'HBM3', 'LPDDR5', 'LPDDR5X', 'DDR5', 'None/Unknown'] as const
   const MEMORY_COLORS: Record<string, string> = {
@@ -527,7 +523,7 @@ function MemoryAnalysisReport() {
           <h4 className="text-sm font-medium text-text-secondary mb-2">Memory Type Distribution</h4>
           <ResponsiveContainer width="100%" height={240}>
             <PieChart>
-              <Pie data={memoryTypePie} cx="50%" cy="50%" outerRadius={85} innerRadius={40} dataKey="value" nameKey="name" label={({ name, percent }: Record<string, unknown>) => `${name} ${((percent as number) * 100).toFixed(0)}%`} labelLine={{ stroke: '#64748b' }}>
+              <Pie data={memoryTypePie} cx="50%" cy="50%" outerRadius={85} innerRadius={40} dataKey="value" nameKey="name" label={({ name, percent }) => `${name} ${((percent ?? 0) * 100).toFixed(0)}%`} labelLine={{ stroke: '#64748b' }}>
                 {memoryTypePie.map((entry) => <Cell key={entry.name} fill={MEMORY_COLORS[entry.name] ?? '#475569'} />)}
               </Pie>
               <Tooltip contentStyle={{ backgroundColor: '#1e293b', border: '1px solid #334155', borderRadius: '8px' }} />
@@ -566,8 +562,6 @@ function MemoryAnalysisReport() {
 function VendorDeepDiveReport() {
   const table = useMemo(() => getDeviceMetricsTable(), [])
   const vendors = useMemo(() => getVendors(), [])
-  const families = useMemo(() => getFamilies(), [])
-  const familyMap = useMemo(() => new Map(families.map(f => [f.familyId, f])), [families])
 
   const qualifiedVendors = useMemo(() => {
     const counts = new Map<string, number>()
@@ -702,8 +696,6 @@ function VendorDeepDiveReport() {
 
 function LaunchTimelineReport() {
   const table = useMemo(() => getDeviceMetricsTable(), [])
-  const families = useMemo(() => getFamilies(), [])
-  const familyMap = useMemo(() => new Map(families.map(f => [f.familyId, f])), [families])
 
   const currentYear = new Date().getFullYear()
 

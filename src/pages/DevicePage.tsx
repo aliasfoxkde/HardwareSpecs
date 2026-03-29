@@ -1,5 +1,5 @@
 import { useParams, Link } from 'react-router-dom'
-import { useMemo } from 'react'
+import { useMemo, useEffect } from 'react'
 import { getDevice, getDevicesByCategory, getDeviceMetrics } from '@/lib/api'
 
 function fmtNum(n: number | null | undefined, decimals = 2): string {
@@ -18,6 +18,27 @@ export function DevicePage() {
     const sameCategory = getDevicesByCategory(device.family.category)
     return sameCategory.filter(d => d.device.deviceId !== device.device.deviceId).slice(0, 5)
   }, [device])
+
+  useEffect(() => {
+    if (!device) return
+    const tops = metrics?.effectiveInt8Tops ? `${metrics.effectiveInt8Tops.toLocaleString()} TOPS` : ''
+    const price = device.latestPrice?.priceUsd ? `$${device.latestPrice.priceUsd.toLocaleString()}` : ''
+    document.title = `${device.device.modelName}${tops ? ` - ${tops}` : ''}${price ? ` - ${price}` : ''} | SiliconRank`
+    const desc = [
+      `${device.device.modelName}:`,
+      tops,
+      price,
+      device.device.tdpWatts ? `${device.device.tdpWatts}W TDP` : '',
+    ].filter(Boolean).join(', ')
+    let meta = document.querySelector('meta[name="description"]')
+    if (!meta) {
+      meta = document.createElement('meta')
+      meta.setAttribute('name', 'description')
+      document.head.appendChild(meta)
+    }
+    meta.setAttribute('content', `${desc}. Compare specs, benchmarks, and efficiency metrics.`)
+    return () => { document.title = 'SiliconRank' }
+  }, [device, metrics])
 
   if (!device) {
     return (

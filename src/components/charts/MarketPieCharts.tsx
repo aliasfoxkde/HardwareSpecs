@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend } from 'recharts'
 import { getDevicesByCategory, getVendors, getFamilies } from '@/lib/api'
-import { getVendorColor, CHART_STYLES, formatNumber } from './chartUtils'
+import { getVendorColor, CHART_STYLES } from './chartUtils'
 
 export function VendorDistributionPie({ category }: { category: string }) {
   const data = useMemo(() => {
@@ -32,7 +32,7 @@ export function VendorDistributionPie({ category }: { category: string }) {
           outerRadius={90}
           paddingAngle={2}
           dataKey="value"
-          label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+          label={({ name, percent }) => `${name} ${((percent ?? 0) * 100).toFixed(0)}%`}
           labelLine={false}
         >
           {data.map(entry => (
@@ -77,7 +77,7 @@ export function CategoryDistributionPie() {
           outerRadius={90}
           paddingAngle={2}
           dataKey="value"
-          label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+          label={({ name, percent }) => `${name} ${((percent ?? 0) * 100).toFixed(0)}%`}
           labelLine={false}
         >
           {data.map((_, index) => (
@@ -133,7 +133,7 @@ export function PriceBandPie({ category }: { category: string }) {
           outerRadius={80}
           paddingAngle={2}
           dataKey="value"
-          label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+          label={({ name, percent }) => `${name} ${((percent ?? 0) * 100).toFixed(0)}%`}
           labelLine={false}
         >
           {data.map((_, index) => (

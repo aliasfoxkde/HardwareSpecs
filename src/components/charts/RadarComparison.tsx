@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import { RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, Legend, ResponsiveContainer, Tooltip } from 'recharts'
 import { getDeviceMetricsTable, getVendors } from '@/lib/api'
-import { getVendorColor, CHART_STYLES, formatNumber } from './chartUtils'
+import { CHART_STYLES } from './chartUtils'
 
 const RADAR_METRICS = [
   { key: 'tops', label: 'INT8 TOPS', maxKey: 'effectiveInt8Tops' },
@@ -68,7 +68,7 @@ export function RadarComparisonChart({ deviceIds }: { deviceIds: string[] }) {
             borderRadius: '8px',
             color: CHART_STYLES.tooltipText,
           }}
-          formatter={(value: number) => [`${value}%`, 'Relative Score']}
+          formatter={(value) => [`${Number(value ?? 0)}%`, 'Relative Score']}
         />
         {devices.map((d, i) => (
           <Radar
@@ -143,7 +143,7 @@ export function TopDevicesRadar({ category }: { category: string }) {
             borderRadius: '8px',
             color: CHART_STYLES.tooltipText,
           }}
-          formatter={(value: number) => [`${value}%`, 'Relative Score']}
+          formatter={(value) => [`${Number(value ?? 0)}%`, 'Relative Score']}
         />
         {deviceNames.map((name, i) => (
           <Radar

@@ -1,21 +1,21 @@
 import { useMemo } from 'react'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts'
-import { getDevicesByCategory } from '@/lib/api'
+import { getDeviceMetricsTable } from '@/lib/api'
 import { CHART_STYLES, formatNumber } from './chartUtils'
 
 export function MultiMetricComparison({ category }: { category: string }) {
   const data = useMemo(() => {
-    const devices = getDevicesByCategory(category as any)
-    return devices
-      .filter(d => d.metrics.effectiveInt8Tops > 0 || d.metrics.fp16Tflops != null || d.metrics.fp32Tflops != null)
-      .sort((a, b) => b.metrics.effectiveInt8Tops - a.metrics.effectiveInt8Tops)
+    const table = getDeviceMetricsTable().filter(m => m.categoryName === category)
+    return table
+      .filter(m => m.effectiveInt8Tops > 0 || m.fp16Tflops != null || m.fp32Tflops != null)
+      .sort((a, b) => b.effectiveInt8Tops - a.effectiveInt8Tops)
       .slice(0, 15)
-      .map(d => ({
-        name: d.device.modelName.replace(/^(NVIDIA GeForce |NVIDIA |AMD Radeon |AMD |Intel Arc |Intel )/, ''),
-        fullName: d.device.modelName,
-        int8Tops: d.metrics.effectiveInt8Tops,
-        fp16Tflops: d.metrics.fp16Tflops ?? 0,
-        fp32Tflops: d.metrics.fp32Tflops ?? 0,
+      .map(m => ({
+        name: m.modelName.replace(/^(NVIDIA GeForce |NVIDIA |AMD Radeon |AMD |Intel Arc |Intel )/, ''),
+        fullName: m.modelName,
+        int8Tops: m.effectiveInt8Tops,
+        fp16Tflops: m.fp16Tflops ?? 0,
+        fp32Tflops: m.fp32Tflops ?? 0,
       }))
   }, [category])
 
@@ -49,17 +49,17 @@ export function MultiMetricComparison({ category }: { category: string }) {
 
 export function PricePerfStacked({ category }: { category: string }) {
   const data = useMemo(() => {
-    const devices = getDevicesByCategory(category as any)
-    return devices
-      .filter(d => d.latestPrice && (d.metrics.topsPerDollar != null || d.metrics.perfPerDollar != null))
-      .sort((a, b) => (b.metrics.topsPerDollar ?? 0) - (a.metrics.topsPerDollar ?? 0))
+    const table = getDeviceMetricsTable().filter(m => m.categoryName === category)
+    return table
+      .filter(m => m.latestPrice != null && (m.topsPerDollar != null || m.perfPerDollar != null))
+      .sort((a, b) => (b.topsPerDollar ?? 0) - (a.topsPerDollar ?? 0))
       .slice(0, 15)
-      .map(d => ({
-        name: d.device.modelName.replace(/^(NVIDIA GeForce |NVIDIA |AMD Radeon |AMD |Intel Arc |Intel )/, ''),
-        fullName: d.device.modelName,
-        topsPerDollar: d.metrics.topsPerDollar ?? 0,
-        perfPerDollar: d.metrics.perfPerDollar ?? 0,
-        price: d.latestPrice!.priceUsd,
+      .map(m => ({
+        name: m.modelName.replace(/^(NVIDIA GeForce |NVIDIA |AMD Radeon |AMD |Intel Arc |Intel )/, ''),
+        fullName: m.modelName,
+        topsPerDollar: m.topsPerDollar ?? 0,
+        perfPerDollar: m.perfPerDollar ?? 0,
+        price: m.latestPrice!,
       }))
   }, [category])
 
@@ -81,9 +81,9 @@ export function PricePerfStacked({ category }: { category: string }) {
             color: CHART_STYLES.tooltipText,
           }}
           labelFormatter={(_, payload) => payload?.[0]?.payload?.fullName ?? ''}
-          formatter={(value: number, name: string) => {
-            if (name === 'price') return [formatNumber(value, 0), 'Price']
-            return [formatNumber(value), name]
+          formatter={(value, name) => {
+            if (name === 'price') return [formatNumber(Number(value ?? 0), 0), 'Price']
+            return [formatNumber(Number(value ?? 0)), name]
           }}
         />
         <Legend />

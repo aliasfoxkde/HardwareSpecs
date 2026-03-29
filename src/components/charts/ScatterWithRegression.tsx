@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ComposedChart, Line, Cell } from 'recharts'
+import { Scatter, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ComposedChart, Line, Cell } from 'recharts'
 import { getDevicesByCategory } from '@/lib/api'
 import { getVendorColor, CHART_STYLES, formatNumber, linearRegression } from './chartUtils'
 
@@ -62,9 +62,9 @@ export function PerfVsPriceChart({ category }: { category: string }) {
             }
             return ''
           }}
-          formatter={(value: number, name: string) => {
-            if (name === 'price') return [formatNumber(value, 0), 'Price']
-            return [formatNumber(value, 0), 'Score']
+          formatter={(value, name) => {
+            if (name === 'price') return [formatNumber(Number(value ?? 0), 0), 'Price']
+            return [formatNumber(Number(value ?? 0), 0), 'Score']
           }}
         />
         <Scatter data={scatterData}>
@@ -148,9 +148,9 @@ export function TopsVsPriceChart({ category }: { category: string }) {
             }
             return ''
           }}
-          formatter={(value: number, name: string) => {
-            if (name === 'price') return [formatNumber(value, 0), 'Price']
-            return [formatNumber(value), 'INT8 TOPS']
+          formatter={(value, name) => {
+            if (name === 'price') return [formatNumber(Number(value ?? 0), 0), 'Price']
+            return [formatNumber(Number(value ?? 0)), 'INT8 TOPS']
           }}
         />
         <Scatter data={scatterData}>

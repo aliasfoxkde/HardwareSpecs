@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import { getDevicesByCategory } from '@/lib/api'
-import { getVendorColor, CHART_STYLES, formatNumber } from './chartUtils'
+import { getVendorColor, formatNumber } from './chartUtils'
 
 export function PriceTdpHeatmap({ category }: { category: string }) {
   const data = useMemo(() => {
@@ -36,7 +36,6 @@ export function PriceTdpHeatmap({ category }: { category: string }) {
       {/* Rows */}
       {data.slice(0, 15).map(d => {
         const xPct = (d.price / maxPrice) * 100
-        const yPct = (d.tdp / maxTdp) * 100
         const area = d.price * d.tdp
         const intensity = Math.min(area / maxArea, 1)
         const bgOpacity = 0.2 + intensity * 0.6

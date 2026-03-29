@@ -122,4 +122,90 @@ describe('API Layer', () => {
       expect(gpus.every(d => d.family.category === 'GPU')).toBe(true)
     })
   })
+
+  describe('getDevices filtering', () => {
+    it('should filter by min TDP', () => {
+      const { devices, total } = getDevices({ minTdp: 200 })
+      expect(total).toBeGreaterThan(0)
+      expect(devices.every(d => (d.device.tdpWatts ?? Infinity) >= 200)).toBe(true)
+    })
+
+    it('should filter by max TDP', () => {
+      const { devices, total } = getDevices({ maxTdp: 25 })
+      expect(total).toBeGreaterThan(0)
+      expect(devices.every(d => (d.device.tdpWatts ?? 0) <= 25)).toBe(true)
+    })
+
+    it('should filter by TDP range', () => {
+      const { devices, total } = getDevices({ minTdp: 100, maxTdp: 300 })
+      expect(total).toBeGreaterThan(0)
+      for (const d of devices) {
+        const tdp = d.device.tdpWatts
+        if (tdp != null) {
+          expect(tdp).toBeGreaterThanOrEqual(100)
+          expect(tdp).toBeLessThanOrEqual(300)
+        }
+      }
+    })
+
+    it('should filter by min price', () => {
+      const { devices, total } = getDevices({ minPrice: 1000 })
+      expect(total).toBeGreaterThan(0)
+      expect(devices.every(d => (d.latestPrice?.priceUsd ?? 0) >= 1000)).toBe(true)
+    })
+
+    it('should filter by max price', () => {
+      const { devices, total } = getDevices({ maxPrice: 200 })
+      expect(total).toBeGreaterThan(0)
+      expect(devices.every(d => (d.latestPrice?.priceUsd ?? Infinity) <= 200)).toBe(true)
+    })
+
+    it('should filter by vendor', () => {
+      const { devices, total } = getDevices({ vendors: ['nvidia'] })
+      expect(total).toBeGreaterThan(0)
+      expect(devices.every(d => d.vendor.vendorId === 'nvidia')).toBe(true)
+    })
+
+    it('should combine category and price filters', () => {
+      const { devices, total } = getDevices({ categories: ['GPU'], maxPrice: 500 })
+      expect(total).toBeGreaterThan(0)
+      expect(devices.every(d => d.family.category === 'GPU' && (d.latestPrice?.priceUsd ?? Infinity) <= 500)).toBe(true)
+    })
+  })
+
+  describe('getDevices sorting', () => {
+    it('should sort by tops descending', () => {
+      const { devices } = getDevices({ sortBy: 'tops', sortOrder: 'desc', pageSize: 50 })
+      for (let i = 1; i < devices.length; i++) {
+        const prev = devices[i - 1].metrics.effectiveInt8Tops
+        const curr = devices[i].metrics.effectiveInt8Tops
+        expect(curr).toBeLessThanOrEqual(prev)
+      }
+    })
+
+    it('should sort by topsPerDollar descending', () => {
+      const { devices } = getDevices({ sortBy: 'topsPerDollar', sortOrder: 'desc', pageSize: 50 })
+      const withValues = devices.filter(d => d.metrics.topsPerDollar != null)
+      for (let i = 1; i < withValues.length; i++) {
+        expect(withValues[i].metrics.topsPerDollar!).toBeLessThanOrEqual(withValues[i - 1].metrics.topsPerDollar!)
+      }
+    })
+
+    it('should sort by price ascending', () => {
+      const { devices } = getDevices({ sortBy: 'price', sortOrder: 'asc', pageSize: 50 })
+      const withPrices = devices.filter(d => d.latestPrice?.priceUsd != null)
+      for (let i = 1; i < withPrices.length; i++) {
+        expect(withPrices[i].latestPrice!.priceUsd).toBeGreaterThanOrEqual(withPrices[i - 1].latestPrice!.priceUsd)
+      }
+    })
+
+    it('should sort by ram descending', () => {
+      const { devices } = getDevices({ sortBy: 'ram', sortOrder: 'desc', pageSize: 50 })
+      for (let i = 1; i < devices.length; i++) {
+        const prev = devices[i - 1].device.memoryCapacityGB ?? 0
+        const curr = devices[i].device.memoryCapacityGB ?? 0
+        expect(curr).toBeLessThanOrEqual(prev)
+      }
+    })
+  })
 })
