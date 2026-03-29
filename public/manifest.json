@@ -1,0 +1,51 @@
+{
+  "name": "SiliconRank",
+  "short_name": "SiliconRank",
+  "description": "Open hardware intelligence platform. Compare CPUs, GPUs, NPUs, SBCs, and AI accelerators.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "fullscreen",
+  "display_override": ["fullscreen", "standalone"],
+  "orientation": "any",
+  "theme_color": "#0f172a",
+  "background_color": "#0f172a",
+  "categories": ["utilities", "productivity", "developer tools"],
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "Browse Devices",
+      "url": "/browse",
+      "description": "Browse and filter all hardware"
+    },
+    {
+      "name": "Compare",
+      "url": "/compare",
+      "description": "Compare devices side by side"
+    },
+    {
+      "name": "Charts",
+      "url": "/charts",
+      "description": "Interactive visualizations"
+    }
+  ]
+}
