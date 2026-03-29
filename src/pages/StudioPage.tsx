@@ -9,19 +9,30 @@ import {
   type SortingState,
   type ColumnFiltersState,
 } from '@tanstack/react-table'
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, ScatterChart, Scatter, Cell, CartesianGrid } from 'recharts'
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, ScatterChart, Scatter, Cell, CartesianGrid, Line, ComposedChart } from 'recharts'
 import { getDeviceMetricsTable, getVendors } from '@/lib/api'
 import { downloadCSV, downloadJSON } from '@/lib/export'
 import { getItem, setItem } from '@/lib/storage'
 import type { DeviceMetricsRow } from '@/lib/api'
-import { getVendorColor, CHART_STYLES, formatNumber } from '@/components/charts/chartUtils'
+import { getVendorColor, CHART_STYLES, formatNumber, linearRegression } from '@/components/charts/chartUtils'
 
 const STORAGE_KEY = 'siliconrank:studio'
+const SAVED_VIEWS_KEY = 'siliconrank:studio-views'
+
+interface SavedView {
+  name: string
+  columnVisibility: Record<string, boolean>
+  globalFilter: string
+  activePanel: string
+  timestamp: number
+}
+
+const ALL_CATEGORIES = ['CPU', 'GPU', 'SBC', 'NPU', 'ASIC', 'SoC', 'System', 'Memory', 'Storage']
 
 interface StudioState {
   columnVisibility: Record<string, boolean>
   globalFilter: string
-  activePanel: 'none' | 'distribution' | 'scatter' | 'ranking' | 'quality'
+  activePanel: 'none' | 'distribution' | 'scatter' | 'ranking' | 'quality' | 'correlation'
 }
 
 const DEFAULT_VISIBILITY: Record<string, boolean> = {
@@ -112,6 +123,7 @@ const PANELS = [
   { id: 'distribution' as const, label: 'Distributions' },
   { id: 'scatter' as const, label: 'Scatter' },
   { id: 'quality' as const, label: 'Data Quality' },
+  { id: 'correlation' as const, label: 'Correlation' },
 ]
 
 // ─── Distribution Panel ─────────────────────────────
@@ -235,6 +247,14 @@ function RankingPanel({ data }: { data: DeviceMetricsRow[] }) {
     return data.filter(d => d.topsPerWatt != null && d.topsPerWatt > 0).sort((a, b) => (b.topsPerWatt ?? 0) - (a.topsPerWatt ?? 0)).slice(0, 10)
   }, [data])
 
+  const topByFp16 = useMemo(() => {
+    return data.filter(d => d.fp16Tflops != null && d.fp16Tflops > 0).sort((a, b) => b.fp16Tflops! - a.fp16Tflops!).slice(0, 10)
+  }, [data])
+
+  const topByFp32 = useMemo(() => {
+    return data.filter(d => d.fp32Tflops != null && d.fp32Tflops > 0).sort((a, b) => b.fp32Tflops! - a.fp32Tflops!).slice(0, 10)
+  }, [data])
+
   return (
     <div className="space-y-5">
       <div>
@@ -276,6 +296,36 @@ function RankingPanel({ data }: { data: DeviceMetricsRow[] }) {
           </div>
         ))}
       </div>
+      {topByFp16.length > 0 && (
+        <div>
+          <h4 className="text-sm font-semibold text-text-secondary uppercase tracking-wider mb-2">Top 10 by FP16 TFLOPS</h4>
+          {topByFp16.map((d, i) => (
+            <div key={d.deviceId} className="flex items-center gap-2 py-1">
+              <span className="text-xs text-text-muted w-5">{i + 1}</span>
+              <div className="flex-1 bg-bg-tertiary/50 h-4 rounded overflow-hidden">
+                <div className="h-full bg-blue-400/60 rounded" style={{ width: `${d.fp16Tflops! / topByFp16[0].fp16Tflops! * 100}%` }} />
+              </div>
+              <span className="text-xs text-text-primary w-20 truncate">{d.modelName.replace(/^(NVIDIA GeForce |NVIDIA |AMD Radeon |AMD |Intel Arc |Intel )/, '')}</span>
+              <span className="text-xs text-blue-400 font-medium w-16 text-right">{fmtNum(d.fp16Tflops)}</span>
+            </div>
+          ))}
+        </div>
+      )}
+      {topByFp32.length > 0 && (
+        <div>
+          <h4 className="text-sm font-semibold text-text-secondary uppercase tracking-wider mb-2">Top 10 by FP32 TFLOPS</h4>
+          {topByFp32.map((d, i) => (
+            <div key={d.deviceId} className="flex items-center gap-2 py-1">
+              <span className="text-xs text-text-muted w-5">{i + 1}</span>
+              <div className="flex-1 bg-bg-tertiary/50 h-4 rounded overflow-hidden">
+                <div className="h-full bg-purple-400/60 rounded" style={{ width: `${d.fp32Tflops! / topByFp32[0].fp32Tflops! * 100}%` }} />
+              </div>
+              <span className="text-xs text-text-primary w-20 truncate">{d.modelName.replace(/^(NVIDIA GeForce |NVIDIA |AMD Radeon |AMD |Intel Arc |Intel )/, '')}</span>
+              <span className="text-xs text-purple-400 font-medium w-16 text-right">{fmtNum(d.fp32Tflops)}</span>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   )
 }
@@ -353,6 +403,150 @@ function DataQualityPanel({ data }: { data: DeviceMetricsRow[] }) {
   )
 }
 
+// ─── Correlation Panel ─────────────────────────────
+function CorrelationPanel({ data }: { data: DeviceMetricsRow[] }) {
+  const topsPrice = useMemo(() => {
+    const pts = data.filter(d => d.latestPrice != null && d.effectiveInt8Tops > 0)
+      .map(d => ({ x: d.latestPrice!, y: d.effectiveInt8Tops, name: d.modelName, vendorId: d.vendorId }))
+      .slice(0, 150)
+    if (pts.length < 2) return null
+    const reg = linearRegression(pts)
+    const xMin = Math.min(...pts.map(p => p.x))
+    const xMax = Math.max(...pts.map(p => p.x))
+    return {
+      points: pts.map(p => ({ ...p, fill: getVendorColor(p.vendorId) })),
+      regLine: [
+        { x: xMin, y: reg.slope * xMin + reg.intercept },
+        { x: xMax, y: reg.slope * xMax + reg.intercept },
+      ],
+      r2: reg.r2,
+      slope: reg.slope,
+      intercept: reg.intercept,
+    }
+  }, [data])
+
+  const efficiencyData = useMemo(() => {
+    const pts = data.filter(d => d.tdpWatts != null && d.tdpWatts > 0 && d.effectiveInt8Tops > 0)
+      .map(d => ({ x: d.tdpWatts!, y: d.effectiveInt8Tops / d.tdpWatts!, name: d.modelName, vendorId: d.vendorId }))
+      .slice(0, 150)
+    if (pts.length < 2) return null
+    const reg = linearRegression(pts)
+    const xMin = Math.min(...pts.map(p => p.x))
+    const xMax = Math.max(...pts.map(p => p.x))
+    return {
+      points: pts.map(p => ({ ...p, fill: getVendorColor(p.vendorId) })),
+      regLine: [
+        { x: xMin, y: reg.slope * xMin + reg.intercept },
+        { x: xMax, y: reg.slope * xMax + reg.intercept },
+      ],
+      r2: reg.r2,
+      slope: reg.slope,
+      intercept: reg.intercept,
+    }
+  }, [data])
+
+  const tooltipStyle = {
+    backgroundColor: CHART_STYLES.tooltipBg,
+    border: `1px solid ${CHART_STYLES.tooltipBorder}`,
+    borderRadius: '8px',
+    color: CHART_STYLES.tooltipText,
+    fontSize: 12,
+  }
+
+  if (!topsPrice && !efficiencyData) {
+    return <div className="flex items-center justify-center h-48 text-text-muted text-sm">Insufficient data for correlation</div>
+  }
+
+  return (
+    <div className="space-y-5">
+      {topsPrice && (
+        <div>
+          <div className="flex items-center justify-between mb-2">
+            <h4 className="text-sm font-semibold text-text-secondary uppercase tracking-wider">TOPS vs Price</h4>
+            <span className="text-xs text-text-muted">R&sup2; = {topsPrice.r2.toFixed(3)}</span>
+          </div>
+          <ResponsiveContainer width="100%" height={240}>
+            <ComposedChart margin={{ top: 5, right: 5, bottom: 5, left: 5 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke={CHART_STYLES.gridStroke} />
+              <XAxis type="number" dataKey="x" tick={{ fill: CHART_STYLES.axisTick, fontSize: 10 }} name="Price ($)" />
+              <YAxis type="number" dataKey="y" tick={{ fill: CHART_STYLES.axisTick, fontSize: 10 }} name="TOPS" />
+              <Tooltip
+                contentStyle={tooltipStyle}
+                formatter={(value: number, name: string) => {
+                  if (name === 'x') return [`$${Math.round(value).toLocaleString()}`, 'Price']
+                  return [formatNumber(value), 'TOPS']
+                }}
+                labelFormatter={(_, payload) => {
+                  const pt = payload?.[0]?.payload
+                  return pt?.name ?? ''
+                }}
+              />
+              <Scatter data={topsPrice.points} dataKey="y">
+                {topsPrice.points.map((entry, i) => (
+                  <Cell key={i} fill={entry.fill} />
+                ))}
+              </Scatter>
+              <Line
+                type="linear"
+                data={topsPrice.regLine}
+                dataKey="y"
+                stroke="#f59e0b"
+                strokeWidth={2}
+                strokeDasharray="6 3"
+                dot={false}
+                isAnimationActive={false}
+                name="Regression"
+              />
+            </ComposedChart>
+          </ResponsiveContainer>
+        </div>
+      )}
+      {efficiencyData && (
+        <div>
+          <div className="flex items-center justify-between mb-2">
+            <h4 className="text-sm font-semibold text-text-secondary uppercase tracking-wider">TDP vs TOPS/W</h4>
+            <span className="text-xs text-text-muted">R&sup2; = {efficiencyData.r2.toFixed(3)}</span>
+          </div>
+          <ResponsiveContainer width="100%" height={240}>
+            <ComposedChart margin={{ top: 5, right: 5, bottom: 5, left: 5 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke={CHART_STYLES.gridStroke} />
+              <XAxis type="number" dataKey="x" tick={{ fill: CHART_STYLES.axisTick, fontSize: 10 }} name="TDP (W)" />
+              <YAxis type="number" dataKey="y" tick={{ fill: CHART_STYLES.axisTick, fontSize: 10 }} name="TOPS/W" />
+              <Tooltip
+                contentStyle={tooltipStyle}
+                formatter={(value: number, name: string) => {
+                  if (name === 'x') return [`${Math.round(value)}W`, 'TDP']
+                  return [formatNumber(value), 'TOPS/W']
+                }}
+                labelFormatter={(_, payload) => {
+                  const pt = payload?.[0]?.payload
+                  return pt?.name ?? ''
+                }}
+              />
+              <Scatter data={efficiencyData.points} dataKey="y">
+                {efficiencyData.points.map((entry, i) => (
+                  <Cell key={i} fill={entry.fill} />
+                ))}
+              </Scatter>
+              <Line
+                type="linear"
+                data={efficiencyData.regLine}
+                dataKey="y"
+                stroke="#f59e0b"
+                strokeWidth={2}
+                strokeDasharray="6 3"
+                dot={false}
+                isAnimationActive={false}
+                name="Regression"
+              />
+            </ComposedChart>
+          </ResponsiveContainer>
+        </div>
+      )}
+    </div>
+  )
+}
+
 // ─── Mini Bar (for distributions) ────────────────────
 function MiniBar({ data, color }: { data: { range: string; count: number }[]; color: string }) {
   const max = Math.max(...data.map(d => d.count), 1)
@@ -395,8 +589,28 @@ export function StudioPage() {
   )
   const [editingNote, setEditingNote] = useState<string | null>(null)
   const [rowExpanded, setRowExpanded] = useState<Set<string>>(new Set())
+  const [savedViews, setSavedViews] = useState<SavedView[]>(() =>
+    getItem<SavedView[]>(SAVED_VIEWS_KEY, [])
+  )
+  const [showFilters, setShowFilters] = useState(false)
+  const [advFilters, setAdvFilters] = useState({
+    categories: new Set<string>(),
+    vendors: new Set<string>(),
+    tdpMin: '', tdpMax: '',
+    priceMin: '', priceMax: '',
+    topsMin: '', topsMax: '',
+  })
 
   const data = useMemo(() => getDeviceMetricsTable(), [])
+
+  const topVendors = useMemo(() => {
+    const counts = new Map<string, number>()
+    for (const d of data) {
+      const v = d.vendorName ?? ''
+      if (v) counts.set(v, (counts.get(v) ?? 0) + 1)
+    }
+    return [...counts.entries()].sort((a, b) => b[1] - a[1]).slice(0, 10).map(([name]) => name)
+  }, [data])
 
   const columns = useMemo<ColumnDef<DeviceMetricsRow, unknown>[]>(() => [
     { accessorKey: 'modelName', header: 'Device', size: 180 },
@@ -450,8 +664,25 @@ export function StudioPage() {
     { accessorKey: 'topBenchmarkType', header: 'Benchmark Type', size: 130, cell: info => info.getValue() ?? '-' },
   ], [])
 
+  const filteredByAdvData = useMemo(() => {
+    let result = data
+    if (advFilters.categories.size > 0) {
+      result = result.filter(d => advFilters.categories.has(d.categoryName))
+    }
+    if (advFilters.vendors.size > 0) {
+      result = result.filter(d => advFilters.vendors.has(d.vendorName))
+    }
+    if (advFilters.tdpMin !== '') result = result.filter(d => d.tdpWatts != null && d.tdpWatts >= Number(advFilters.tdpMin))
+    if (advFilters.tdpMax !== '') result = result.filter(d => d.tdpWatts != null && d.tdpWatts <= Number(advFilters.tdpMax))
+    if (advFilters.priceMin !== '') result = result.filter(d => d.latestPrice != null && d.latestPrice >= Number(advFilters.priceMin))
+    if (advFilters.priceMax !== '') result = result.filter(d => d.latestPrice != null && d.latestPrice <= Number(advFilters.priceMax))
+    if (advFilters.topsMin !== '') result = result.filter(d => d.effectiveInt8Tops >= Number(advFilters.topsMin))
+    if (advFilters.topsMax !== '') result = result.filter(d => d.effectiveInt8Tops <= Number(advFilters.topsMax))
+    return result
+  }, [data, advFilters])
+
   const table = useReactTable({
-    data,
+    data: filteredByAdvData,
     columns,
     state: {
       sorting,
@@ -513,6 +744,53 @@ export function StudioPage() {
     const rows = table.getFilteredRowModel().rows.map(r => r.original)
     downloadJSON(`siliconrank-studio-${Date.now()}.json`, rows)
   }
+
+  const saveView = useCallback(() => {
+    const name = window.prompt('View name:')
+    if (!name?.trim()) return
+    const view: SavedView = {
+      name: name.trim(),
+      columnVisibility: savedState.columnVisibility,
+      globalFilter: savedState.globalFilter,
+      activePanel: savedState.activePanel,
+      timestamp: Date.now(),
+    }
+    const updated = [...savedViews.filter(v => v.name !== view.name), view]
+    setSavedViews(updated)
+    setItem(SAVED_VIEWS_KEY, updated)
+  }, [savedState, savedViews])
+
+  const loadView = useCallback((view: SavedView) => {
+    const newState = {
+      ...savedState,
+      columnVisibility: { ...DEFAULT_VISIBILITY, ...view.columnVisibility },
+      globalFilter: view.globalFilter,
+      activePanel: view.activePanel as StudioState['activePanel'],
+    }
+    setSavedState(newState)
+    setItem(STORAGE_KEY, newState)
+  }, [savedState])
+
+  const deleteView = useCallback((name: string) => {
+    const updated = savedViews.filter(v => v.name !== name)
+    setSavedViews(updated)
+    setItem(SAVED_VIEWS_KEY, updated)
+  }, [savedViews])
+
+  const hasActiveFilters = advFilters.categories.size > 0 || advFilters.vendors.size > 0 ||
+    advFilters.tdpMin !== '' || advFilters.tdpMax !== '' ||
+    advFilters.priceMin !== '' || advFilters.priceMax !== '' ||
+    advFilters.topsMin !== '' || advFilters.topsMax !== ''
+
+  const clearAdvFilters = useCallback(() => {
+    setAdvFilters({
+      categories: new Set(),
+      vendors: new Set(),
+      tdpMin: '', tdpMax: '',
+      priceMin: '', priceMax: '',
+      topsMin: '', topsMax: '',
+    })
+  }, [])
 
   // Analysis stats for selected rows
   const analysisStats = useMemo(() => {
@@ -588,6 +866,131 @@ export function StudioPage() {
           className="w-full px-4 py-2.5 bg-bg-secondary border border-border-subtle rounded-lg text-sm text-text-primary placeholder-text-muted focus:outline-none focus:ring-2 focus:ring-brand-500"
         />
 
+        {/* Advanced Filters Panel */}
+        {showFilters && (
+          <div className="bg-bg-secondary/50 border border-border-subtle rounded-lg p-3 space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-semibold text-text-secondary uppercase tracking-wider">Advanced Filters</span>
+              {hasActiveFilters && (
+                <button onClick={clearAdvFilters} className="text-xs text-red-400 hover:text-red-300">Clear all</button>
+              )}
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+              {/* Categories */}
+              <div>
+                <div className="text-[10px] text-text-muted uppercase mb-1">Category</div>
+                <div className="flex flex-wrap gap-x-3 gap-y-1">
+                  {ALL_CATEGORIES.map(cat => (
+                    <label key={cat} className="flex items-center gap-1 text-xs text-text-secondary cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={advFilters.categories.has(cat)}
+                        onChange={e => {
+                          setAdvFilters(prev => {
+                            const next = new Set(prev.categories)
+                            if (e.target.checked) next.add(cat)
+                            else next.delete(cat)
+                            return { ...prev, categories: next }
+                          })
+                        }}
+                        className="rounded"
+                      />
+                      {cat}
+                    </label>
+                  ))}
+                </div>
+              </div>
+              {/* Vendors */}
+              <div>
+                <div className="text-[10px] text-text-muted uppercase mb-1">Vendor</div>
+                <div className="flex flex-wrap gap-x-3 gap-y-1">
+                  {topVendors.map(v => (
+                    <label key={v} className="flex items-center gap-1 text-xs text-text-secondary cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={advFilters.vendors.has(v)}
+                        onChange={e => {
+                          setAdvFilters(prev => {
+                            const next = new Set(prev.vendors)
+                            if (e.target.checked) next.add(v)
+                            else next.delete(v)
+                            return { ...prev, vendors: next }
+                          })
+                        }}
+                        className="rounded"
+                      />
+                      {v}
+                    </label>
+                  ))}
+                </div>
+              </div>
+              {/* TDP Range */}
+              <div>
+                <div className="text-[10px] text-text-muted uppercase mb-1">TDP (W)</div>
+                <div className="flex items-center gap-1">
+                  <input
+                    type="number"
+                    placeholder="Min"
+                    value={advFilters.tdpMin}
+                    onChange={e => setAdvFilters(prev => ({ ...prev, tdpMin: e.target.value }))}
+                    className="w-full px-2 py-1 bg-bg-tertiary/50 border border-border-subtle rounded text-xs text-text-primary"
+                  />
+                  <span className="text-text-muted text-xs">&ndash;</span>
+                  <input
+                    type="number"
+                    placeholder="Max"
+                    value={advFilters.tdpMax}
+                    onChange={e => setAdvFilters(prev => ({ ...prev, tdpMax: e.target.value }))}
+                    className="w-full px-2 py-1 bg-bg-tertiary/50 border border-border-subtle rounded text-xs text-text-primary"
+                  />
+                </div>
+              </div>
+              {/* Price Range */}
+              <div>
+                <div className="text-[10px] text-text-muted uppercase mb-1">Price ($)</div>
+                <div className="flex items-center gap-1">
+                  <input
+                    type="number"
+                    placeholder="Min"
+                    value={advFilters.priceMin}
+                    onChange={e => setAdvFilters(prev => ({ ...prev, priceMin: e.target.value }))}
+                    className="w-full px-2 py-1 bg-bg-tertiary/50 border border-border-subtle rounded text-xs text-text-primary"
+                  />
+                  <span className="text-text-muted text-xs">&ndash;</span>
+                  <input
+                    type="number"
+                    placeholder="Max"
+                    value={advFilters.priceMax}
+                    onChange={e => setAdvFilters(prev => ({ ...prev, priceMax: e.target.value }))}
+                    className="w-full px-2 py-1 bg-bg-tertiary/50 border border-border-subtle rounded text-xs text-text-primary"
+                  />
+                </div>
+              </div>
+            </div>
+            {/* TOPS Range — full width */}
+            <div className="max-w-xs">
+              <div className="text-[10px] text-text-muted uppercase mb-1">INT8 TOPS</div>
+              <div className="flex items-center gap-1">
+                <input
+                  type="number"
+                  placeholder="Min"
+                  value={advFilters.topsMin}
+                  onChange={e => setAdvFilters(prev => ({ ...prev, topsMin: e.target.value }))}
+                  className="w-full px-2 py-1 bg-bg-tertiary/50 border border-border-subtle rounded text-xs text-text-primary"
+                />
+                <span className="text-text-muted text-xs">&ndash;</span>
+                <input
+                  type="number"
+                  placeholder="Max"
+                  value={advFilters.topsMax}
+                  onChange={e => setAdvFilters(prev => ({ ...prev, topsMax: e.target.value }))}
+                  className="w-full px-2 py-1 bg-bg-tertiary/50 border border-border-subtle rounded text-xs text-text-primary"
+                />
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Preset Views + Column Toggle + Panel Toggle */}
         <div className="flex flex-wrap gap-2 items-center">
           <span className="text-xs text-text-muted font-medium">Views:</span>
@@ -610,6 +1013,29 @@ export function StudioPage() {
           ))}
 
           <span className="text-xs text-text-muted font-medium ml-2">Panel:</span>
+          <button
+            onClick={saveView}
+            className="px-3 py-1 rounded-lg text-xs font-medium bg-bg-secondary text-text-secondary hover:text-text-primary border border-border-subtle"
+          >
+            Save View
+          </button>
+          {savedViews.map(view => (
+            <div key={view.name} className="flex items-center gap-0.5 px-2 py-1 rounded-lg text-xs font-medium bg-brand-600/10 text-brand-300 border border-brand-500/20">
+              <button onClick={() => loadView(view)} className="hover:text-brand-200">{view.name}</button>
+              <button onClick={() => deleteView(view.name)} className="ml-1 text-text-muted hover:text-red-400">&times;</button>
+            </div>
+          ))}
+
+          <button
+            onClick={() => setShowFilters(prev => !prev)}
+            className={`px-3 py-1 rounded-lg text-xs font-medium transition-colors border ${
+              showFilters || hasActiveFilters
+                ? 'bg-yellow-600/20 text-yellow-300 border-yellow-500/30'
+                : 'bg-bg-secondary text-text-secondary hover:text-text-primary border-border-subtle'
+            }`}
+          >
+            Filters{hasActiveFilters ? ' *' : ''}
+          </button>
           {PANELS.map(panel => (
             <button
               key={panel.id}
@@ -781,6 +1207,7 @@ export function StudioPage() {
             {savedState.activePanel === 'distribution' && <DistributionPanel data={filteredData} />}
             {savedState.activePanel === 'scatter' && <ScatterPanel data={filteredData} />}
             {savedState.activePanel === 'quality' && <DataQualityPanel data={filteredData} />}
+            {savedState.activePanel === 'correlation' && <CorrelationPanel data={filteredData} />}
           </div>
         )}
       </div>
