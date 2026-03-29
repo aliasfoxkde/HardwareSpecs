@@ -12,6 +12,8 @@ export interface DeviceMetrics {
   perfPerWatt: number | null
   fp16Tflops: number | null
   fp32Tflops: number | null
+  fp4Tflops: number | null
+  fp8Tflops: number | null
   dataCompleteness: number
   latestPrice: number | null
   tdpWatts: number | null
@@ -50,6 +52,8 @@ export function getDeviceMetrics(deviceId: string): DeviceMetrics | null {
 
   const fp16Spec = deviceSpecs.find(s => s.fp16Tflops != null)
   const fp32Spec = deviceSpecs.find(s => s.fp32Tflops != null)
+  const fp4Spec = deviceSpecs.find(s => s.fp4Tflops != null)
+  const fp8Spec = deviceSpecs.find(s => s.fp8Tflops != null)
   const int8Spec = deviceSpecs.find(s => s.int8Tops != null)
 
   const effectiveTops = effective?.value ?? int8Spec?.int8Tops ?? 0
@@ -64,6 +68,8 @@ export function getDeviceMetrics(deviceId: string): DeviceMetrics | null {
     perfPerWatt: device.tdpWatts && topBench ? topBench.score / device.tdpWatts : null,
     fp16Tflops: fp16Spec?.fp16Tflops ?? null,
     fp32Tflops: fp32Spec?.fp32Tflops ?? null,
+    fp4Tflops: fp4Spec?.fp4Tflops ?? null,
+    fp8Tflops: fp8Spec?.fp8Tflops ?? null,
     dataCompleteness: completeness,
     latestPrice: price,
     tdpWatts: device.tdpWatts ?? null,
@@ -124,6 +130,8 @@ export function getDeviceMetricsTable(): DeviceMetricsRow[] {
         perfPerWatt: null,
         fp16Tflops: null,
         fp32Tflops: null,
+        fp4Tflops: null,
+        fp8Tflops: null,
         dataCompleteness: 0,
         latestPrice: null,
         tdpWatts: null,

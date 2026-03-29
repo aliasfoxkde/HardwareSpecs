@@ -61,6 +61,8 @@ export function Layout() {
     { path: '/compare', label: 'Compare' },
     { path: '/charts', label: 'Charts' },
     { path: '/studio', label: 'Studio' },
+    { path: '/tools', label: 'Tools' },
+    { path: '/reports', label: 'Reports' },
     { path: '/docs', label: 'Docs' },
   ]
 
@@ -243,6 +245,8 @@ export function Layout() {
                 <Link to="/compare" className="text-sm text-text-secondary hover:text-text-primary transition-colors">Compare</Link>
                 <Link to="/charts" className="text-sm text-text-secondary hover:text-text-primary transition-colors">Charts</Link>
                 <Link to="/studio" className="text-sm text-text-secondary hover:text-text-primary transition-colors">Studio</Link>
+                <Link to="/tools" className="text-sm text-text-secondary hover:text-text-primary transition-colors">Tools</Link>
+                <Link to="/reports" className="text-sm text-text-secondary hover:text-text-primary transition-colors">Reports</Link>
                 <Link to="/docs" className="text-sm text-text-secondary hover:text-text-primary transition-colors">API Docs</Link>
               </div>
             </div>

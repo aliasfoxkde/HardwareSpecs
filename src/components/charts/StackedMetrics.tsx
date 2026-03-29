@@ -11,7 +11,7 @@ export function MultiMetricComparison({ category }: { category: string }) {
       .sort((a, b) => b.metrics.effectiveInt8Tops - a.metrics.effectiveInt8Tops)
       .slice(0, 15)
       .map(d => ({
-        name: d.device.modelName.length > 18 ? d.device.modelName.slice(0, 16) + '..' : d.device.modelName,
+        name: d.device.modelName.replace(/^(NVIDIA GeForce |NVIDIA |AMD Radeon |AMD |Intel Arc |Intel )/, ''),
         fullName: d.device.modelName,
         int8Tops: d.metrics.effectiveInt8Tops,
         fp16Tflops: d.metrics.fp16Tflops ?? 0,
@@ -25,10 +25,10 @@ export function MultiMetricComparison({ category }: { category: string }) {
 
   return (
     <ResponsiveContainer width="100%" height={Math.max(300, data.length * 32)}>
-      <BarChart data={data} layout="vertical" margin={{ top: 10, right: 30, bottom: 20, left: 90 }}>
+      <BarChart data={data} layout="vertical" margin={{ top: 10, right: 30, bottom: 20, left: 140 }}>
         <CartesianGrid strokeDasharray="3 3" stroke={CHART_STYLES.gridStroke} />
         <XAxis type="number" tick={{ fill: CHART_STYLES.axisTick, fontSize: 11 }} />
-        <YAxis type="category" dataKey="name" tick={{ fill: CHART_STYLES.axisTick, fontSize: 10 }} width={85} />
+        <YAxis type="category" dataKey="name" tick={{ fill: CHART_STYLES.axisTick, fontSize: 11 }} width={135} />
         <Tooltip
           contentStyle={{
             backgroundColor: CHART_STYLES.tooltipBg,
@@ -55,7 +55,7 @@ export function PricePerfStacked({ category }: { category: string }) {
       .sort((a, b) => (b.metrics.topsPerDollar ?? 0) - (a.metrics.topsPerDollar ?? 0))
       .slice(0, 15)
       .map(d => ({
-        name: d.device.modelName.length > 18 ? d.device.modelName.slice(0, 16) + '..' : d.device.modelName,
+        name: d.device.modelName.replace(/^(NVIDIA GeForce |NVIDIA |AMD Radeon |AMD |Intel Arc |Intel )/, ''),
         fullName: d.device.modelName,
         topsPerDollar: d.metrics.topsPerDollar ?? 0,
         perfPerDollar: d.metrics.perfPerDollar ?? 0,
@@ -69,10 +69,10 @@ export function PricePerfStacked({ category }: { category: string }) {
 
   return (
     <ResponsiveContainer width="100%" height={Math.max(300, data.length * 32)}>
-      <BarChart data={data} layout="vertical" margin={{ top: 10, right: 30, bottom: 20, left: 90 }}>
+      <BarChart data={data} layout="vertical" margin={{ top: 10, right: 30, bottom: 20, left: 140 }}>
         <CartesianGrid strokeDasharray="3 3" stroke={CHART_STYLES.gridStroke} />
         <XAxis type="number" tick={{ fill: CHART_STYLES.axisTick, fontSize: 11 }} />
-        <YAxis type="category" dataKey="name" tick={{ fill: CHART_STYLES.axisTick, fontSize: 10 }} width={85} />
+        <YAxis type="category" dataKey="name" tick={{ fill: CHART_STYLES.axisTick, fontSize: 11 }} width={135} />
         <Tooltip
           contentStyle={{
             backgroundColor: CHART_STYLES.tooltipBg,

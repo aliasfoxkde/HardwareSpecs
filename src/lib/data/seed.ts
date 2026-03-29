@@ -1804,6 +1804,8 @@ export const devices: DeviceVariant[] = [
     formFactor: 'PCIe 5.0 x16',
     interface: 'PCIe 5.0 x16',
     notes: 'Blackwell, 21,760 CUDA cores, DLSS 4, 3801 MHz boost',
+    referenceUrl: 'https://www.nvidia.com/en-us/geforce/graphics-cards/50-series/rtx-5090/',
+    purchaseUrl: 'https://www.nvidia.com/en-us/geforce/graphics-cards/50-series/rtx-5090/buy/',
   },
   {
     deviceId: 'nvidia-rtx-4090',
@@ -1819,6 +1821,8 @@ export const devices: DeviceVariant[] = [
     formFactor: 'PCIe 4.0 x16',
     interface: 'PCIe 4.0 x16',
     notes: 'Ada Lovelace, 16,384 CUDA cores, 2520 MHz boost',
+    referenceUrl: 'https://www.nvidia.com/en-us/geforce/graphics-cards/40-series/rtx-4090/',
+    purchaseUrl: 'https://www.nvidia.com/en-us/geforce/graphics-cards/40-series/rtx-4090/buy/',
   },
   {
     deviceId: 'nvidia-rtx-4070-ti',
@@ -1834,6 +1838,8 @@ export const devices: DeviceVariant[] = [
     formFactor: 'PCIe 4.0 x16',
     interface: 'PCIe 4.0 x16',
     notes: 'Ada Lovelace, 8,448 CUDA cores, 2610 MHz boost',
+    purchaseUrl: 'https://www.nvidia.com/en-us/geforce/graphics-cards/40-series/rtx-4070-ti-super/buy/',
+    referenceUrl: 'https://www.nvidia.com/en-us/geforce/graphics-cards/40-series/rtx-4070-ti/',
   },
   {
     deviceId: 'nvidia-a100-80gb',
@@ -1864,6 +1870,7 @@ export const devices: DeviceVariant[] = [
     formFactor: 'SXM5',
     interface: 'SXM5',
     notes: 'Hopper, 16,896 CUDA cores, 4th gen Tensor Cores, FP8 Transformer Engine',
+    referenceUrl: 'https://www.nvidia.com/en-us/data-center/h100/',
   },
   {
     deviceId: 'amd-rx-9070-xt',
@@ -1909,6 +1916,7 @@ export const devices: DeviceVariant[] = [
     formFactor: 'OAM',
     interface: 'OAM',
     notes: 'CDNA 3, 19,456 CUs, 192 GB HBM3, 5.3 TB/s bandwidth',
+    referenceUrl: 'https://www.amd.com/en/products/accelerators/instinct/mi300/mi300x.html',
   },
   {
     deviceId: 'intel-arc-b580',
@@ -1939,6 +1947,8 @@ export const devices: DeviceVariant[] = [
     formFactor: 'PCIe 5.0 x16',
     interface: 'PCIe 5.0 x16',
     notes: 'Blackwell, 10,752 CUDA cores, DLSS 4, 3607 MHz boost',
+    referenceUrl: 'https://www.nvidia.com/en-us/geforce/graphics-cards/50-series/rtx-5080/',
+    purchaseUrl: 'https://www.nvidia.com/en-us/geforce/graphics-cards/50-series/rtx-5080/buy/',
   },
   {
     deviceId: 'nvidia-rtx-4080-super',
@@ -1954,6 +1964,8 @@ export const devices: DeviceVariant[] = [
     formFactor: 'PCIe 4.0 x16',
     interface: 'PCIe 4.0 x16',
     notes: 'Ada Lovelace, 10,240 CUDA cores, 2550 MHz boost',
+    purchaseUrl: 'https://www.nvidia.com/en-us/geforce/graphics-cards/40-series/rtx-4080-super/buy/',
+    referenceUrl: 'https://www.nvidia.com/en-us/geforce/graphics-cards/40-series/rtx-4080-super/',
   },
   {
     deviceId: 'nvidia-rtx-4060-ti',
@@ -1995,6 +2007,7 @@ export const devices: DeviceVariant[] = [
     tensorCores: 280,
     rtCores: 70,
     notes: 'Blackwell, 8,960 CUDA cores, DLSS 4, GDDR7',
+    purchaseUrl: 'https://www.nvidia.com/en-us/geforce/graphics-cards/50-series/rtx-5070-ti/buy/',
   },
   {
     deviceId: 'nvidia-rtx-5070',
@@ -2041,6 +2054,7 @@ export const devices: DeviceVariant[] = [
     tensorCores: 144,
     rtCores: 36,
     notes: 'Blackwell, 4,608 CUDA cores, DLSS 4, GDDR7 16GB',
+    purchaseUrl: 'https://www.nvidia.com/en-us/geforce/graphics-cards/50-series/rtx-5060-ti/buy/',
   },
   {
     deviceId: 'nvidia-rtx-5060-ti-8gb',
@@ -2064,6 +2078,7 @@ export const devices: DeviceVariant[] = [
     tensorCores: 144,
     rtCores: 36,
     notes: 'Blackwell, 4,608 CUDA cores, DLSS 4, GDDR7 8GB',
+    purchaseUrl: 'https://www.nvidia.com/en-us/geforce/graphics-cards/50-series/rtx-5060-ti/buy/',
   },
   {
     deviceId: 'nvidia-rtx-5060',
@@ -2134,6 +2149,7 @@ export const devices: DeviceVariant[] = [
     tensorCores: 304,
     rtCores: 76,
     notes: 'Ada Lovelace, 9,728 CUDA cores, 3rd gen RT, DLSS 3',
+    purchaseUrl: 'https://www.nvidia.com/en-us/geforce/graphics-cards/40-series/rtx-4080/buy/',
   },
   {
     deviceId: 'nvidia-rtx-4070-ti-base',
@@ -2157,6 +2173,7 @@ export const devices: DeviceVariant[] = [
     tensorCores: 240,
     rtCores: 60,
     notes: 'Ada Lovelace, 7,680 CUDA cores, DLSS 3, 12GB GDDR6X',
+    purchaseUrl: 'https://www.nvidia.com/en-us/geforce/graphics-cards/40-series/rtx-4070-ti/buy/',
   },
   {
     deviceId: 'nvidia-rtx-4070-super',
@@ -2180,6 +2197,7 @@ export const devices: DeviceVariant[] = [
     tensorCores: 224,
     rtCores: 56,
     notes: 'Ada Lovelace, 7,168 CUDA cores, DLSS 3, replaced 4070 non-Super',
+    purchaseUrl: 'https://www.nvidia.com/en-us/geforce/graphics-cards/40-series/rtx-4070-super/buy/',
   },
   {
     deviceId: 'nvidia-rtx-4070',
@@ -2249,6 +2267,7 @@ export const devices: DeviceVariant[] = [
     tensorCores: 136,
     rtCores: 34,
     notes: 'Ada Lovelace, 4,352 CUDA cores, DLSS 3, 8GB variant',
+    purchaseUrl: 'https://www.nvidia.com/en-us/geforce/graphics-cards/40-series/rtx-4060-ti/buy/',
   },
   {
     deviceId: 'nvidia-rtx-4060-ti-16gb',
@@ -2272,6 +2291,7 @@ export const devices: DeviceVariant[] = [
     tensorCores: 136,
     rtCores: 34,
     notes: 'Ada Lovelace, 4,352 CUDA cores, DLSS 3, 16GB variant, same GPU as 8GB',
+    purchaseUrl: 'https://www.nvidia.com/en-us/geforce/graphics-cards/40-series/rtx-4060-ti/buy/',
   },
   // --- RTX 30 Series (Ampere) ---
   {
@@ -2296,6 +2316,7 @@ export const devices: DeviceVariant[] = [
     tensorCores: 336,
     rtCores: 84,
     notes: 'Ampere, 10,752 CUDA cores, 24GB GDDR6X, flagship Ampere',
+    purchaseUrl: 'https://www.nvidia.com/en-us/geforce/graphics-cards/30-series/rtx-3090-ti/buy/',
   },
   {
     deviceId: 'nvidia-rtx-3090',
@@ -2319,6 +2340,7 @@ export const devices: DeviceVariant[] = [
     tensorCores: 328,
     rtCores: 82,
     notes: 'Ampere, 10,496 CUDA cores, 24GB GDDR6X, 8K capable',
+    purchaseUrl: 'https://www.nvidia.com/en-us/geforce/graphics-cards/30-series/rtx-3090/buy/',
   },
   {
     deviceId: 'nvidia-rtx-3080-ti',
@@ -2342,6 +2364,7 @@ export const devices: DeviceVariant[] = [
     tensorCores: 320,
     rtCores: 80,
     notes: 'Ampere, 10,240 CUDA cores, GDDR6X, near-3090 perf',
+    purchaseUrl: 'https://www.nvidia.com/en-us/geforce/graphics-cards/30-series/rtx-3080-ti/buy/',
   },
   {
     deviceId: 'nvidia-rtx-3080',
@@ -2365,6 +2388,7 @@ export const devices: DeviceVariant[] = [
     tensorCores: 272,
     rtCores: 68,
     notes: 'Ampere, 8,704 CUDA cores, GDDR6X, excellent value',
+    purchaseUrl: 'https://www.nvidia.com/en-us/geforce/graphics-cards/30-series/rtx-3080/buy/',
   },
   {
     deviceId: 'nvidia-rtx-3070-ti',
@@ -2388,6 +2412,7 @@ export const devices: DeviceVariant[] = [
     tensorCores: 192,
     rtCores: 48,
     notes: 'Ampere, 6,144 CUDA cores, GDDR6X',
+    purchaseUrl: 'https://www.nvidia.com/en-us/geforce/graphics-cards/30-series/rtx-3070-ti/buy/',
   },
   {
     deviceId: 'nvidia-rtx-3070',
@@ -2411,6 +2436,7 @@ export const devices: DeviceVariant[] = [
     tensorCores: 184,
     rtCores: 46,
     notes: 'Ampere, 5,888 CUDA cores, 2080 Ti performance at lower price',
+    purchaseUrl: 'https://www.nvidia.com/en-us/geforce/graphics-cards/30-series/rtx-3070/buy/',
   },
   {
     deviceId: 'nvidia-rtx-3060-ti',
@@ -2434,6 +2460,7 @@ export const devices: DeviceVariant[] = [
     tensorCores: 152,
     rtCores: 38,
     notes: 'Ampere, 4,864 CUDA cores, GDDR6, 1080p killer',
+    purchaseUrl: 'https://www.nvidia.com/en-us/geforce/graphics-cards/30-series/rtx-3060-ti/buy/',
   },
   {
     deviceId: 'nvidia-rtx-3060-12gb',
@@ -5125,6 +5152,7 @@ export const devices: DeviceVariant[] = [
     formFactor: 'SBC',
     interface: 'PCIe 2.0 x1',
     notes: 'Broadcom BCM2712, VideoCore VII GPU, Wi-Fi 5 optional HAT',
+    purchaseUrl: 'https://www.raspberrypi.com/products/raspberry-pi-5/',
   },
   {
     deviceId: 'raspberry-pi-4-8gb',
@@ -5140,6 +5168,7 @@ export const devices: DeviceVariant[] = [
     memoryCapacityGB: 8,
     formFactor: 'SBC',
     notes: 'Broadcom BCM2711, VideoCore VI GPU, USB 3.0, Gigabit Ethernet',
+    purchaseUrl: 'https://www.raspberrypi.com/products/raspberry-pi-4-model-b/',
   },
   {
     deviceId: 'radxa-rock-5b',
@@ -5269,6 +5298,7 @@ export const devices: DeviceVariant[] = [
     formFactor: 'SoM',
     interface: 'PCIe 4.0 x4',
     notes: 'ARM Cortex-A78AE, 1024-core Ampere GPU, 100 TOPS',
+    purchaseUrl: 'https://developer.nvidia.com/embedded/jetson-orin-nx/',
   },
   {
     deviceId: 'nvidia-jetson-agx-orin-64gb',
@@ -5286,6 +5316,7 @@ export const devices: DeviceVariant[] = [
     formFactor: 'SoM',
     interface: 'PCIe 4.0 x8',
     notes: 'ARM Cortex-A78AE, 2048-core Ampere GPU, 275 TOPS',
+    purchaseUrl: 'https://developer.nvidia.com/embedded/jetson-agx-orin/',
   },
   {
     deviceId: 'hailo-8',
@@ -5388,6 +5419,8 @@ export const devices: DeviceVariant[] = [
     formFactor: 'Desktop',
     interface: 'PCIe 5.0 x16',
     notes: 'Grace Blackwell Superchip, integrated GB10 GPU, personal AI supercomputer',
+    referenceUrl: 'https://www.nvidia.com/en-us/dgx-systems/dgx-spark/',
+    purchaseUrl: 'https://www.nvidia.com/en-us/shop/dgx-spark/',
   },
   {
     deviceId: 'apple-mac-mini-m4',
@@ -5452,6 +5485,7 @@ export const devices: DeviceVariant[] = [
     formFactor: 'GB200 NVL',
     interface: 'NVLink 5',
     notes: 'Blackwell Ultra, 2nd gen Transformer Engine, FP4, 208 BFLOPS FP4',
+    referenceUrl: 'https://www.nvidia.com/en-us/data-center/b200/',
   },
   {
     deviceId: 'nvidia-h200-sxm',
@@ -5467,6 +5501,7 @@ export const devices: DeviceVariant[] = [
     formFactor: 'SXM5',
     interface: 'NVLink 4',
     notes: 'Hopper, 141 GB HBM3e (largest GPU memory), 4.8 TB/s bandwidth, same GPU as H100',
+    referenceUrl: 'https://www.nvidia.com/en-us/data-center/h200/',
   },
   {
     deviceId: 'nvidia-l40s',
@@ -5497,6 +5532,7 @@ export const devices: DeviceVariant[] = [
     formFactor: 'OAM',
     interface: 'OAM',
     notes: 'CDNA 3.5, 288 GB HBM3e, FP8 & FP16 optimized, drop-in for MI300X platforms',
+    referenceUrl: 'https://www.amd.com/en/products/accelerators/instinct/mi325x.html',
   },
 
   // ========== Apple Silicon SoCs ==========
@@ -5625,6 +5661,7 @@ export const devices: DeviceVariant[] = [
     formFactor: 'SoM',
     interface: 'PCIe 4.0 x1',
     notes: 'ARM Cortex-A78AE, 1024-core Ampere GPU, 67 TOPS (post-Super update), $249 entry-level AI dev kit',
+    purchaseUrl: 'https://developer.nvidia.com/embedded/jetson-orin-nano-developer-kit',
   },
 
   // ========== Mid-Range CPUs ==========
@@ -5966,6 +6003,7 @@ export const devices: DeviceVariant[] = [
     formFactor: 'Rack (8U)',
     interface: 'NVLink 4 x4 + InfiniBand',
     notes: '8x H100 SXM5 80GB = 640 GB HBM3, 32 petaFLOPS FP8, 8u rack, $250K+',
+    referenceUrl: 'https://www.nvidia.com/en-us/data-center/dgx-h100/',
   },
   {
     deviceId: 'groq-lpu-inference',
@@ -5998,6 +6036,7 @@ export const devices: DeviceVariant[] = [
     formFactor: 'CS-3 System',
     interface: 'Ethernet',
     notes: '4 trillion transistors, 44 GB on-chip SRAM, 21.4 TB/s, 850K sparse cores',
+    referenceUrl: 'https://cerebras.ai/products-cs3/',
   },
   {
     deviceId: 'intel-gaudi-3',
@@ -6015,6 +6054,7 @@ export const devices: DeviceVariant[] = [
     formFactor: 'PCIe 5.0 x16',
     interface: 'PCIe 5.0 x16',
     notes: 'AI training accelerator, 128 Gbps Ethernet, 192 GB HBM2e, 3072 GB/s bandwidth',
+    referenceUrl: 'https://www.intel.com/content/www/us/en/products/details/discrete-gpus/gaudi/overview.html',
   },
 
   // ========== Gaming Handhelds ==========
@@ -6162,6 +6202,7 @@ export const devices: DeviceVariant[] = [
     formFactor: 'PCIe 4.0 x16',
     interface: 'PCIe 4.0 x16',
     notes: 'Ada Lovelace, 18,176 CUDA cores, 48 GB ECC, 91.1 TFLOPS FP32, workstation flagship',
+    purchaseUrl: 'https://www.nvidia.com/en-us/design-visualization/rtx-6000-ada-generation/',
   },
 
   // ========== Additional SBCs ==========
@@ -6238,6 +6279,7 @@ export const devices: DeviceVariant[] = [
     memoryCapacityGB: 4,
     formFactor: 'Keyboard Computer',
     notes: 'BCM2711, VideoCore VI GPU, integrated keyboard form factor',
+    purchaseUrl: 'https://www.raspberrypi.com/products/raspberry-pi-400/',
   },
   {
     deviceId: 'raspberry-pi-cm4-8gb',
@@ -7740,10 +7782,11 @@ export const benchmarks: BenchmarkResult[] = [
     deviceId: 'nvidia-dgx-spark',
     benchmarkTypeId: 'ai-int8-throughput',
     sourceId: 'vendor-msrp',
-    rawScore: 4.0,
+    rawScore: 250,
     sampleSize: 1,
-    confidence: 0.75,
+    confidence: 0.60,
     observedAt: '2025-03-17',
+    testConditions: { note: 'Estimated INT8 TOPS. FP4 sparse = 1000 TOPS per NVIDIA.' },
   },
   {
     resultId: 'ai8-mac-mini-m4',
@@ -9794,34 +9837,40 @@ export const specs: SpecSnapshot[] = [
     snapshotId: 'spec-rtx-5090',
     deviceId: 'nvidia-rtx-5090',
     sourceId: 'nvidia-specs',
-    int8Tops: 3148,
-    fp16Tflops: 3148,
+    int8Tops: 1676,
+    fp4Tflops: 3352,
+    fp16Tflops: 838,
     fp32Tflops: 104.8,
     tdpWatts: 575,
     boostWatts: 600,
     memoryBwGBps: 1792,
+    otherSpecs: { aiTopsFp4Sparse: 3352, note: 'NVIDIA markets 3352 AI TOPS = FP4 2:4 sparse. INT8 dense ~1676 TOPS. FP16 dense ~838 TFLOPS.' },
   },
   {
     snapshotId: 'spec-rtx-4090',
     deviceId: 'nvidia-rtx-4090',
     sourceId: 'nvidia-specs',
-    int8Tops: 1321,
-    fp16Tflops: 661,
+    int8Tops: 661,
+    fp8Tflops: 1321,
+    fp16Tflops: 330,
     fp32Tflops: 82.6,
     tdpWatts: 450,
     boostWatts: 600,
     memoryBwGBps: 1008,
+    otherSpecs: { note: 'INT8 dense = 661 TOPS. FP8 sparse = 1321 TFLOPS. NVIDIA marketed 1321 AI TOPS = FP8 sparse, not INT8.' },
   },
   {
     snapshotId: 'spec-rtx-4070ti',
     deviceId: 'nvidia-rtx-4070-ti',
     sourceId: 'nvidia-specs',
-    int8Tops: 710,
-    fp16Tflops: 355,
+    int8Tops: 355,
+    fp8Tflops: 710,
+    fp16Tflops: 177,
     fp32Tflops: 44.1,
     tdpWatts: 285,
     boostWatts: 310,
     memoryBwGBps: 672,
+    otherSpecs: { note: 'INT8 dense = 355 TOPS. FP8 sparse = 710 TFLOPS. NVIDIA marketed 710 AI TOPS = FP8 sparse, not INT8.' },
   },
   {
     snapshotId: 'spec-a100-80gb',
@@ -9832,6 +9881,7 @@ export const specs: SpecSnapshot[] = [
     fp32Tflops: 19.5,
     tdpWatts: 300,
     memoryBwGBps: 2000,
+    otherSpecs: { note: 'INT8 dense = 624 TOPS. FP16 dense = 312 TFLOPS. A100 uses Tensor Cores without sparse acceleration.' },
   },
   {
     snapshotId: 'spec-h100-sxm',
@@ -9842,7 +9892,7 @@ export const specs: SpecSnapshot[] = [
     fp32Tflops: 67,
     tdpWatts: 700,
     memoryBwGBps: 3350,
-    otherSpecs: { fp8Tflops: 1979, transformerEngine: true },
+    otherSpecs: { fp8Tflops: 1979, transformerEngine: true, note: 'INT8 dense = 1979 TOPS. FP8 with Transformer Engine = 1979 TFLOPS (dense). FP16 dense = 989 TFLOPS.' },
   },
   {
     snapshotId: 'spec-rx-9070xt',
@@ -9870,12 +9920,13 @@ export const specs: SpecSnapshot[] = [
     snapshotId: 'spec-mi300x',
     deviceId: 'amd-mi300x',
     sourceId: 'amd-specs',
-    int8Tops: 2614,
-    fp16Tflops: 1307,
-    fp32Tflops: 48.7,
+    int8Tops: 1307,
+    fp8Tflops: 1307,
+    fp16Tflops: 654,
+    fp32Tflops: 81.2,
     tdpWatts: 750,
     memoryBwGBps: 5300,
-    otherSpecs: { fp8Tflops: 2614, cdnaVersion: 3 },
+    otherSpecs: { cdnaVersion: 3, note: 'INT8 dense = 1307 TOPS. FP8 = 1307 TFLOPS. FP16 dense = 654 TFLOPS.' },
   },
   {
     snapshotId: 'spec-arc-b580',
@@ -10332,23 +10383,27 @@ export const specs: SpecSnapshot[] = [
     snapshotId: 'spec-rtx-5080',
     deviceId: 'nvidia-rtx-5080',
     sourceId: 'nvidia-specs',
-    int8Tops: 1556,
-    fp16Tflops: 1556,
+    int8Tops: 901,
+    fp4Tflops: 1801,
+    fp16Tflops: 451,
     fp32Tflops: 56.2,
     tdpWatts: 360,
     boostWatts: 400,
     memoryBwGBps: 960,
+    otherSpecs: { note: 'INT8 dense = 901 TOPS. FP4 sparse = 1801 TFLOPS. NVIDIA markets 1801 AI TOPS = FP4 2:4 sparse, not INT8.' },
   },
   {
     snapshotId: 'spec-rtx-4080-super',
     deviceId: 'nvidia-rtx-4080-super',
     sourceId: 'nvidia-specs',
-    int8Tops: 832,
-    fp16Tflops: 416,
+    int8Tops: 416,
+    fp8Tflops: 832,
+    fp16Tflops: 208,
     fp32Tflops: 52.2,
     tdpWatts: 320,
     boostWatts: 320,
     memoryBwGBps: 736,
+    otherSpecs: { note: 'INT8 dense = 416 TOPS. FP8 sparse = 832 TFLOPS. NVIDIA marketed 832 AI TOPS = FP8 sparse, not INT8.' },
   },
   {
     snapshotId: 'spec-rtx-4060-ti',
@@ -10404,12 +10459,14 @@ export const specs: SpecSnapshot[] = [
     snapshotId: 'spec-dgx-spark',
     deviceId: 'nvidia-dgx-spark',
     sourceId: 'vendor-msrp',
-    int8Tops: 4000,
-    fp16Tflops: 2000,
+    int8Tops: 250,
+    fp4Tflops: 1000,
+    fp16Tflops: 500,
     fp32Tflops: 150,
     tdpWatts: 100,
     boostWatts: 1000,
     memoryBwGBps: 400,
+    otherSpecs: { fp4TopsSparse: 1000, tensorCores: 0, note: 'FP4 sparse = 1000 TOPS per NVIDIA specs. INT8 estimated at ~250 TOPS.' },
   },
   {
     snapshotId: 'spec-mac-mini-m4',
@@ -10437,13 +10494,15 @@ export const specs: SpecSnapshot[] = [
     snapshotId: 'spec-nvidia-b200',
     deviceId: 'nvidia-b200',
     sourceId: 'nvidia-specs',
-    int8Tops: 4000,
-    fp16Tflops: 2250,
+    int8Tops: 2000,
+    fp4Tflops: 4000,
+    fp8Tflops: 2000,
+    fp16Tflops: 1000,
     fp32Tflops: 90,
     tdpWatts: 1000,
     boostWatts: 1200,
     memoryBwGBps: 8000,
-    otherSpecs: { fp4Tflops: 9000, transformerEngineV2: true },
+    otherSpecs: { fp4TflopsSparse: 8000, transformerEngineV2: true, note: 'FP4 4 PFLOPS dense / 8 PFLOPS sparse. FP8 2 PFLOPS dense. INT8 dense ~2000 TOPS.' },
   },
   {
     snapshotId: 'spec-nvidia-h200',
@@ -10454,28 +10513,31 @@ export const specs: SpecSnapshot[] = [
     fp32Tflops: 67,
     tdpWatts: 700,
     memoryBwGBps: 4800,
-    otherSpecs: { fp8Tflops: 1979, transformerEngine: true, hbm3e: true },
+    otherSpecs: { fp8Tflops: 1979, transformerEngine: true, hbm3e: true, note: 'INT8 dense = 1979 TOPS. Same GPU die as H100 SXM5 with upgraded HBM3e memory.' },
   },
   {
     snapshotId: 'spec-nvidia-l40s',
     deviceId: 'nvidia-l40s',
     sourceId: 'nvidia-specs',
     int8Tops: 733,
+    fp8Tflops: 733,
     fp16Tflops: 366,
     fp32Tflops: 91.6,
     tdpWatts: 350,
     memoryBwGBps: 864,
+    otherSpecs: { note: 'INT8 dense = 733 TOPS. FP8 sparse = 733 TFLOPS. FP16 dense = 366 TFLOPS.' },
   },
   {
     snapshotId: 'spec-amd-mi325x',
     deviceId: 'amd-mi325x',
     sourceId: 'amd-specs',
-    int8Tops: 3200,
-    fp16Tflops: 1600,
-    fp32Tflops: 48.7,
+    int8Tops: 1918,
+    fp8Tflops: 1918,
+    fp16Tflops: 959,
+    fp32Tflops: 47.9,
     tdpWatts: 1000,
     memoryBwGBps: 6400,
-    otherSpecs: { fp8Tflops: 3200, cdnaVersion: '3.5' },
+    otherSpecs: { cdnaVersion: '3.5', note: 'INT8 dense = 1918 TOPS. FP8 = 1918 TFLOPS. FP16 dense = 959 TFLOPS.' },
   },
 
   // ===== Apple Silicon Specs =====
@@ -10869,12 +10931,13 @@ export const specs: SpecSnapshot[] = [
     snapshotId: 'spec-dgx-h100',
     deviceId: 'nvidia-dgx-h100-system',
     sourceId: 'nvidia-specs',
-    int8Tops: 15800,
-    fp16Tflops: 15800,
-    fp32Tflops: 530,
+    int8Tops: 15832,
+    fp16Tflops: 7832,
+    fp32Tflops: 536,
     tdpWatts: 10000,
     boostWatts: 10000,
     memoryBwGBps: 33500,
+    otherSpecs: { note: '8x H100 SXM5 aggregate: 8 * 1979 = 15832 INT8 dense, 8 * 979 = 7832 FP16 dense, 8 * 67 = 536 FP32 dense.' },
   },
   {
     snapshotId: 'spec-groq-lpu',
@@ -10897,17 +10960,20 @@ export const specs: SpecSnapshot[] = [
     tdpWatts: 800,
     boostWatts: 800,
     memoryBwGBps: 21300,
+    otherSpecs: { note: 'Marketing compute figure. Not directly comparable to GPU tensor TOPS. Cerebras uses compute-in-memory architecture.' },
   },
   {
     snapshotId: 'spec-intel-gaudi3',
     deviceId: 'intel-gaudi-3',
     sourceId: 'intel-specs',
-    int8Tops: 3664,
-    fp16Tflops: 1832,
-    fp32Tflops: 916,
+    int8Tops: 1835,
+    fp8Tflops: 1835,
+    fp16Tflops: 918,
+    fp32Tflops: 459,
     tdpWatts: 900,
     boostWatts: 900,
     memoryBwGBps: 3072,
+    otherSpecs: { note: 'INT8 dense = 1835 TOPS. FP8 = 1835 TFLOPS. FP16 dense = 918 TFLOPS.' },
   },
 
   // ========== Wave 2: Gaming Handhelds ==========
@@ -11000,12 +11066,14 @@ export const specs: SpecSnapshot[] = [
     snapshotId: 'spec-rtx6000-ada',
     deviceId: 'nvidia-rtx-6000-ada',
     sourceId: 'nvidia-specs',
-    int8Tops: 1912,
-    fp16Tflops: 1912,
+    int8Tops: 733,
+    fp8Tflops: 733,
+    fp16Tflops: 363,
     fp32Tflops: 91.6,
     tdpWatts: 300,
     boostWatts: 300,
     memoryBwGBps: 960,
+    otherSpecs: { note: 'INT8 dense = 733 TOPS. FP8 sparse = 733 TFLOPS. FP16 dense = 363 TFLOPS.' },
   },
 
   // ========== Wave 2: Additional SBCs ==========

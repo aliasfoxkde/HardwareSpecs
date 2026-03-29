@@ -1,13 +1,33 @@
 import { useMemo } from 'react'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts'
-import { getDeviceMetricsTable } from '@/lib/api'
+import { getDeviceMetricsTable, getVendors } from '@/lib/api'
 import { getVendorColor, CHART_STYLES, formatNumber } from './chartUtils'
 
-function truncateName(name: string, max = 20): string {
-  return name.length > max ? name.slice(0, max - 2) + '..' : name
+function shortName(name: string, vendorName: string): string {
+  // Strip vendor prefix for brevity, keep the actual model name
+  let short = name
+  const prefixes = [
+    'NVIDIA GeForce ', 'NVIDIA GeForce RTX ', 'NVIDIA ',
+    'AMD Radeon ', 'AMD Radeon RX ', 'AMD ',
+    'Intel Arc ', 'Intel ',
+  ]
+  for (const prefix of prefixes) {
+    if (short.startsWith(prefix)) {
+      short = short.slice(prefix.length)
+      break
+    }
+  }
+  return short
 }
 
 export function TopTopsBarChart({ limit = 20 }: { limit?: number }) {
+  const vendors = useMemo(() => getVendors(), [])
+  const vendorNameMap = useMemo(() => {
+    const m: Record<string, string> = {}
+    for (const v of vendors) m[v.vendorId] = v.name
+    return m
+  }, [vendors])
+
   const data = useMemo(() => {
     return getDeviceMetricsTable()
       .filter(m => m.effectiveInt8Tops > 0)
@@ -15,20 +35,22 @@ export function TopTopsBarChart({ limit = 20 }: { limit?: number }) {
       .slice(0, limit)
       .map(m => ({
         deviceId: m.deviceId,
-        name: truncateName(m.modelName),
+        name: shortName(m.modelName, vendorNameMap[m.vendorId] ?? ''),
+        fullName: m.modelName,
         vendorId: m.vendorId,
+        vendorName: vendorNameMap[m.vendorId] ?? m.vendorId,
         tops: m.effectiveInt8Tops,
       }))
-  }, [limit])
+  }, [limit, vendorNameMap])
 
   if (data.length === 0) return <div className="flex items-center justify-center h-full text-text-muted">No INT8 TOPS data available</div>
 
   return (
-    <ResponsiveContainer width="100%" height={Math.max(300, data.length * 30)}>
-      <BarChart data={data} layout="vertical" margin={{ top: 10, right: 30, bottom: 20, left: 100 }}>
+    <ResponsiveContainer width="100%" height={Math.max(300, data.length * 28)}>
+      <BarChart data={data} layout="vertical" margin={{ top: 10, right: 30, bottom: 20, left: 140 }}>
         <CartesianGrid strokeDasharray="3 3" stroke={CHART_STYLES.gridStroke} />
         <XAxis type="number" tick={{ fill: CHART_STYLES.axisTick, fontSize: 11 }} />
-        <YAxis type="category" dataKey="name" tick={{ fill: CHART_STYLES.axisTick, fontSize: 10 }} width={95} />
+        <YAxis type="category" dataKey="name" tick={{ fill: CHART_STYLES.axisTick, fontSize: 11 }} width={135} />
         <Tooltip
           contentStyle={{
             backgroundColor: CHART_STYLES.tooltipBg,
@@ -36,6 +58,7 @@ export function TopTopsBarChart({ limit = 20 }: { limit?: number }) {
             borderRadius: '8px',
             color: CHART_STYLES.tooltipText,
           }}
+          labelFormatter={(_, payload) => payload?.[0]?.payload?.fullName ?? ''}
           formatter={(value: number) => [`${formatNumber(value)} TOPS`, 'INT8 TOPS']}
         />
         <Bar dataKey="tops" name="INT8 TOPS" radius={[0, 4, 4, 0]}>
@@ -49,6 +72,13 @@ export function TopTopsBarChart({ limit = 20 }: { limit?: number }) {
 }
 
 export function TopTopsPerDollarChart({ limit = 20 }: { limit?: number }) {
+  const vendors = useMemo(() => getVendors(), [])
+  const vendorNameMap = useMemo(() => {
+    const m: Record<string, string> = {}
+    for (const v of vendors) m[v.vendorId] = v.name
+    return m
+  }, [vendors])
+
   const data = useMemo(() => {
     return getDeviceMetricsTable()
       .filter(m => m.topsPerDollar != null && m.topsPerDollar > 0)
@@ -56,20 +86,21 @@ export function TopTopsPerDollarChart({ limit = 20 }: { limit?: number }) {
       .slice(0, limit)
       .map(m => ({
         deviceId: m.deviceId,
-        name: truncateName(m.modelName),
+        name: shortName(m.modelName, vendorNameMap[m.vendorId] ?? ''),
+        fullName: m.modelName,
         vendorId: m.vendorId,
         topsPerDollar: m.topsPerDollar,
       }))
-  }, [limit])
+  }, [limit, vendorNameMap])
 
   if (data.length === 0) return <div className="flex items-center justify-center h-full text-text-muted">No TOPS/$ data available</div>
 
   return (
-    <ResponsiveContainer width="100%" height={Math.max(300, data.length * 30)}>
-      <BarChart data={data} layout="vertical" margin={{ top: 10, right: 30, bottom: 20, left: 100 }}>
+    <ResponsiveContainer width="100%" height={Math.max(300, data.length * 28)}>
+      <BarChart data={data} layout="vertical" margin={{ top: 10, right: 30, bottom: 20, left: 140 }}>
         <CartesianGrid strokeDasharray="3 3" stroke={CHART_STYLES.gridStroke} />
         <XAxis type="number" tick={{ fill: CHART_STYLES.axisTick, fontSize: 11 }} />
-        <YAxis type="category" dataKey="name" tick={{ fill: CHART_STYLES.axisTick, fontSize: 10 }} width={95} />
+        <YAxis type="category" dataKey="name" tick={{ fill: CHART_STYLES.axisTick, fontSize: 11 }} width={135} />
         <Tooltip
           contentStyle={{
             backgroundColor: CHART_STYLES.tooltipBg,
@@ -77,6 +108,7 @@ export function TopTopsPerDollarChart({ limit = 20 }: { limit?: number }) {
             borderRadius: '8px',
             color: CHART_STYLES.tooltipText,
           }}
+          labelFormatter={(_, payload) => payload?.[0]?.payload?.fullName ?? ''}
           formatter={(value: number) => [`${formatNumber(value)} TOPS/$`, 'TOPS/$']}
         />
         <Bar dataKey="topsPerDollar" name="TOPS/$" fill="#22c55e" radius={[0, 4, 4, 0]} />
@@ -86,6 +118,13 @@ export function TopTopsPerDollarChart({ limit = 20 }: { limit?: number }) {
 }
 
 export function TopTopsPerWattChart({ limit = 20 }: { limit?: number }) {
+  const vendors = useMemo(() => getVendors(), [])
+  const vendorNameMap = useMemo(() => {
+    const m: Record<string, string> = {}
+    for (const v of vendors) m[v.vendorId] = v.name
+    return m
+  }, [vendors])
+
   const data = useMemo(() => {
     return getDeviceMetricsTable()
       .filter(m => m.topsPerWatt != null && m.topsPerWatt > 0)
@@ -93,20 +132,21 @@ export function TopTopsPerWattChart({ limit = 20 }: { limit?: number }) {
       .slice(0, limit)
       .map(m => ({
         deviceId: m.deviceId,
-        name: truncateName(m.modelName),
+        name: shortName(m.modelName, vendorNameMap[m.vendorId] ?? ''),
+        fullName: m.modelName,
         vendorId: m.vendorId,
         topsPerWatt: m.topsPerWatt,
       }))
-  }, [limit])
+  }, [limit, vendorNameMap])
 
   if (data.length === 0) return <div className="flex items-center justify-center h-full text-text-muted">No TOPS/W data available</div>
 
   return (
-    <ResponsiveContainer width="100%" height={Math.max(300, data.length * 30)}>
-      <BarChart data={data} layout="vertical" margin={{ top: 10, right: 30, bottom: 20, left: 100 }}>
+    <ResponsiveContainer width="100%" height={Math.max(300, data.length * 28)}>
+      <BarChart data={data} layout="vertical" margin={{ top: 10, right: 30, bottom: 20, left: 140 }}>
         <CartesianGrid strokeDasharray="3 3" stroke={CHART_STYLES.gridStroke} />
         <XAxis type="number" tick={{ fill: CHART_STYLES.axisTick, fontSize: 11 }} />
-        <YAxis type="category" dataKey="name" tick={{ fill: CHART_STYLES.axisTick, fontSize: 10 }} width={95} />
+        <YAxis type="category" dataKey="name" tick={{ fill: CHART_STYLES.axisTick, fontSize: 11 }} width={135} />
         <Tooltip
           contentStyle={{
             backgroundColor: CHART_STYLES.tooltipBg,
@@ -114,6 +154,7 @@ export function TopTopsPerWattChart({ limit = 20 }: { limit?: number }) {
             borderRadius: '8px',
             color: CHART_STYLES.tooltipText,
           }}
+          labelFormatter={(_, payload) => payload?.[0]?.payload?.fullName ?? ''}
           formatter={(value: number) => [`${formatNumber(value)} TOPS/W`, 'TOPS/W']}
         />
         <Bar dataKey="topsPerWatt" name="TOPS/W" fill="#3b82f6" radius={[0, 4, 4, 0]} />

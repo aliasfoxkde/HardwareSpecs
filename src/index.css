@@ -110,3 +110,15 @@ body {
   background-size: 200% auto;
   animation: gradient-x 4s ease infinite;
 }
+
+@keyframes squirtle {
+  0% { transform: scale(0) rotate(-45deg); opacity: 0; }
+  50% { transform: scale(1.15) rotate(8deg); opacity: 1; }
+  65% { transform: scale(0.92) rotate(-4deg); }
+  80% { transform: scale(1.05) rotate(2deg); }
+  100% { transform: scale(1) rotate(0deg); opacity: 1; }
+}
+
+.animate-squirtle {
+  animation: squirtle 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97);
+}

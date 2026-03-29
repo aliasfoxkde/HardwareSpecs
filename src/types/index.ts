@@ -63,6 +63,8 @@ export interface DeviceVariant {
   formFactor?: string
   interface?: string
   notes?: string
+  referenceUrl?: string
+  purchaseUrl?: string
   // GPU-specific fields
   tmus?: number
   rops?: number
@@ -111,6 +113,8 @@ export interface SpecSnapshot {
   deviceId: string
   sourceId: string
   int8Tops?: number
+  fp4Tflops?: number
+  fp8Tflops?: number
   fp16Tflops?: number
   fp32Tflops?: number
   tdpWatts?: number

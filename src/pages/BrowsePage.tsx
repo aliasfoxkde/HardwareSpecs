@@ -130,27 +130,28 @@ export function BrowsePage() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-fade-in">
-      <div className="flex items-center justify-between mb-6">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 animate-fade-in flex flex-col" style={{ height: 'calc(100vh - 4rem)' }}>
+      {/* Header — fixed */}
+      <div className="flex items-center justify-between mb-3 shrink-0">
         <div>
           <h1 className="text-2xl font-bold text-text-primary">Browse Devices</h1>
           <p className="text-sm text-text-secondary">{total} devices found</p>
         </div>
       </div>
 
-      {/* Filters */}
-      <div className="mb-6 space-y-4">
+      {/* Filters — fixed */}
+      <div className="mb-3 space-y-3 shrink-0">
         {/* Search */}
         <input
           type="text"
           placeholder="Search by name, vendor, or family..."
           value={filters.searchQuery}
           onChange={e => setFilters(f => ({ ...f, searchQuery: e.target.value, page: 1 }))}
-          className="w-full px-4 py-2.5 bg-bg-secondary border border-border-subtle rounded-lg text-sm text-text-primary placeholder-text-muted focus:outline-none focus:ring-2 focus:ring-brand-500"
+          className="w-full px-4 py-2 bg-bg-secondary border border-border-subtle rounded-lg text-sm text-text-primary placeholder-text-muted focus:outline-none focus:ring-2 focus:ring-brand-500"
         />
 
-        {/* Category filters */}
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-2 items-center">
+          {/* Category filters */}
           {CATEGORIES.map(cat => (
             <button
               key={cat}
@@ -164,10 +165,8 @@ export function BrowsePage() {
               {cat}
             </button>
           ))}
-        </div>
 
-        {/* Vendor filters */}
-        <div className="flex flex-wrap gap-2">
+          {/* Vendor filters */}
           {activeVendors.map(vendor => vendor && (
             <button
               key={vendor.vendorId}
@@ -181,26 +180,26 @@ export function BrowsePage() {
               {vendor.name}
             </button>
           ))}
-        </div>
 
-        {/* Active filter summary */}
-        {(filters.categories.length > 0 || filters.vendors.length > 0 || filters.searchQuery) && (
-          <button
-            onClick={() => setFilters(f => ({ ...f, categories: [], vendors: [], searchQuery: '', page: 1 }))}
-            className="text-sm text-brand-400 hover:text-brand-300"
-          >
-            Clear all filters
-          </button>
-        )}
+          {/* Active filter summary */}
+          {(filters.categories.length > 0 || filters.vendors.length > 0 || filters.searchQuery) && (
+            <button
+              onClick={() => setFilters(f => ({ ...f, categories: [], vendors: [], searchQuery: '', page: 1 }))}
+              className="text-sm text-brand-400 hover:text-brand-300"
+            >
+              Clear all filters
+            </button>
+          )}
+        </div>
       </div>
 
-      {/* Device table */}
-      <div className="bg-bg-card/30 border border-border-subtle/50 rounded-xl overflow-hidden">
+      {/* Table area — scrollable */}
+      <div className="bg-bg-card/30 border border-border-subtle/50 rounded-xl overflow-hidden flex flex-col flex-1 min-h-0">
         {/* Desktop table */}
-        <div className="hidden lg:block overflow-x-auto">
+        <div className="hidden lg:flex flex-col flex-1 min-h-0 overflow-auto">
           <table className="w-full">
-            <thead>
-              <tr className="border-b border-border-subtle/50">
+            <thead className="sticky top-0 z-10">
+              <tr className="border-b border-border-subtle/50 bg-bg-secondary">
                 {COLUMNS.map(col => (
                   <th
                     key={col.key}
@@ -295,7 +294,7 @@ export function BrowsePage() {
         </div>
 
         {/* Mobile/tablet cards */}
-        <div className="lg:hidden divide-y divide-border-subtle/30">
+        <div className="lg:hidden divide-y divide-border-subtle/30 overflow-auto flex-1">
           {devices.map(item => {
             const ram = item.device.memoryCapacityGB
             const price = item.latestPrice?.priceUsd
@@ -355,57 +354,57 @@ export function BrowsePage() {
             No devices match your filters.
           </div>
         )}
-      </div>
 
-      {/* Pagination */}
-      {totalPages > 1 && (
-        <div className="flex items-center justify-between mt-6">
-          <div className="text-sm text-text-secondary">
-            Showing {(filters.page - 1) * filters.pageSize + 1}-{Math.min(filters.page * filters.pageSize, total)} of {total}
+        {/* Pagination — fixed at bottom */}
+        {totalPages > 1 && (
+          <div className="flex items-center justify-between px-4 py-3 border-t border-border-subtle/30 shrink-0">
+            <div className="text-sm text-text-secondary">
+              Showing {(filters.page - 1) * filters.pageSize + 1}-{Math.min(filters.page * filters.pageSize, total)} of {total}
+            </div>
+            <div className="flex gap-1">
+              <button
+                onClick={() => setFilters(f => ({ ...f, page: Math.max(1, f.page - 1) }))}
+                disabled={filters.page <= 1}
+                className="px-3 py-1.5 bg-bg-secondary border border-border-subtle rounded-lg text-sm text-text-secondary disabled:opacity-30 hover:text-text-primary"
+              >
+                Previous
+              </button>
+              {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                let page: number
+                if (totalPages <= 5) {
+                  page = i + 1
+                } else if (filters.page <= 3) {
+                  page = i + 1
+                } else if (filters.page >= totalPages - 2) {
+                  page = totalPages - 4 + i
+                } else {
+                  page = filters.page - 2 + i
+                }
+                return (
+                  <button
+                    key={page}
+                    onClick={() => setFilters(f => ({ ...f, page }))}
+                    className={`px-3 py-1.5 rounded-lg text-sm ${
+                      page === filters.page
+                        ? 'bg-brand-600 text-text-primary'
+                        : 'bg-bg-secondary text-text-secondary hover:text-text-primary border border-border-subtle'
+                    }`}
+                  >
+                    {page}
+                  </button>
+                )
+              })}
+              <button
+                onClick={() => setFilters(f => ({ ...f, page: Math.min(totalPages, f.page + 1) }))}
+                disabled={filters.page >= totalPages}
+                className="px-3 py-1.5 bg-bg-secondary border border-border-subtle rounded-lg text-sm text-text-secondary disabled:opacity-30 hover:text-text-primary"
+              >
+                Next
+              </button>
+            </div>
           </div>
-          <div className="flex gap-1">
-            <button
-              onClick={() => setFilters(f => ({ ...f, page: Math.max(1, f.page - 1) }))}
-              disabled={filters.page <= 1}
-              className="px-3 py-1.5 bg-bg-secondary border border-border-subtle rounded-lg text-sm text-text-secondary disabled:opacity-30 hover:text-text-primary"
-            >
-              Previous
-            </button>
-            {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-              let page: number
-              if (totalPages <= 5) {
-                page = i + 1
-              } else if (filters.page <= 3) {
-                page = i + 1
-              } else if (filters.page >= totalPages - 2) {
-                page = totalPages - 4 + i
-              } else {
-                page = filters.page - 2 + i
-              }
-              return (
-                <button
-                  key={page}
-                  onClick={() => setFilters(f => ({ ...f, page }))}
-                  className={`px-3 py-1.5 rounded-lg text-sm ${
-                    page === filters.page
-                      ? 'bg-brand-600 text-text-primary'
-                      : 'bg-bg-secondary text-text-secondary hover:text-text-primary border border-border-subtle'
-                  }`}
-                >
-                  {page}
-                </button>
-              )
-            })}
-            <button
-              onClick={() => setFilters(f => ({ ...f, page: Math.min(totalPages, f.page + 1) }))}
-              disabled={filters.page >= totalPages}
-              className="px-3 py-1.5 bg-bg-secondary border border-border-subtle rounded-lg text-sm text-text-secondary disabled:opacity-30 hover:text-text-primary"
-            >
-              Next
-            </button>
-          </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   )
 }

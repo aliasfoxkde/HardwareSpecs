@@ -9,16 +9,19 @@ import {
   type SortingState,
   type ColumnFiltersState,
 } from '@tanstack/react-table'
-import { getDeviceMetricsTable } from '@/lib/api'
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, ScatterChart, Scatter, Cell, CartesianGrid } from 'recharts'
+import { getDeviceMetricsTable, getVendors } from '@/lib/api'
 import { downloadCSV, downloadJSON } from '@/lib/export'
 import { getItem, setItem } from '@/lib/storage'
 import type { DeviceMetricsRow } from '@/lib/api'
+import { getVendorColor, CHART_STYLES, formatNumber } from '@/components/charts/chartUtils'
 
 const STORAGE_KEY = 'siliconrank:studio'
 
 interface StudioState {
   columnVisibility: Record<string, boolean>
   globalFilter: string
+  activePanel: 'none' | 'distribution' | 'scatter' | 'ranking' | 'quality'
 }
 
 const DEFAULT_VISIBILITY: Record<string, boolean> = {
@@ -36,6 +39,8 @@ const DEFAULT_VISIBILITY: Record<string, boolean> = {
   baseClockMhz: false,
   boostClockMhz: false,
   memoryBusWidth: false,
+  fp4Tflops: false,
+  fp8Tflops: false,
 }
 
 const PRESET_VIEWS: Record<string, Record<string, boolean>> = {
@@ -44,6 +49,7 @@ const PRESET_VIEWS: Record<string, Record<string, boolean>> = {
     architecture: true, launchDate: true, latestPrice: true, tdpWatts: true,
     effectiveInt8Tops: false, topsPerDollar: false, topsPerWatt: false,
     perfPerDollar: false, perfPerWatt: false, fp16Tflops: false, fp32Tflops: false,
+    fp4Tflops: false, fp8Tflops: false,
     dataCompleteness: true, processNm: false, cores: false, threads: false,
     memoryCapacityGB: false, memoryType: false, memoryBandwidthGBps: false,
     formFactor: false, status: false, topBenchmarkScore: false, topBenchmarkType: false,
@@ -56,6 +62,7 @@ const PRESET_VIEWS: Record<string, Record<string, boolean>> = {
     architecture: true, launchDate: true, latestPrice: true, tdpWatts: true,
     effectiveInt8Tops: true, topsPerDollar: true, topsPerWatt: true,
     perfPerDollar: true, perfPerWatt: true, fp16Tflops: true, fp32Tflops: true,
+    fp4Tflops: true, fp8Tflops: true,
     dataCompleteness: true, processNm: true, cores: true, threads: true,
     memoryCapacityGB: true, memoryType: true, memoryBandwidthGBps: true,
     formFactor: false, status: false, topBenchmarkScore: true, topBenchmarkType: false,
@@ -68,6 +75,7 @@ const PRESET_VIEWS: Record<string, Record<string, boolean>> = {
     architecture: false, launchDate: true, latestPrice: true, tdpWatts: true,
     effectiveInt8Tops: true, topsPerDollar: true, topsPerWatt: true,
     perfPerDollar: true, perfPerWatt: true, fp16Tflops: false, fp32Tflops: false,
+    fp4Tflops: false, fp8Tflops: false,
     dataCompleteness: true, processNm: false, cores: false, threads: false,
     memoryCapacityGB: false, memoryType: false, memoryBandwidthGBps: false,
     formFactor: false, status: false, topBenchmarkScore: false, topBenchmarkType: false,
@@ -80,6 +88,7 @@ const PRESET_VIEWS: Record<string, Record<string, boolean>> = {
     architecture: true, launchDate: true, latestPrice: true, tdpWatts: true,
     effectiveInt8Tops: true, topsPerDollar: true, topsPerWatt: true,
     perfPerDollar: true, perfPerWatt: true, fp16Tflops: true, fp32Tflops: true,
+    fp4Tflops: true, fp8Tflops: true,
     dataCompleteness: true, processNm: true, cores: true, threads: true,
     memoryCapacityGB: true, memoryType: true, memoryBandwidthGBps: true,
     formFactor: true, status: true, topBenchmarkScore: true, topBenchmarkType: true,
@@ -97,10 +106,282 @@ function fmtNum(n: number | null | undefined, decimals = 2): string {
   return n.toFixed(decimals)
 }
 
+const PANELS = [
+  { id: 'none' as const, label: 'Table Only' },
+  { id: 'ranking' as const, label: 'Rankings' },
+  { id: 'distribution' as const, label: 'Distributions' },
+  { id: 'scatter' as const, label: 'Scatter' },
+  { id: 'quality' as const, label: 'Data Quality' },
+]
+
+// ─── Distribution Panel ─────────────────────────────
+function DistributionPanel({ data }: { data: DeviceMetricsRow[] }) {
+  const filtered = useMemo(() => data.filter(d => d.effectiveInt8Tops > 0), [data])
+
+  const topDistribution = useMemo(() => {
+    const buckets = [
+      { range: '0-1', min: 0, max: 1 },
+      { range: '1-10', min: 1, max: 10 },
+      { range: '10-50', min: 10, max: 50 },
+      { range: '50-100', min: 50, max: 100 },
+      { range: '100-500', min: 100, max: 500 },
+      { range: '500-1000', min: 500, max: 1000 },
+      { range: '1000+', min: 1000, max: Infinity },
+    ]
+    return buckets.map(b => ({
+      range: b.range,
+      count: filtered.filter(d => d.effectiveInt8Tops >= b.min && d.effectiveInt8Tops < b.max).length,
+    }))
+  }, [filtered])
+
+  const tdpDistribution = useMemo(() => {
+    const buckets = [
+      { range: '0-50W', min: 0, max: 50 },
+      { range: '50-100W', min: 50, max: 100 },
+      { range: '100-200W', min: 100, max: 200 },
+      { range: '200-350W', min: 200, max: 350 },
+      { range: '350W+', min: 350, max: Infinity },
+    ]
+    return buckets.map(b => ({
+      range: b.range,
+      count: data.filter(d => d.tdpWatts != null && d.tdpWatts >= b.min && d.tdpWatts < b.max).length,
+    }))
+  }, [data])
+
+  const priceDistribution = useMemo(() => {
+    const buckets = [
+      { range: '0-100', min: 0, max: 100 },
+      { range: '100-300', min: 100, max: 300 },
+      { range: '300-500', min: 300, max: 500 },
+      { range: '500-1000', min: 500, max: 1000 },
+      { range: '1000+', min: 1000, max: Infinity },
+    ]
+    return buckets.map(b => ({
+      range: b.range,
+      count: data.filter(d => d.latestPrice != null && d.latestPrice >= b.min && d.latestPrice < b.max).length,
+    }))
+  }, [data])
+
+  return (
+    <div className="space-y-5">
+      <h4 className="text-sm font-semibold text-text-secondary uppercase tracking-wider">INT8 TOPS Distribution</h4>
+      <MiniBar data={topDistribution} color="#3b82f6" />
+      <h4 className="text-sm font-semibold text-text-secondary uppercase tracking-wider mt-3">TDP Distribution</h4>
+      <MiniBar data={tdpDistribution} color="#ef4444" />
+      <h4 className="text-sm font-semibold text-text-secondary uppercase tracking-wider mt-3">Price Distribution</h4>
+      <MiniBar data={priceDistribution} color="#22c55e" />
+      <div className="text-xs text-text-muted mt-4">
+        Showing {filtered.length} devices with TOPS data, {data.length} total
+      </div>
+    </div>
+  )
+}
+
+// ─── Scatter Panel ─────────────────────────────────
+function ScatterPanel({ data }: { data: DeviceMetricsRow[] }) {
+  const scatterData = useMemo(() => {
+    return data
+      .filter(d => d.latestPrice != null && d.effectiveInt8Tops > 0)
+      .map(d => ({
+        name: d.modelName,
+        vendorId: d.vendorId,
+        price: d.latestPrice!,
+        tops: d.effectiveInt8Tops,
+        fill: getVendorColor(d.vendorId),
+      }))
+      .sort((a, b) => b.tops - a.tops)
+      .slice(0, 100)
+  }, [data])
+
+  if (scatterData.length === 0) {
+    return <div className="flex items-center justify-center h-48 text-text-muted text-sm">No price + TOPS data</div>
+  }
+
+  return (
+    <div className="space-y-3">
+      <h4 className="text-sm font-semibold text-text-secondary uppercase tracking-wider">TOPS vs Price</h4>
+      <ResponsiveContainer width="100%" height={280}>
+        <ScatterChart margin={{ top: 5, right: 5, bottom: 5, left: 5 }}>
+          <CartesianGrid strokeDasharray="3 3" stroke={CHART_STYLES.gridStroke} />
+          <XAxis type="number" dataKey="price" tick={{ fill: CHART_STYLES.axisTick, fontSize: 10 }} name="Price ($)" />
+          <YAxis type="number" dataKey="tops" tick={{ fill: CHART_STYLES.axisTick, fontSize: 10 }} name="INT8 TOPS" />
+          <Tooltip
+            contentStyle={{ backgroundColor: CHART_STYLES.tooltipBg, border: `1px solid ${CHART_STYLES.tooltipBorder}`, borderRadius: '8px', color: CHART_STYLES.tooltipText, fontSize: 12 }}
+            formatter={(value: number, name: string) => name === 'price' ? [`$${Math.round(value).toLocaleString()}`, 'Price'] : [formatNumber(value), 'TOPS']}
+            labelFormatter={(_, payload) => payload?.[0]?.payload?.name ?? ''}
+          />
+          <Scatter data={scatterData}>
+            {scatterData.map((entry, i) => (
+              <Cell key={i} fill={entry.fill} />
+            ))}
+          </Scatter>
+        </ScatterChart>
+      </ResponsiveContainer>
+    </div>
+  )
+}
+
+// ─── Ranking Panel ─────────────────────────────────
+function RankingPanel({ data }: { data: DeviceMetricsRow[] }) {
+  const topByTops = useMemo(() => {
+    return data.filter(d => d.effectiveInt8Tops > 0).sort((a, b) => b.effectiveInt8Tops - a.effectiveInt8Tops).slice(0, 10)
+  }, [data])
+
+  const topByValue = useMemo(() => {
+    return data.filter(d => d.topsPerDollar != null && d.topsPerDollar > 0).sort((a, b) => (b.topsPerDollar ?? 0) - (a.topsPerDollar ?? 0)).slice(0, 10)
+  }, [data])
+
+  const topByEfficiency = useMemo(() => {
+    return data.filter(d => d.topsPerWatt != null && d.topsPerWatt > 0).sort((a, b) => (b.topsPerWatt ?? 0) - (a.topsPerWatt ?? 0)).slice(0, 10)
+  }, [data])
+
+  return (
+    <div className="space-y-5">
+      <div>
+        <h4 className="text-sm font-semibold text-text-secondary uppercase tracking-wider mb-2">Top 10 by TOPS</h4>
+        {topByTops.map((d, i) => (
+          <div key={d.deviceId} className="flex items-center gap-2 py-1">
+            <span className="text-xs text-text-muted w-5">{i + 1}</span>
+            <div className="flex-1 bg-bg-tertiary/50 h-4 rounded overflow-hidden">
+              <div className="h-full bg-brand-500/60 rounded" style={{ width: `${(d.effectiveInt8Tops / topByTops[0].effectiveInt8Tops) * 100}%` }} />
+            </div>
+            <span className="text-xs text-text-primary w-20 truncate">{d.modelName.replace(/^(NVIDIA GeForce |NVIDIA |AMD Radeon |AMD |Intel Arc |Intel )/, '')}</span>
+            <span className="text-xs text-brand-400 font-medium w-16 text-right">{fmtNum(d.effectiveInt8Tops, 0)}</span>
+          </div>
+        ))}
+      </div>
+      <div>
+        <h4 className="text-sm font-semibold text-text-secondary uppercase tracking-wider mb-2">Top 10 by TOPS/$</h4>
+        {topByValue.map((d, i) => (
+          <div key={d.deviceId} className="flex items-center gap-2 py-1">
+            <span className="text-xs text-text-muted w-5">{i + 1}</span>
+            <div className="flex-1 bg-bg-tertiary/50 h-4 rounded overflow-hidden">
+              <div className="h-full bg-green-500/60 rounded" style={{ width: `${(d.topsPerDollar ?? 0) / (topByValue[0].topsPerDollar ?? 1) * 100}%` }} />
+            </div>
+            <span className="text-xs text-text-primary w-20 truncate">{d.modelName.replace(/^(NVIDIA GeForce |NVIDIA |AMD Radeon |AMD |Intel Arc |Intel )/, '')}</span>
+            <span className="text-xs text-green-400 font-medium w-16 text-right">{fmtNum(d.topsPerDollar)}</span>
+          </div>
+        ))}
+      </div>
+      <div>
+        <h4 className="text-sm font-semibold text-text-secondary uppercase tracking-wider mb-2">Top 10 by TOPS/W</h4>
+        {topByEfficiency.map((d, i) => (
+          <div key={d.deviceId} className="flex items-center gap-2 py-1">
+            <span className="text-xs text-text-muted w-5">{i + 1}</span>
+            <div className="flex-1 bg-bg-tertiary/50 h-4 rounded overflow-hidden">
+              <div className="h-full bg-blue-500/60 rounded" style={{ width: `${(d.topsPerWatt ?? 0) / (topByEfficiency[0].topsPerWatt ?? 1) * 100}%` }} />
+            </div>
+            <span className="text-xs text-text-primary w-20 truncate">{d.modelName.replace(/^(NVIDIA GeForce |NVIDIA |AMD Radeon |AMD |Intel Arc |Intel )/, '')}</span>
+            <span className="text-xs text-blue-400 font-medium w-16 text-right">{fmtNum(d.topsPerWatt)}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+// ─── Data Quality Panel ─────────────────────────────
+function DataQualityPanel({ data }: { data: DeviceMetricsRow[] }) {
+  const stats = useMemo(() => {
+    const total = data.length
+    const hasTops = data.filter(d => d.effectiveInt8Tops > 0).length
+    const hasPrice = data.filter(d => d.latestPrice != null).length
+    const hasTdp = data.filter(d => d.tdpWatts != null).length
+    const hasBench = data.filter(d => d.topBenchmarkScore != null).length
+    const hasSpecs = data.filter(d => d.fp32Tflops != null || d.fp16Tflops != null).length
+    const hasMemory = data.filter(d => d.memoryCapacityGB != null).length
+    const hasCores = data.filter(d => d.cores != null).length
+    const hasProcess = data.filter(d => d.processNm != null).length
+
+    const fields = [
+      { label: 'INT8 TOPS', count: hasTops, pct: Math.round(hasTops / total * 100), color: 'bg-brand-500' },
+      { label: 'Price', count: hasPrice, pct: Math.round(hasPrice / total * 100), color: 'bg-green-500' },
+      { label: 'TDP', count: hasTdp, pct: Math.round(hasTdp / total * 100), color: 'bg-red-500' },
+      { label: 'Benchmarks', count: hasBench, pct: Math.round(hasBench / total * 100), color: 'bg-purple-500' },
+      { label: 'FP16/FP32', count: hasSpecs, pct: Math.round(hasSpecs / total * 100), color: 'bg-yellow-500' },
+      { label: 'Memory', count: hasMemory, pct: Math.round(hasMemory / total * 100), color: 'bg-cyan-500' },
+      { label: 'Cores', count: hasCores, pct: Math.round(hasCores / total * 100), color: 'bg-orange-500' },
+      { label: 'Process', count: hasProcess, pct: Math.round(hasProcess / total * 100), color: 'bg-pink-500' },
+    ]
+
+    const avgCompleteness = data.length > 0
+      ? Math.round(data.reduce((s, d) => s + d.dataCompleteness, 0) / data.length * 100)
+      : 0
+
+    const highQuality = data.filter(d => d.dataCompleteness >= 0.7).length
+    const mediumQuality = data.filter(d => d.dataCompleteness >= 0.4 && d.dataCompleteness < 0.7).length
+    const lowQuality = data.filter(d => d.dataCompleteness < 0.4).length
+
+    return { total, fields, avgCompleteness, highQuality, mediumQuality, lowQuality }
+  }, [data])
+
+  return (
+    <div className="space-y-4">
+      <div>
+        <h4 className="text-sm font-semibold text-text-secondary uppercase tracking-wider mb-2">Overall</h4>
+        <div className="grid grid-cols-3 gap-2 text-center">
+          <div className="bg-bg-tertiary/30 rounded-lg p-2">
+            <div className="text-lg font-bold text-green-400">{stats.highQuality}</div>
+            <div className="text-[10px] text-text-muted">High (&ge;70%)</div>
+          </div>
+          <div className="bg-bg-tertiary/30 rounded-lg p-2">
+            <div className="text-lg font-bold text-yellow-400">{stats.mediumQuality}</div>
+            <div className="text-[10px] text-text-muted">Medium (40-70%)</div>
+          </div>
+          <div className="bg-bg-tertiary/30 rounded-lg p-2">
+            <div className="text-lg font-bold text-red-400">{stats.lowQuality}</div>
+            <div className="text-[10px] text-text-muted">Low (&lt;40%)</div>
+          </div>
+        </div>
+        <div className="mt-2 text-xs text-text-muted">Average completeness: <span className="text-text-primary font-medium">{stats.avgCompleteness}%</span></div>
+      </div>
+      <div>
+        <h4 className="text-sm font-semibold text-text-secondary uppercase tracking-wider mb-2">Field Coverage</h4>
+        <div className="space-y-1.5">
+          {stats.fields.map(f => (
+            <div key={f.label} className="flex items-center gap-2">
+              <span className="text-xs text-text-secondary w-20">{f.label}</span>
+              <div className="flex-1 h-2 bg-bg-tertiary/50 rounded-full overflow-hidden">
+                <div className={`h-full rounded-full ${f.color}`} style={{ width: `${f.pct}%` }} />
+              </div>
+              <span className="text-xs text-text-muted w-12 text-right">{f.pct}%</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ─── Mini Bar (for distributions) ────────────────────
+function MiniBar({ data, color }: { data: { range: string; count: number }[]; color: string }) {
+  const max = Math.max(...data.map(d => d.count), 1)
+  return (
+    <ResponsiveContainer width="100%" height={data.length * 22}>
+      <BarChart data={data} layout="vertical" margin={{ top: 0, right: 30, bottom: 0, left: 55 }}>
+        <XAxis type="number" hide tick={false} />
+        <YAxis type="category" dataKey="range" tick={{ fill: CHART_STYLES.axisTick, fontSize: 10 }} width={50} />
+        <Tooltip contentStyle={{ backgroundColor: CHART_STYLES.tooltipBg, border: `1px solid ${CHART_STYLES.tooltipBorder}`, borderRadius: '8px', color: CHART_STYLES.tooltipText, fontSize: 12 }} />
+        <Bar dataKey="count" fill={color} radius={[0, 3, 3, 0]} />
+      </BarChart>
+    </ResponsiveContainer>
+  )
+}
+
+// ─── Stat Card ───────────────────────────────────────
+function StatCard({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="bg-bg-tertiary/30 rounded-lg p-2 text-center">
+      <div className="text-[10px] text-text-muted uppercase">{label}</div>
+      <div className="text-sm font-bold text-text-primary">{value}</div>
+    </div>
+  )
+}
+
+// ─── Main Studio Page ───────────────────────────────
 export function StudioPage() {
   const [savedState, setSavedState] = useState<StudioState>(() => {
-    const saved = getItem<StudioState>(STORAGE_KEY, { columnVisibility: DEFAULT_VISIBILITY, globalFilter: '' })
-    // Merge with defaults so new columns aren't missing
+    const saved = getItem<StudioState>(STORAGE_KEY, { columnVisibility: DEFAULT_VISIBILITY, globalFilter: '', activePanel: 'none' })
     return {
       ...saved,
       columnVisibility: { ...DEFAULT_VISIBILITY, ...saved.columnVisibility },
@@ -145,6 +426,8 @@ export function StudioPage() {
     { accessorKey: 'perfPerWatt', header: 'Perf/W', size: 90, cell: info => { const v = info.getValue(); return v != null && v > 0 ? fmtNum(v, 0) : '-' } },
     { accessorKey: 'fp16Tflops', header: 'FP16 TFLOPS', size: 100, cell: info => info.getValue() ?? '-' },
     { accessorKey: 'fp32Tflops', header: 'FP32 TFLOPS', size: 100, cell: info => info.getValue() ?? '-' },
+    { accessorKey: 'fp4Tflops', header: 'FP4 TOPS', size: 90, cell: info => { const v = info.getValue(); return v != null && v > 0 ? fmtNum(v) : '-' } },
+    { accessorKey: 'fp8Tflops', header: 'FP8 TOPS', size: 90, cell: info => { const v = info.getValue(); return v != null && v > 0 ? fmtNum(v) : '-' } },
     { accessorKey: 'topBenchmarkScore', header: 'Top Benchmark', size: 110, cell: info => { const v = info.getValue(); return v != null ? Number(v).toLocaleString() : '-' } },
     { accessorKey: 'dataCompleteness', header: 'Data Quality', size: 100, cell: info => {
       const v = info.getValue() as number
@@ -274,9 +557,12 @@ export function StudioPage() {
     }
   }, [selectedRows, data])
 
+  const filteredData = useMemo(() => table.getFilteredRowModel().rows.map(r => r.original), [table])
+
   return (
-    <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-fade-in">
-      <div className="flex items-center justify-between mb-4">
+    <div className="mx-auto px-4 sm:px-6 lg:px-8 py-4 animate-fade-in flex flex-col" style={{ height: 'calc(100vh - 4rem)' }}>
+      {/* Header — fixed */}
+      <div className="flex items-center justify-between mb-3 shrink-0">
         <div>
           <h1 className="text-2xl font-bold text-text-primary">Studio</h1>
           <p className="text-sm text-text-secondary">{table.getFilteredRowModel().rows.length} devices &middot; {selectedRows.size} selected</p>
@@ -291,8 +577,8 @@ export function StudioPage() {
         </div>
       </div>
 
-      {/* Controls */}
-      <div className="mb-4 space-y-3">
+      {/* Controls — fixed */}
+      <div className="mb-3 space-y-2 shrink-0">
         {/* Search */}
         <input
           type="text"
@@ -302,7 +588,7 @@ export function StudioPage() {
           className="w-full px-4 py-2.5 bg-bg-secondary border border-border-subtle rounded-lg text-sm text-text-primary placeholder-text-muted focus:outline-none focus:ring-2 focus:ring-brand-500"
         />
 
-        {/* Preset Views + Column Toggle */}
+        {/* Preset Views + Column Toggle + Panel Toggle */}
         <div className="flex flex-wrap gap-2 items-center">
           <span className="text-xs text-text-muted font-medium">Views:</span>
           {Object.entries(PRESET_VIEWS).map(([name, vis]) => (
@@ -323,7 +609,26 @@ export function StudioPage() {
             </button>
           ))}
 
-          <span className="text-xs text-text-muted font-medium ml-4">Columns:</span>
+          <span className="text-xs text-text-muted font-medium ml-2">Panel:</span>
+          {PANELS.map(panel => (
+            <button
+              key={panel.id}
+              onClick={() => {
+                const newState = { ...savedState, activePanel: panel.id }
+                setSavedState(newState)
+                setItem(STORAGE_KEY, newState)
+              }}
+              className={`px-3 py-1 rounded-lg text-xs font-medium transition-colors ${
+                savedState.activePanel === panel.id
+                  ? 'bg-purple-600/30 text-purple-300 border border-purple-500/30'
+                  : 'bg-bg-secondary text-text-secondary hover:text-text-primary border border-border-subtle'
+              }`}
+            >
+              {panel.label}
+            </button>
+          ))}
+
+          <span className="text-xs text-text-muted font-medium ml-2">Columns:</span>
           <div className="relative">
             <button
               onClick={(e) => {
@@ -332,7 +637,7 @@ export function StudioPage() {
               }}
               className="px-3 py-1 rounded-lg text-xs font-medium bg-bg-secondary text-text-secondary hover:text-text-primary border border-border-subtle"
             >
-              Toggle Columns ({visibleColumns.length}/{table.getAllLeafColumns().length})
+              Toggle ({visibleColumns.length}/{table.getAllLeafColumns().length})
             </button>
             <div className="hidden absolute top-full mt-1 left-0 z-50 bg-bg-secondary border border-border-subtle rounded-lg shadow-xl max-h-80 overflow-y-auto w-56 py-2">
               {table.getAllLeafColumns().map(col => (
@@ -351,13 +656,13 @@ export function StudioPage() {
         </div>
       </div>
 
-      {/* Analysis Panel */}
+      {/* Analysis Panel — fixed when visible */}
       {analysisStats && (
-        <div className="mb-4 bg-bg-card/30 border border-border-subtle/50 rounded-xl p-4">
-          <h3 className="text-sm font-semibold text-text-secondary uppercase tracking-wider mb-3">
+        <div className="mb-3 bg-bg-card/30 border border-border-subtle/50 rounded-xl p-3 shrink-0">
+          <h3 className="text-sm font-semibold text-text-secondary uppercase tracking-wider mb-2">
             Analysis — {analysisStats.count} selected devices
           </h3>
-          <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3">
             <StatCard label="Avg Price" value={analysisStats.avgPrice ? `$${Math.round(analysisStats.avgPrice).toLocaleString()}` : '-'} />
             <StatCard label="Median Price" value={analysisStats.medianPrice ? `$${Math.round(analysisStats.medianPrice).toLocaleString()}` : '-'} />
             <StatCard label="Avg TOPS" value={analysisStats.avgTops ? fmtNum(analysisStats.avgTops) : '-'} />
@@ -369,112 +674,116 @@ export function StudioPage() {
         </div>
       )}
 
-      {/* Table */}
-      <div className="bg-bg-card/30 border border-border-subtle/50 rounded-xl overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-border-subtle/50 bg-bg-card/50">
-                <th className="px-3 py-2.5 w-10">
-                  <input
-                    type="checkbox"
-                    checked={selectedRows.size === table.getFilteredRowModel().rows.length && selectedRows.size > 0}
-                    onChange={toggleAllRows}
-                    className="rounded"
-                  />
-                </th>
-                <th className="px-1 py-2.5 w-8" />
-                {visibleColumns.map(col => (
-                  <th
-                    key={col.id}
-                    onClick={col.getToggleSortingHandler()}
-                    className="px-3 py-2.5 text-xs font-semibold text-text-secondary uppercase tracking-wider text-left cursor-pointer select-none hover:text-text-primary whitespace-nowrap"
-                  >
-                    {flexRender(col.columnDef.header, col.getContext())}
-                    {{ asc: ' ↑', desc: ' ↓' }[col.getIsSorted() as string] ?? ''}
+      {/* Main Content: Table + Side Panel — scrollable */}
+      <div className="flex gap-6 min-h-0 flex-1">
+        {/* Table */}
+        <div className={`bg-bg-card/30 border border-border-subtle/50 rounded-xl overflow-hidden flex flex-col min-w-0 ${savedState.activePanel !== 'none' ? 'flex-1' : 'w-full'}`}>
+          <div className="overflow-auto flex-1">
+            <table className="w-full text-sm">
+              <thead className="sticky top-0 z-10">
+                <tr className="border-b border-border-subtle/50 bg-bg-secondary">
+                  <th className="px-3 py-2.5 w-10">
+                    <input
+                      type="checkbox"
+                      checked={selectedRows.size === table.getFilteredRowModel().rows.length && selectedRows.size > 0}
+                      onChange={toggleAllRows}
+                      className="rounded"
+                    />
                   </th>
-                ))}
-                <th className="px-3 py-2.5 text-xs font-semibold text-text-secondary uppercase w-16">Notes</th>
-              </tr>
-            </thead>
-            <tbody>
-              {table.getRowModel().rows.map(row => {
-                const isExpanded = rowExpanded.has(row.original.deviceId)
-                return (
-                  <tr
-                    key={row.id}
-                    className={`border-b border-border-subtle/30 hover:bg-bg-tertiary/30 transition-colors ${selectedRows.has(row.original.deviceId) ? 'bg-brand-600/5' : ''}`}
-                  >
-                    <td className="px-3 py-2">
-                      <input
-                        type="checkbox"
-                        checked={selectedRows.has(row.original.deviceId)}
-                        onChange={() => toggleRow(row.original.deviceId)}
-                        className="rounded"
-                      />
-                    </td>
-                    <td className="px-1 py-2">
-                      <button
-                        onClick={() => {
-                          setRowExpanded(prev => {
-                            const next = new Set(prev)
-                            if (next.has(row.original.deviceId)) next.delete(row.original.deviceId)
-                            else next.add(row.original.deviceId)
-                            return next
-                          })
-                        }}
-                        className="text-xs text-text-muted hover:text-text-primary"
-                      >
-                        {isExpanded ? '▼' : '▶'}
-                      </button>
-                    </td>
-                    {visibleColumns.map(col => (
-                      <td key={col.id} className="px-3 py-2 text-text-primary whitespace-nowrap">
-                        {flexRender(col.columnDef.cell, col.getContext())}
-                      </td>
-                    ))}
-                    <td className="px-3 py-2">
-                      {editingNote === row.original.deviceId ? (
+                  <th className="px-1 py-2.5 w-8" />
+                  {table.getLeafHeaders().map(header => (
+                    <th
+                      key={header.id}
+                      onClick={header.column.getToggleSortingHandler()}
+                      className="px-3 py-2.5 text-xs font-semibold text-text-secondary uppercase tracking-wider text-left cursor-pointer select-none hover:text-text-primary whitespace-nowrap"
+                    >
+                      {flexRender(header.column.columnDef.header, header.getContext())}
+                      {{ asc: ' ↑', desc: ' ↓' }[header.column.getIsSorted() as string] ?? ''}
+                    </th>
+                  ))}
+                  <th className="px-3 py-2.5 text-xs font-semibold text-text-secondary uppercase w-16">Notes</th>
+                </tr>
+              </thead>
+              <tbody>
+                {table.getRowModel().rows.map(row => {
+                  const isExpanded = rowExpanded.has(row.original.deviceId)
+                  return (
+                    <tr
+                      key={row.id}
+                      className={`border-b border-border-subtle/30 hover:bg-bg-tertiary/30 transition-colors ${selectedRows.has(row.original.deviceId) ? 'bg-brand-600/5' : ''}`}
+                    >
+                      <td className="px-3 py-2">
                         <input
-                          autoFocus
-                          defaultValue={notes[row.original.deviceId] ?? ''}
-                          onBlur={e => saveNote(row.original.deviceId, e.target.value)}
-                          onKeyDown={e => { if (e.key === 'Enter') saveNote(row.original.deviceId, e.currentTarget.value); if (e.key === 'Escape') setEditingNote(null) }}
-                          className="w-20 px-1 py-0.5 bg-bg-secondary border border-border-subtle rounded text-xs text-text-primary"
+                          type="checkbox"
+                          checked={selectedRows.has(row.original.deviceId)}
+                          onChange={() => toggleRow(row.original.deviceId)}
+                          className="rounded"
                         />
-                      ) : (
+                      </td>
+                      <td className="px-1 py-2">
                         <button
-                          onClick={() => setEditingNote(row.original.deviceId)}
-                          className={`text-xs ${notes[row.original.deviceId] ? 'text-yellow-400' : 'text-text-muted hover:text-text-primary'}`}
-                          title={notes[row.original.deviceId] ?? 'Add note'}
+                          onClick={() => {
+                            setRowExpanded(prev => {
+                              const next = new Set(prev)
+                              if (next.has(row.original.deviceId)) next.delete(row.original.deviceId)
+                              else next.add(row.original.deviceId)
+                              return next
+                            })
+                          }}
+                          className="text-xs text-text-muted hover:text-text-primary"
                         >
-                          {notes[row.original.deviceId] ? '✎' : '○'}
+                          {isExpanded ? '▼' : '▶'}
                         </button>
-                      )}
-                    </td>
-                  </tr>
-                )
-              })}
-            </tbody>
-          </table>
+                      </td>
+                      {row.getVisibleCells().map(cell => (
+                        <td key={cell.id} className="px-3 py-2 text-text-primary whitespace-nowrap">
+                          {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                        </td>
+                      ))}
+                      <td className="px-3 py-2">
+                        {editingNote === row.original.deviceId ? (
+                          <input
+                            autoFocus
+                            defaultValue={notes[row.original.deviceId] ?? ''}
+                            onBlur={e => saveNote(row.original.deviceId, e.target.value)}
+                            onKeyDown={e => { if (e.key === 'Enter') saveNote(row.original.deviceId, e.currentTarget.value); if (e.key === 'Escape') setEditingNote(null) }}
+                            className="w-20 px-1 py-0.5 bg-bg-secondary border border-border-subtle rounded text-xs text-text-primary"
+                          />
+                        ) : (
+                          <button
+                            onClick={() => setEditingNote(row.original.deviceId)}
+                            className={`text-xs ${notes[row.original.deviceId] ? 'text-yellow-400' : 'text-text-muted hover:text-text-primary'}`}
+                            title={notes[row.original.deviceId] ?? 'Add note'}
+                          >
+                            {notes[row.original.deviceId] ? '✎' : '○'}
+                          </button>
+                        )}
+                      </td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+          </div>
+          {table.getRowModel().rows.length === 0 && (
+            <div className="px-4 py-12 text-center text-text-muted">No devices match your filter.</div>
+          )}
+          <div className="px-4 py-2 border-t border-border-subtle/30 text-xs text-text-muted shrink-0">
+            {table.getFilteredRowModel().rows.length} of {data.length} devices
+            {selectedRows.size > 0 && ` · ${selectedRows.size} selected`}
+          </div>
         </div>
-        {table.getRowModel().rows.length === 0 && (
-          <div className="px-4 py-12 text-center text-text-muted">No devices match your filter.</div>
-        )}
-        <div className="px-4 py-3 border-t border-border-subtle/30 text-xs text-text-muted">
-          {table.getFilteredRowModel().rows.length} of {data.length} devices
-          {selectedRows.size > 0 && ` · ${selectedRows.size} selected`}
-        </div>
-      </div>
-    </div>
-  )
-}
 
-function StatCard({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="bg-bg-tertiary/30 rounded-lg p-2 text-center">
-      <div className="text-[10px] text-text-muted uppercase">{label}</div>
-      <div className="text-sm font-bold text-text-primary">{value}</div>
+        {/* Side Panel */}
+        {savedState.activePanel !== 'none' && (
+          <div className="w-80 shrink-0 bg-bg-card/30 border border-border-subtle/50 rounded-xl p-4 overflow-y-auto">
+            {savedState.activePanel === 'ranking' && <RankingPanel data={filteredData} />}
+            {savedState.activePanel === 'distribution' && <DistributionPanel data={filteredData} />}
+            {savedState.activePanel === 'scatter' && <ScatterPanel data={filteredData} />}
+            {savedState.activePanel === 'quality' && <DataQualityPanel data={filteredData} />}
+          </div>
+        )}
+      </div>
     </div>
   )
 }

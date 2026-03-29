@@ -8,6 +8,8 @@ const DevicePage = lazy(() => import('@/pages/DevicePage').then(m => ({ default:
 const ComparePage = lazy(() => import('@/pages/ComparePage').then(m => ({ default: m.ComparePage })))
 const ChartsPage = lazy(() => import('@/pages/ChartsPage').then(m => ({ default: m.ChartsPage })))
 const StudioPage = lazy(() => import('@/pages/StudioPage').then(m => ({ default: m.StudioPage })))
+const ToolsPage = lazy(() => import('@/pages/ToolsPage').then(m => ({ default: m.ToolsPage })))
+const ReportsPage = lazy(() => import('@/pages/ReportsPage').then(m => ({ default: m.ReportsPage })))
 const DocsPage = lazy(() => import('@/pages/DocsPage').then(m => ({ default: m.DocsPage })))
 const NotFoundPage = lazy(() => import('@/pages/NotFoundPage').then(m => ({ default: m.NotFoundPage })))
 
@@ -30,6 +32,8 @@ export default function App() {
           <Route path="/compare" element={<ComparePage />} />
           <Route path="/charts" element={<ChartsPage />} />
           <Route path="/studio" element={<StudioPage />} />
+          <Route path="/tools" element={<ToolsPage />} />
+          <Route path="/reports" element={<ReportsPage />} />
           <Route path="/docs" element={<DocsPage />} />
           <Route path="*" element={<NotFoundPage />} />
         </Route>

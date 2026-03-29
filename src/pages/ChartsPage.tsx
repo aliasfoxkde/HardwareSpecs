@@ -4,9 +4,11 @@ import { ChartContainer } from '@/components/charts/ChartContainer'
 import { VendorDistributionPie, CategoryDistributionPie, PriceBandPie } from '@/components/charts/MarketPieCharts'
 import { TopTopsBarChart, TopTopsPerDollarChart, TopTopsPerWattChart } from '@/components/charts/PerformanceRankings'
 import { PerfVsPriceChart, TopsVsPriceChart } from '@/components/charts/ScatterWithRegression'
-import { TdpOverTimeChart, TopsOverTimeChart } from '@/components/charts/TimeSeriesChart'
+import { TdpOverTimeChart, TopsOverTimeChart, PriceOverTimeChart, ProcessOverTimeChart } from '@/components/charts/TimeSeriesChart'
 import { PriceTdpHeatmap, VendorPerfHeatmap } from '@/components/charts/HeatmapChart'
 import { MultiMetricComparison, PricePerfStacked } from '@/components/charts/StackedMetrics'
+import { TopDevicesRadar } from '@/components/charts/RadarComparison'
+import { InfographicPanel } from '@/components/charts/InfographicPanel'
 import { getVendorColor } from '@/components/charts/chartUtils'
 import type { DeviceCategory } from '@/types'
 
@@ -18,6 +20,8 @@ const tabs = [
   { id: 'value', label: 'Value' },
   { id: 'efficiency', label: 'Efficiency' },
   { id: 'trends', label: 'Trends' },
+  { id: 'compare', label: 'Compare' },
+  { id: 'report', label: 'Report' },
 ] as const
 
 type TabId = typeof tabs[number]['id']
@@ -52,7 +56,7 @@ export function ChartsPage() {
             </button>
           ))}
         </div>
-        <div className="flex gap-1 ml-auto">
+        <div className="flex gap-1 flex-wrap ml-auto">
           {tabs.map(tab => (
             <button
               key={tab.id}
@@ -82,7 +86,7 @@ export function ChartsPage() {
         })}
       </div>
 
-      {/* Charts */}
+      {/* Overview */}
       {activeTab === 'overview' && (
         <div className="grid lg:grid-cols-2 gap-6">
           <ChartContainer title={`Vendor Share — ${activeCategory}`}>
@@ -100,6 +104,7 @@ export function ChartsPage() {
         </div>
       )}
 
+      {/* Performance */}
       {activeTab === 'performance' && (
         <div className="grid lg:grid-cols-2 gap-6">
           <ChartContainer title={`TOP 20 INT8 TOPS — ${activeCategory}`}>
@@ -117,6 +122,7 @@ export function ChartsPage() {
         </div>
       )}
 
+      {/* Value */}
       {activeTab === 'value' && (
         <div className="grid lg:grid-cols-2 gap-6">
           <ChartContainer title={`TOP 20 TOPS/$ — ${activeCategory}`}>
@@ -128,12 +134,13 @@ export function ChartsPage() {
           <ChartContainer title={`Price-TDP Heatmap — ${activeCategory}`}>
             <PriceTdpHeatmap category={activeCategory} />
           </ChartContainer>
-          <ChartContainer title={`Price Bands — ${activeCategory}`}>
-            <PriceBandPie category={activeCategory} />
+          <ChartContainer title={`Price Perf Stacked — ${activeCategory}`}>
+            <PricePerfStacked category={activeCategory} />
           </ChartContainer>
         </div>
       )}
 
+      {/* Efficiency */}
       {activeTab === 'efficiency' && (
         <div className="grid lg:grid-cols-2 gap-6">
           <ChartContainer title={`TOPS/$ Rankings — ${activeCategory}`}>
@@ -151,6 +158,7 @@ export function ChartsPage() {
         </div>
       )}
 
+      {/* Trends */}
       {activeTab === 'trends' && (
         <div className="grid lg:grid-cols-2 gap-6">
           <ChartContainer title={`TDP Trend by Vendor — ${activeCategory}`}>
@@ -159,12 +167,49 @@ export function ChartsPage() {
           <ChartContainer title={`INT8 TOPS Trend by Vendor — ${activeCategory}`}>
             <TopsOverTimeChart category={activeCategory} />
           </ChartContainer>
-          <ChartContainer title={`Price vs Performance (with trend) — ${activeCategory}`}>
-            <PerfVsPriceChart category={activeCategory} />
+          <ChartContainer title={`Avg Price Trend by Vendor — ${activeCategory}`}>
+            <PriceOverTimeChart category={activeCategory} />
           </ChartContainer>
-          <ChartContainer title={`INT8 TOPS vs Price (with trend) — ${activeCategory}`}>
-            <TopsVsPriceChart category={activeCategory} />
+          <ChartContainer title={`Process Node Trend by Vendor — ${activeCategory}`}>
+            <ProcessOverTimeChart category={activeCategory} />
           </ChartContainer>
+        </div>
+      )}
+
+      {/* Compare (Radar) */}
+      {activeTab === 'compare' && (
+        <div className="grid lg:grid-cols-2 gap-6">
+          <ChartContainer title={`Top 5 Radar — ${activeCategory}`}>
+            <TopDevicesRadar category={activeCategory} />
+          </ChartContainer>
+          <ChartContainer title={`TOPS Comparison — ${activeCategory}`}>
+            <TopTopsBarChart limit={15} />
+          </ChartContainer>
+          <ChartContainer title={`TOPS/$ Comparison — ${activeCategory}`}>
+            <TopTopsPerDollarChart limit={15} />
+          </ChartContainer>
+          <ChartContainer title={`TOPS/W Comparison — ${activeCategory}`}>
+            <TopTopsPerWattChart limit={15} />
+          </ChartContainer>
+        </div>
+      )}
+
+      {/* Report */}
+      {activeTab === 'report' && (
+        <div className="grid lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2">
+            <ChartContainer title={`${activeCategory} Report`}>
+              <InfographicPanel category={activeCategory} />
+            </ChartContainer>
+          </div>
+          <div className="space-y-6">
+            <ChartContainer title={`Vendor Share — ${activeCategory}`}>
+              <VendorDistributionPie category={activeCategory} />
+            </ChartContainer>
+            <ChartContainer title={`Price Bands — ${activeCategory}`}>
+              <PriceBandPie category={activeCategory} />
+            </ChartContainer>
+          </div>
         </div>
       )}
     </div>

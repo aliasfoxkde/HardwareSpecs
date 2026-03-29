@@ -69,6 +69,28 @@ export function DevicePage() {
                 <div className="text-sm text-text-secondary">{latestPrice.condition === 'msrp' ? 'MSRP' : latestPrice.condition}</div>
               </>
             )}
+            <div className="flex gap-2 mt-2">
+              {device.device.referenceUrl && (
+                <a
+                  href={device.device.referenceUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-3 py-1.5 text-xs font-medium rounded-lg bg-bg-tertiary/50 text-text-secondary hover:text-brand-400 border border-border-subtle/50 hover:border-brand-500/30 transition-colors"
+                >
+                  Source &nearr;
+                </a>
+              )}
+              {device.device.purchaseUrl && (
+                <a
+                  href={device.device.purchaseUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-3 py-1.5 text-xs font-medium rounded-lg bg-green-600/20 text-green-400 hover:bg-green-600/30 border border-green-500/20 hover:border-green-500/30 transition-colors"
+                >
+                  Buy &nearr;
+                </a>
+              )}
+            </div>
           </div>
         </div>
       </div>
@@ -128,6 +150,18 @@ export function DevicePage() {
                     <div className="text-lg font-bold text-text-primary">{fmtNum(metrics.fp32Tflops)}</div>
                   </div>
                 )}
+                {metrics.fp4Tflops != null && (
+                  <div className="bg-bg-tertiary/50 rounded-lg p-3 text-center">
+                    <div className="text-xs text-text-secondary mb-1">FP4 TFLOPS</div>
+                    <div className="text-lg font-bold text-orange-400">{fmtNum(metrics.fp4Tflops)}</div>
+                  </div>
+                )}
+                {metrics.fp8Tflops != null && (
+                  <div className="bg-bg-tertiary/50 rounded-lg p-3 text-center">
+                    <div className="text-xs text-text-secondary mb-1">FP8 TFLOPS</div>
+                    <div className="text-lg font-bold text-cyan-400">{fmtNum(metrics.fp8Tflops)}</div>
+                  </div>
+                )}
               </div>
               {/* Data Completeness bar */}
               <div className="mt-4 flex items-center gap-3">
@@ -185,6 +219,18 @@ export function DevicePage() {
                       <div className="flex justify-between">
                         <span className="text-sm text-text-secondary">FP32 TFLOPS</span>
                         <span className="text-sm font-medium text-text-primary">{spec.fp32Tflops}</span>
+                      </div>
+                    )}
+                    {spec.fp4Tflops !== undefined && (
+                      <div className="flex justify-between">
+                        <span className="text-sm text-text-secondary">FP4 TFLOPS</span>
+                        <span className="text-sm font-medium text-orange-400">{spec.fp4Tflops}</span>
+                      </div>
+                    )}
+                    {spec.fp8Tflops !== undefined && (
+                      <div className="flex justify-between">
+                        <span className="text-sm text-text-secondary">FP8 TFLOPS</span>
+                        <span className="text-sm font-medium text-cyan-400">{spec.fp8Tflops}</span>
                       </div>
                     )}
                   </div>
