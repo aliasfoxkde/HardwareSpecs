@@ -20,6 +20,7 @@ import {
   specs as seedSpecs,
   prices as seedPrices,
 } from '@/lib/data/seed'
+import { getDeviceMetrics } from './computed'
 
 // In-memory data store (populated from seed data)
 let vendorData = [...seedVendors]
@@ -61,6 +62,14 @@ export interface DeviceListItem {
   family: DeviceFamily
   latestPrice?: PriceSnapshot
   topBenchmark?: BenchmarkResult
+  metrics: {
+    effectiveInt8Tops: number
+    topsPerDollar: number | null
+    topsPerWatt: number | null
+    perfPerDollar: number | null
+    perfPerWatt: number | null
+    dataCompleteness: number
+  }
 }
 
 export interface DeviceDetail extends DeviceListItem {
@@ -156,6 +165,30 @@ export function getDevices(options?: Partial<FilterState>): { devices: DeviceLis
         valA = getLatestPrice(a.deviceId)?.priceUsd ?? Infinity
         valB = getLatestPrice(b.deviceId)?.priceUsd ?? Infinity
         break
+      case 'tops':
+        valA = getDeviceMetrics(a.deviceId)?.effectiveInt8Tops ?? 0
+        valB = getDeviceMetrics(b.deviceId)?.effectiveInt8Tops ?? 0
+        break
+      case 'topsPerDollar':
+        valA = getDeviceMetrics(a.deviceId)?.topsPerDollar ?? 0
+        valB = getDeviceMetrics(b.deviceId)?.topsPerDollar ?? 0
+        break
+      case 'topsPerWatt':
+        valA = getDeviceMetrics(a.deviceId)?.topsPerWatt ?? 0
+        valB = getDeviceMetrics(b.deviceId)?.topsPerWatt ?? 0
+        break
+      case 'perfPerDollar':
+        valA = getDeviceMetrics(a.deviceId)?.perfPerDollar ?? 0
+        valB = getDeviceMetrics(b.deviceId)?.perfPerDollar ?? 0
+        break
+      case 'perfPerWatt':
+        valA = getDeviceMetrics(a.deviceId)?.perfPerWatt ?? 0
+        valB = getDeviceMetrics(b.deviceId)?.perfPerWatt ?? 0
+        break
+      case 'dataCompleteness':
+        valA = getDeviceMetrics(a.deviceId)?.dataCompleteness ?? 0
+        valB = getDeviceMetrics(b.deviceId)?.dataCompleteness ?? 0
+        break
       default:
         valA = a.launchDate
         valB = b.launchDate
@@ -173,13 +206,24 @@ export function getDevices(options?: Partial<FilterState>): { devices: DeviceLis
   const start = (page - 1) * pageSize
   const paginatedResult = result.slice(start, start + pageSize)
 
-  const devices: DeviceListItem[] = paginatedResult.map(d => ({
-    device: d,
-    vendor: vendorMap.get(familyMap.get(d.familyId)?.vendorId ?? '')!,
-    family: familyMap.get(d.familyId)!,
-    latestPrice: getLatestPrice(d.deviceId),
-    topBenchmark: getDeviceBenchmarks(d.deviceId).sort((a, b) => b.normalizedScore! - a.normalizedScore!)[0],
-  }))
+  const devices: DeviceListItem[] = paginatedResult.map(d => {
+    const m = getDeviceMetrics(d.deviceId)
+    return {
+      device: d,
+      vendor: vendorMap.get(familyMap.get(d.familyId)?.vendorId ?? '')!,
+      family: familyMap.get(d.familyId)!,
+      latestPrice: getLatestPrice(d.deviceId),
+      topBenchmark: getDeviceBenchmarks(d.deviceId).sort((a, b) => b.normalizedScore! - a.normalizedScore!)[0],
+      metrics: {
+        effectiveInt8Tops: m?.effectiveInt8Tops ?? 0,
+        topsPerDollar: m?.topsPerDollar ?? null,
+        topsPerWatt: m?.topsPerWatt ?? null,
+        perfPerDollar: m?.perfPerDollar ?? null,
+        perfPerWatt: m?.perfPerWatt ?? null,
+        dataCompleteness: m?.dataCompleteness ?? 0,
+      },
+    }
+  })
 
   return { devices, total }
 }
@@ -193,6 +237,8 @@ export function getDevice(deviceId: string): DeviceDetail | undefined {
 
   if (!family || !vendor) return undefined
 
+  const m = getDeviceMetrics(deviceId)
+
   return {
     device,
     vendor,
@@ -202,6 +248,14 @@ export function getDevice(deviceId: string): DeviceDetail | undefined {
     benchmarks: getDeviceBenchmarks(deviceId),
     specs: getDeviceSpecs(deviceId),
     prices: getDevicePrices(deviceId),
+    metrics: {
+      effectiveInt8Tops: m?.effectiveInt8Tops ?? 0,
+      topsPerDollar: m?.topsPerDollar ?? null,
+      topsPerWatt: m?.topsPerWatt ?? null,
+      perfPerDollar: m?.perfPerDollar ?? null,
+      perfPerWatt: m?.perfPerWatt ?? null,
+      dataCompleteness: m?.dataCompleteness ?? 0,
+    },
   }
 }
 
@@ -218,12 +272,23 @@ export function searchDevices(query: string, limit = 20): DeviceListItem[] {
       )
     })
     .slice(0, limit)
-    .map(d => ({
-      device: d,
-      vendor: vendorMap.get(familyMap.get(d.familyId)?.vendorId ?? '')!,
-      family: familyMap.get(d.familyId)!,
-      latestPrice: getLatestPrice(d.deviceId),
-    }))
+    .map(d => {
+      const m = getDeviceMetrics(d.deviceId)
+      return {
+        device: d,
+        vendor: vendorMap.get(familyMap.get(d.familyId)?.vendorId ?? '')!,
+        family: familyMap.get(d.familyId)!,
+        latestPrice: getLatestPrice(d.deviceId),
+        metrics: {
+          effectiveInt8Tops: m?.effectiveInt8Tops ?? 0,
+          topsPerDollar: m?.topsPerDollar ?? null,
+          topsPerWatt: m?.topsPerWatt ?? null,
+          perfPerDollar: m?.perfPerDollar ?? null,
+          perfPerWatt: m?.perfPerWatt ?? null,
+          dataCompleteness: m?.dataCompleteness ?? 0,
+        },
+      }
+    })
 }
 
 export function compareDevices(deviceIds: string[]): DeviceDetail[] {
@@ -252,16 +317,30 @@ export function getStats() {
   }
 }
 
+export { getDeviceMetrics, getAllDeviceMetrics, getDeviceMetricsTable } from './computed'
+export type { DeviceMetrics, DeviceMetricsRow } from './computed'
+
 export function getDevicesByCategory(category: DeviceCategory): DeviceListItem[] {
   const familyIds = new Set(
     familyData.filter(f => f.category === category).map(f => f.familyId)
   )
   return deviceData
     .filter(d => familyIds.has(d.familyId))
-    .map(d => ({
-      device: d,
-      vendor: vendorMap.get(familyMap.get(d.familyId)?.vendorId ?? '')!,
-      family: familyMap.get(d.familyId)!,
-      latestPrice: getLatestPrice(d.deviceId),
-    }))
+    .map(d => {
+      const m = getDeviceMetrics(d.deviceId)
+      return {
+        device: d,
+        vendor: vendorMap.get(familyMap.get(d.familyId)?.vendorId ?? '')!,
+        family: familyMap.get(d.familyId)!,
+        latestPrice: getLatestPrice(d.deviceId),
+        metrics: {
+          effectiveInt8Tops: m?.effectiveInt8Tops ?? 0,
+          topsPerDollar: m?.topsPerDollar ?? null,
+          topsPerWatt: m?.topsPerWatt ?? null,
+          perfPerDollar: m?.perfPerDollar ?? null,
+          perfPerWatt: m?.perfPerWatt ?? null,
+          dataCompleteness: m?.dataCompleteness ?? 0,
+        },
+      }
+    })
 }
