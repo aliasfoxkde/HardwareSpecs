@@ -67,3 +67,6 @@ coverage/
 data/raw/
 data/*.sqlite
 data/*.db
+
+# MCP server generated data
+mcp-server/data.json

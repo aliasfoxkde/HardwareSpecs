@@ -5,12 +5,15 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "tsc -b && vite build && node scripts/build-sitemap.cjs",
+    "build:sitemap": "node scripts/build-sitemap.cjs",
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "lint": "eslint .",
+    "build:api": "node scripts/build-api-data.cjs",
+    "build:mcp": "npm run build:api",
     "deploy": "npm run build && npx wrangler pages deploy dist"
   },
   "dependencies": {

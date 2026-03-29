@@ -328,6 +328,192 @@ export function getStats() {
   }
 }
 
+// --- Rankings & Top-N ---
+
+export type RankingMetric = 'tops' | 'topsPerDollar' | 'topsPerWatt' | 'fp16Tflops' | 'fp32Tflops' | 'price' | 'memoryGB' | 'tdp'
+
+export interface RankingEntry {
+  rank: number
+  device: DeviceVariant
+  vendor: Vendor
+  family: DeviceFamily
+  value: number | null
+  price?: PriceSnapshot
+}
+
+export function getTopDevices(metric: RankingMetric, limit = 20, category?: DeviceCategory): RankingEntry[] {
+  let pool = deviceData
+  if (category) {
+    const familyIds = new Set(familyData.filter(f => f.category === category).map(f => f.familyId))
+    pool = pool.filter(d => familyIds.has(d.familyId))
+  }
+
+  const entries: RankingEntry[] = pool.map(d => {
+    const family = familyMap.get(d.familyId)
+    const vendor = family ? vendorMap.get(family.vendorId) : undefined
+    const m = getDeviceMetrics(d.deviceId)
+    const price = getLatestPrice(d.deviceId)
+
+    let value: number | null = null
+    switch (metric) {
+      case 'tops': value = m?.effectiveInt8Tops ?? null; break
+      case 'topsPerDollar': value = m?.topsPerDollar ?? null; break
+      case 'topsPerWatt': value = m?.topsPerWatt ?? null; break
+      case 'fp16Tflops': {
+        const spec = specData.find(s => s.deviceId === d.deviceId)
+        value = spec?.fp16Tflops ?? null
+        break
+      }
+      case 'fp32Tflops': {
+        const spec = specData.find(s => s.deviceId === d.deviceId)
+        value = spec?.fp32Tflops ?? null
+        break
+      }
+      case 'price': value = price?.priceUsd ?? null; break
+      case 'memoryGB': value = d.memoryCapacityGB ?? null; break
+      case 'tdp': value = d.tdpWatts ?? null; break
+    }
+
+    return { rank: 0, device: d, vendor: vendor!, family: family!, value, price: price ?? undefined }
+  })
+
+  const descending = ['tops', 'topsPerDollar', 'topsPerWatt', 'fp16Tflops', 'fp32Tflops', 'memoryGB'].includes(metric)
+  entries.sort((a, b) => {
+    if (a.value === null && b.value === null) return 0
+    if (a.value === null) return 1
+    if (b.value === null) return -1
+    return descending ? b.value! - a.value! : a.value! - b.value!
+  })
+
+  return entries.slice(0, limit).map((e, i) => ({ ...e, rank: i + 1 }))
+}
+
+// --- Category & Vendor Analytics ---
+
+export interface CategoryStats {
+  category: DeviceCategory
+  deviceCount: number
+  vendorCount: number
+  avgTdp: number
+  minPrice: number | null
+  maxPrice: number | null
+  avgPrice: number | null
+  avgTops: number
+  maxTops: number
+  topDevice?: DeviceVariant
+}
+
+export function getCategoryStats(): CategoryStats[] {
+  const categories = [...new Set(familyData.map(f => f.category))] as DeviceCategory[]
+  return categories.map(cat => {
+    const familyIds = new Set(familyData.filter(f => f.category === cat).map(f => f.familyId))
+    const devs = deviceData.filter(d => familyIds.has(d.familyId))
+    const vendorIds = new Set(devs.map(d => familyMap.get(d.familyId)?.vendorId).filter(Boolean))
+
+    const prices = devs.map(d => getLatestPrice(d.deviceId)?.priceUsd).filter((p): p is number => p !== undefined && p !== null)
+    const topsList = devs.map(d => getDeviceMetrics(d.deviceId)?.effectiveInt8Tops ?? 0)
+
+    const sortedByTops = [...devs].sort((a, b) =>
+      (getDeviceMetrics(b.deviceId)?.effectiveInt8Tops ?? 0) - (getDeviceMetrics(a.deviceId)?.effectiveInt8Tops ?? 0)
+    )
+
+    return {
+      category: cat,
+      deviceCount: devs.length,
+      vendorCount: vendorIds.size,
+      avgTdp: Math.round(devs.reduce((s, d) => s + (d.tdpWatts ?? 0), 0) / Math.max(devs.length, 1)),
+      minPrice: prices.length ? Math.min(...prices) : null,
+      maxPrice: prices.length ? Math.max(...prices) : null,
+      avgPrice: prices.length ? Math.round(prices.reduce((s, p) => s + p, 0) / prices.length) : null,
+      avgTops: Math.round(topsList.reduce((s, t) => s + t, 0) / Math.max(topsList.length, 1) * 10) / 10,
+      maxTops: Math.max(...topsList),
+      topDevice: sortedByTops[0],
+    }
+  })
+}
+
+export interface VendorStats {
+  vendor: Vendor
+  deviceCount: number
+  categories: DeviceCategory[]
+  avgPrice: number | null
+  bestTopsDevice?: { device: DeviceVariant; tops: number }
+}
+
+export function getVendorStats(): VendorStats[] {
+  return vendorData.map(v => {
+    const fids = familyData.filter(f => f.vendorId === v.vendorId).map(f => f.familyId)
+    const devs = deviceData.filter(d => fids.includes(d.familyId))
+    const cats = [...new Set(familyData.filter(f => f.vendorId === v.vendorId).map(f => f.category))] as DeviceCategory[]
+
+    const prices = devs.map(d => getLatestPrice(d.deviceId)?.priceUsd).filter((p): p is number => p !== undefined && p !== null)
+
+    const withTops = devs.map(d => ({
+      device: d,
+      tops: getDeviceMetrics(d.deviceId)?.effectiveInt8Tops ?? 0,
+    })).sort((a, b) => b.tops - a.tops)
+
+    return {
+      vendor: v,
+      deviceCount: devs.length,
+      categories: cats,
+      avgPrice: prices.length ? Math.round(prices.reduce((s, p) => s + p, 0) / prices.length) : null,
+      bestTopsDevice: withTops[0]?.tops > 0 ? withTops[0] : undefined,
+    }
+  }).sort((a, b) => b.deviceCount - a.deviceCount)
+}
+
+// --- Power & Price Range Queries ---
+
+export function getDevicesByPowerRange(minW: number, maxW: number): DeviceListItem[] {
+  return deviceData
+    .filter(d => (d.tdpWatts ?? 0) >= minW && (d.tdpWatts ?? Infinity) <= maxW)
+    .map(d => {
+      const m = getDeviceMetrics(d.deviceId)
+      return {
+        device: d,
+        vendor: vendorMap.get(familyMap.get(d.familyId)?.vendorId ?? '')!,
+        family: familyMap.get(d.familyId)!,
+        latestPrice: getLatestPrice(d.deviceId),
+        metrics: {
+          effectiveInt8Tops: m?.effectiveInt8Tops ?? 0,
+          topsPerDollar: m?.topsPerDollar ?? null,
+          topsPerWatt: m?.topsPerWatt ?? null,
+          perfPerDollar: m?.perfPerDollar ?? null,
+          perfPerWatt: m?.perfPerWatt ?? null,
+          dataCompleteness: m?.dataCompleteness ?? 0,
+        },
+      }
+    })
+}
+
+export function getDevicesByPriceRange(minUsd: number, maxUsd: number): DeviceListItem[] {
+  return deviceData
+    .filter(d => {
+      const price = getLatestPrice(d.deviceId)?.priceUsd
+      return price !== undefined && price !== null && price >= minUsd && price <= maxUsd
+    })
+    .map(d => {
+      const m = getDeviceMetrics(d.deviceId)
+      return {
+        device: d,
+        vendor: vendorMap.get(familyMap.get(d.familyId)?.vendorId ?? '')!,
+        family: familyMap.get(d.familyId)!,
+        latestPrice: getLatestPrice(d.deviceId),
+        metrics: {
+          effectiveInt8Tops: m?.effectiveInt8Tops ?? 0,
+          topsPerDollar: m?.topsPerDollar ?? null,
+          topsPerWatt: m?.topsPerWatt ?? null,
+          perfPerDollar: m?.perfPerDollar ?? null,
+          perfPerWatt: m?.perfPerWatt ?? null,
+          dataCompleteness: m?.dataCompleteness ?? 0,
+        },
+      }
+    })
+}
+
+// --- Computed exports ---
+
 export { getDeviceMetrics, getAllDeviceMetrics, getDeviceMetricsTable } from './computed'
 export type { DeviceMetrics, DeviceMetricsRow } from './computed'
 
