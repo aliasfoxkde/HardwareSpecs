@@ -6858,19 +6858,6 @@ export const devices: DeviceVariant[] = [
     notes: 'Cloud TPU v5p, high-performance training',
     referenceUrl: 'https://cloud.google.com/tpu/docs/v5p'
   },
-  { deviceId: 'qualcomm-qcs8550',
-    familyId: 'qualcomm-qcs8550',
-    modelName: 'Qualcomm QCS8550',
-    launchDate: '2024-04',
-    processNm: 4,
-    tdpWatts: 20,
-    memoryType: 'LPDDR5X',
-    memoryCapacityGB: 16,
-    memoryBandwidthGBps: 51.2,
-    formFactor: 'Module',
-    notes: 'Oryon CPU + Hexagon NPU, 48 TOPS',
-    referenceUrl: 'https://www.qualcomm.com/products/technology/processors/qcs8550-processor'
-  },
   { deviceId: 'huawei-ascend-910b',
     familyId: 'huawei-ascend-910b',
     modelName: 'Huawei Ascend 910B',
@@ -6897,34 +6884,6 @@ export const devices: DeviceVariant[] = [
     notes: 'Da Vinci, low-power edge inference, 16 TOPS INT8',
     referenceUrl: 'https://www.huawei.com/en/products/computing/ascend'
   },
-  { deviceId: 'radxa-rock-5b',
-    familyId: 'rockchip-rk3588',
-    modelName: 'Radxa ROCK 5B',
-    launchDate: '2022-12',
-    processNm: 8,
-    tdpWatts: 12,
-    memoryType: 'LPDDR4X',
-    memoryCapacityGB: 16,
-    memoryBandwidthGBps: 51.2,
-    formFactor: 'SBC',
-    notes: 'RK3588, NPU 6 TOPS',
-    referenceUrl: 'https://radxa.com/products/rock5/5b/',
-    purchaseUrl: 'https://www.amazon.com/dp/B0BLMPTDWB'
-  },
-  { deviceId: 'radxa-rock-5a',
-    familyId: 'rockchip-rk3588',
-    modelName: 'Radxa ROCK 5A',
-    launchDate: '2022-06',
-    processNm: 8,
-    tdpWatts: 10,
-    memoryType: 'LPDDR4X',
-    memoryCapacityGB: 16,
-    memoryBandwidthGBps: 51.2,
-    formFactor: 'SBC',
-    notes: 'RK3588, 6 TOPS NPU',
-    referenceUrl: 'https://radxa.com/products/rock5/5a/',
-    purchaseUrl: 'https://www.amazon.com/dp/B0BLMNK3RH'
-  },
   { deviceId: 'orange-pi-5',
     familyId: 'rockchip-rk3588s',
     modelName: 'Orange Pi 5',
@@ -6938,20 +6897,6 @@ export const devices: DeviceVariant[] = [
     notes: 'RK3588S, 6 TOPS NPU',
     referenceUrl: 'https://www.orangepi.org/html/hardWare/computerAndMicrocontrollers/details/444.html',
     purchaseUrl: 'https://www.amazon.com/dp/B0B1C3V3Y1'
-  },
-  { deviceId: 'orange-pi-5-plus',
-    familyId: 'rockchip-rk3588s',
-    modelName: 'Orange Pi 5 Plus',
-    launchDate: '2023-08',
-    processNm: 8,
-    tdpWatts: 15,
-    memoryType: 'LPDDR5',
-    memoryCapacityGB: 16,
-    memoryBandwidthGBps: 51.2,
-    formFactor: 'SBC',
-    notes: 'RK3588S, 16GB LPDDR5',
-    referenceUrl: 'https://www.orangepi.org/html/hardWare/computerAndMicrocontrollers/details/457.html',
-    purchaseUrl: 'https://www.amazon.com/dp/B0C9Z7TYC6'
   },
 
 ];
@@ -11891,18 +11836,6 @@ export const specs: SpecSnapshot[] = [
   { snapshotId: 'spec-new-29', deviceId: 'huawei-ascend-310', sourceId: 'vendor-datasheet',
     int8Tops: 16
   },
-  { snapshotId: 'spec-new-30', deviceId: 'radxa-rock-5b', sourceId: 'vendor-datasheet',
-    int8Tops: 6
-  },
-  { snapshotId: 'spec-new-31', deviceId: 'radxa-rock-5a', sourceId: 'vendor-datasheet',
-    int8Tops: 6
-  },
-  { snapshotId: 'spec-new-32', deviceId: 'orange-pi-5', sourceId: 'vendor-datasheet',
-    int8Tops: 6
-  },
-  { snapshotId: 'spec-new-33', deviceId: 'orange-pi-5-plus', sourceId: 'vendor-datasheet',
-    int8Tops: 6
-  },
 
 ];
 // Price Snapshots (MSRP launch prices in USD)
@@ -13387,9 +13320,5 @@ export const prices: PriceSnapshot[] = [
   { priceId: 'price-new-15', deviceId: 'amd-mi300x-192gb', sourceId: 'vendor-msrp', priceUsd: 15000, condition: 'msrp', region: 'US', observedAt: '2025-01-15' },
   { priceId: 'price-new-16', deviceId: 'amd-mi250x-128gb', sourceId: 'vendor-msrp', priceUsd: 9999, condition: 'msrp', region: 'US', observedAt: '2025-01-15' },
   { priceId: 'price-new-17', deviceId: 'amd-mi210-64gb', sourceId: 'vendor-msrp', priceUsd: 4999, condition: 'msrp', region: 'US', observedAt: '2025-01-15' },
-  { priceId: 'price-new-18', deviceId: 'radxa-rock-5b', sourceId: 'vendor-msrp', priceUsd: 189, condition: 'msrp', region: 'US', observedAt: '2025-01-15' },
-  { priceId: 'price-new-19', deviceId: 'radxa-rock-5a', sourceId: 'vendor-msrp', priceUsd: 179, condition: 'msrp', region: 'US', observedAt: '2025-01-15' },
-  { priceId: 'price-new-20', deviceId: 'orange-pi-5', sourceId: 'vendor-msrp', priceUsd: 89, condition: 'msrp', region: 'US', observedAt: '2025-01-15' },
-  { priceId: 'price-new-21', deviceId: 'orange-pi-5-plus', sourceId: 'vendor-msrp', priceUsd: 109, condition: 'msrp', region: 'US', observedAt: '2025-01-15' },
 
 ];
