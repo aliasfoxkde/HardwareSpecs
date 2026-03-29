@@ -1,0 +1,88 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" fill="none">
+  <rect width="1200" height="630" fill="#0f172a"/>
+  <rect x="1" y="1" width="1198" height="628" rx="12" fill="none" stroke="#1e293b" stroke-width="2"/>
+
+  <!-- Chip icon -->
+  <g transform="translate(80, 265)">
+    <rect x="0" y="0" width="100" height="100" rx="20" fill="#1e293b" stroke="#3b82f6" stroke-width="2"/>
+    <rect x="10" y="4" width="5" height="8" rx="2" fill="#3b82f6"/>
+    <rect x="25" y="4" width="5" height="8" rx="2" fill="#3b82f6"/>
+    <rect x="40" y="4" width="5" height="8" rx="2" fill="#3b82f6"/>
+    <rect x="55" y="4" width="5" height="8" rx="2" fill="#3b82f6"/>
+    <rect x="70" y="4" width="5" height="8" rx="2" fill="#3b82f6"/>
+    <rect x="10" y="88" width="5" height="8" rx="2" fill="#3b82f6"/>
+    <rect x="25" y="88" width="5" height="8" rx="2" fill="#3b82f6"/>
+    <rect x="40" y="88" width="5" height="8" rx="2" fill="#3b82f6"/>
+    <rect x="55" y="88" width="5" height="8" rx="2" fill="#3b82f6"/>
+    <rect x="70" y="88" width="5" height="8" rx="2" fill="#3b82f6"/>
+    <rect x="15" y="15" width="70" height="70" rx="8" fill="#1e40af"/>
+    <rect x="20" y="20" width="60" height="60" rx="4" fill="#2563eb"/>
+    <line x1="30" y1="35" x2="45" y2="35" stroke="#93c5fd" stroke-width="2"/>
+    <line x1="45" y1="35" x2="45" y2="50" stroke="#93c5fd" stroke-width="2"/>
+    <line x1="45" y1="50" x2="70" y2="50" stroke="#93c5fd" stroke-width="2"/>
+    <line x1="55" y1="25" x2="70" y2="25" stroke="#93c5fd" stroke-width="2"/>
+    <line x1="70" y1="25" x2="70" y2="50" stroke="#93c5fd" stroke-width="2"/>
+    <circle cx="30" cy="35" r="2.5" fill="#60a5fa"/>
+    <circle cx="70" cy="25" r="2.5" fill="#60a5fa"/>
+    <circle cx="70" cy="50" r="2.5" fill="#60a5fa"/>
+  </g>
+
+  <!-- Title -->
+  <text x="200" y="310" font-family="system-ui, -apple-system, sans-serif" font-size="72" font-weight="800" fill="white" letter-spacing="-2">SiliconRank</text>
+  <text x="200" y="355" font-family="system-ui, -apple-system, sans-serif" font-size="24" fill="#94a3b8">Open Hardware Intelligence</text>
+
+  <!-- Tagline -->
+  <text x="200" y="400" font-family="system-ui, -apple-system, sans-serif" font-size="16" fill="#64748b">Compare every chip. One platform.</text>
+
+  <!-- Stats -->
+  <g transform="translate(200, 440)">
+    <rect x="0" y="0" width="100" height="36" rx="8" fill="#1e293b" stroke="#334155" stroke-width="1"/>
+    <text x="50" y="24" font-family="system-ui, sans-serif" font-size="14" fill="#60a5fa" text-anchor="middle" font-weight="700">46+</text>
+    <text x="110" y="24" font-family="system-ui, sans-serif" font-size="12" fill="#94a3b8">Devices</text>
+
+    <rect x="180" y="0" width="100" height="36" rx="8" fill="#1e293b" stroke="#334155" stroke-width="1"/>
+    <text x="230" y="24" font-family="system-ui, sans-serif" font-size="14" fill="#60a5fa" text-anchor="middle" font-weight="700">12+</text>
+    <text x="290" y="24" font-family="system-ui, sans-serif" font-size="12" fill="#94a3b8">Vendors</text>
+
+    <rect x="360" y="0" width="100" height="36" rx="8" fill="#1e293b" stroke="#334155" stroke-width="1"/>
+    <text x="410" y="24" font-family="system-ui, sans-serif" font-size="14" fill="#60a5fa" text-anchor="middle" font-weight="700">7</text>
+    <text x="470" y="24" font-family="system-ui, sans-serif" font-size="12" fill="#94a3b8">Categories</text>
+  </g>
+
+  <!-- Categories -->
+  <g transform="translate(200, 520)">
+    <text x="0" y="14" font-family="system-ui, sans-serif" font-size="13" fill="#3b82f6" font-weight="600">CPUs</text>
+    <text x="65" y="14" font-family="system-ui, sans-serif" font-size="13" fill="#64748b">GPUs</text>
+    <text x="125" y="14" font-family="system-ui, sans-serif" font-size="13" fill="#64748b">NPUs</text>
+    <text x="185" y="14" font-family="system-ui, sans-serif" font-size="13" fill="#64748b">SBCs</text>
+    <text x="240" y="14" font-family="system-ui, sans-serif" font-size="13" fill="#64748b">ASICs</text>
+    <text x="300" y="14" font-family="system-ui, sans-serif" font-size="13" fill="#64748b">Systems</text>
+  </g>
+
+  <!-- URL -->
+  <text x="200" y="580" font-family="system-ui, -apple-system, sans-serif" font-size="18" fill="#64748b">siliconrank.cyopsys.com</text>
+
+  <!-- Right side decorative elements -->
+  <g transform="translate(750, 100)" opacity="0.3">
+    <!-- Scatter plot dots -->
+    <circle cx="50" cy="80" r="6" fill="#3b82f6"/>
+    <circle cx="120" cy="40" r="8" fill="#22c55e"/>
+    <circle cx="200" cy="120" r="10" fill="#f59e0b"/>
+    <circle cx="280" cy="60" r="7" fill="#ef4444"/>
+    <circle cx="350" cy="150" r="12" fill="#8b5cf6"/>
+    <circle cx="100" cy="160" r="5" fill="#06b6d4"/>
+    <circle cx="250" cy="30" r="9" fill="#f97316"/>
+    <circle cx="380" cy="90" r="6" fill="#ec4899"/>
+
+    <!-- Axis lines -->
+    <line x1="20" y1="180" x2="400" y2="180" stroke="#334155" stroke-width="1"/>
+    <line x1="20" y1="20" x2="20" y2="180" stroke="#334155" stroke-width="1"/>
+
+    <!-- Bar chart bars -->
+    <rect x="430" y="130" width="30" height="50" rx="3" fill="#3b82f6" opacity="0.6"/>
+    <rect x="470" y="90" width="30" height="90" rx="3" fill="#22c55e" opacity="0.6"/>
+    <rect x="510" y="110" width="30" height="70" rx="3" fill="#f59e0b" opacity="0.6"/>
+    <rect x="550" y="70" width="30" height="110" rx="3" fill="#ef4444" opacity="0.6"/>
+    <rect x="590" y="40" width="30" height="140" rx="3" fill="#8b5cf6" opacity="0.6"/>
+  </g>
+</svg>
