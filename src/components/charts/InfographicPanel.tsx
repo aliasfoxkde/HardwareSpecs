@@ -77,7 +77,7 @@ export function InfographicPanel({ category }: { category: string }) {
   }, [category])
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4" role="img" aria-label={`${category} infographic statistics`}>
       {/* Key stats row */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         <StatCard label="Total Devices" value={stats.totalDevices.toLocaleString()} accent="text-brand-400" />

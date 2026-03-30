@@ -27,7 +27,7 @@ export function PriceTdpHeatmap({ category }: { category: DeviceCategory }) {
   const maxArea = maxPrice * maxTdp
 
   return (
-    <div className="space-y-1">
+    <div className="space-y-1" role="img" aria-label={`Price vs TDP heatmap for ${category}`}>
       {/* Header */}
       <div className="flex items-end gap-1 text-xs text-text-muted px-1">
         <div className="w-28 shrink-0" />
@@ -63,7 +63,7 @@ export function PriceTdpHeatmap({ category }: { category: DeviceCategory }) {
       })}
 
       {/* Legend */}
-      <div className="flex items-center gap-2 mt-2 text-xs text-text-muted">
+      <div className="flex items-center gap-2 mt-2 text-xs text-text-muted" aria-hidden="true">
         <span>Low price/TDP</span>
         <div className="flex-1 h-2 bg-bg-tertiary/30 rounded overflow-hidden">
           <div className="h-full rounded bg-brand-500" style={{ opacity: 0.2, width: '100%' }} />
@@ -113,21 +113,21 @@ export function VendorPerfHeatmap({ category }: { category: DeviceCategory }) {
   const maxTpw = Math.max(...data.map(d => d.avgTopsPerWatt))
 
   return (
-    <div>
+    <div role="table" aria-label={`Vendor performance heatmap for ${category}`}>
       {/* Header */}
-      <div className="grid grid-cols-[100px_1fr_1fr_1fr_50px] gap-2 text-xs font-semibold text-text-secondary mb-2 px-1">
-        <div>Vendor</div>
-        <div className="text-center">Avg TOPS</div>
-        <div className="text-center">Avg TOPS/$</div>
-        <div className="text-center">Avg TOPS/W</div>
-        <div className="text-right">#</div>
+      <div role="row" className="grid grid-cols-[100px_1fr_1fr_1fr_50px] gap-2 text-xs font-semibold text-text-secondary mb-2 px-1">
+        <div role="columnheader">Vendor</div>
+        <div role="columnheader" className="text-center">Avg TOPS</div>
+        <div role="columnheader" className="text-center">Avg TOPS/$</div>
+        <div role="columnheader" className="text-center">Avg TOPS/W</div>
+        <div role="columnheader" className="text-right">#</div>
       </div>
 
       {/* Rows */}
       {data.map(d => (
-        <div key={d.vendorId} className="grid grid-cols-[100px_1fr_1fr_1fr_50px] gap-2 items-center py-1.5 px-1 rounded hover:bg-bg-tertiary/30">
-          <div className="text-sm text-text-primary font-medium truncate">{d.name}</div>
-          <div className="relative h-5">
+        <div key={d.vendorId} role="row" className="grid grid-cols-[100px_1fr_1fr_1fr_50px] gap-2 items-center py-1.5 px-1 rounded hover:bg-bg-tertiary/30">
+          <div role="cell" className="text-sm text-text-primary font-medium truncate">{d.name}</div>
+          <div role="cell" className="relative h-5">
             <div
               className="absolute inset-y-0 left-0 rounded bg-brand-500/30"
               style={{ width: `${(d.avgTops / maxTops) * 100}%` }}
@@ -136,7 +136,7 @@ export function VendorPerfHeatmap({ category }: { category: DeviceCategory }) {
               {formatNumber(d.avgTops, 0)}
             </div>
           </div>
-          <div className="relative h-5">
+          <div role="cell" className="relative h-5">
             <div
               className="absolute inset-y-0 left-0 rounded bg-green-500/30"
               style={{ width: `${(d.avgTopsPerDollar / maxTpd) * 100}%` }}
@@ -145,7 +145,7 @@ export function VendorPerfHeatmap({ category }: { category: DeviceCategory }) {
               {formatNumber(d.avgTopsPerDollar)}
             </div>
           </div>
-          <div className="relative h-5">
+          <div role="cell" className="relative h-5">
             <div
               className="absolute inset-y-0 left-0 rounded bg-blue-500/30"
               style={{ width: `${(d.avgTopsPerWatt / maxTpw) * 100}%` }}
@@ -154,7 +154,7 @@ export function VendorPerfHeatmap({ category }: { category: DeviceCategory }) {
               {formatNumber(d.avgTopsPerWatt)}
             </div>
           </div>
-          <div className="text-xs text-text-muted text-right">{d.count}</div>
+          <div role="cell" className="text-xs text-text-muted text-right">{d.count}</div>
         </div>
       ))}
     </div>
