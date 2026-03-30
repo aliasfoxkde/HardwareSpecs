@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, memo } from 'react'
+import { useState, useMemo, useEffect, useRef, memo } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { compareDevices, searchDevices, getDeviceMetrics } from '@/lib/api'
 import { downloadCSV } from '@/lib/export'
@@ -23,6 +23,19 @@ export function ComparePage() {
   })
   const [searchQuery, setSearchQuery] = useState('')
   const [showAdd, setShowAdd] = useState(false)
+  const addDropdownRef = useRef<HTMLDivElement>(null)
+
+  // Close dropdown on Escape
+  useEffect(() => {
+    if (!showAdd) return
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setShowAdd(false)
+      }
+    }
+    document.addEventListener('keydown', handleKeyDown)
+    return () => document.removeEventListener('keydown', handleKeyDown)
+  }, [showAdd])
 
   // Sync selectedIds to URL
   useEffect(() => {
@@ -115,11 +128,12 @@ export function ComparePage() {
               placeholder="Search for a device to compare..."
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
+              aria-label="Search devices to compare"
               className="w-full pl-10 pr-4 py-3 bg-bg-secondary border border-border-subtle rounded-xl text-text-primary placeholder-text-muted focus:outline-none focus:ring-2 focus:ring-brand-500"
             />
           </div>
           {searchResults.length > 0 && (
-            <div className="mt-2 bg-bg-secondary border border-border-subtle rounded-xl overflow-hidden">
+            <div className="mt-2 bg-bg-secondary border border-border-subtle rounded-xl overflow-hidden" role="listbox" aria-label="Search results">
               {searchResults.map(result => (
                 <button
                   key={result.device.deviceId}
@@ -147,34 +161,39 @@ export function ComparePage() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold text-text-primary">Compare Devices</h1>
-          <p className="text-sm text-text-secondary">{devices.length} device{devices.length !== 1 ? 's' : ''} selected</p>
+          <p className="text-sm text-text-secondary" role="status" aria-live="polite">{devices.length} device{devices.length !== 1 ? 's' : ''} selected</p>
         </div>
         <div className="flex gap-2">
           {selectedIds.length < 6 && (
             <div className="relative">
               <button
                 onClick={() => setShowAdd(!showAdd)}
+                aria-expanded={showAdd}
+                aria-haspopup="listbox"
                 className="px-4 py-2 bg-brand-600 hover:bg-brand-500 text-text-primary text-sm font-medium rounded-lg transition-colors"
               >
                 + Add Device
               </button>
               {showAdd && (
-                <div className="absolute right-0 top-full mt-2 w-72 bg-bg-secondary border border-border-subtle rounded-xl shadow-xl z-50 overflow-hidden">
+                <div ref={addDropdownRef} className="absolute right-0 top-full mt-2 w-72 bg-bg-secondary border border-border-subtle rounded-xl shadow-xl z-50 overflow-hidden">
                   <input
                     type="text"
                     placeholder="Search..."
                     value={searchQuery}
                     onChange={e => setSearchQuery(e.target.value)}
                     autoFocus
+                    aria-label="Search devices to add"
                     className="w-full px-4 py-2.5 bg-bg-secondary text-sm text-text-primary placeholder-text-muted focus:outline-none border-b border-border-subtle"
                   />
-                  <div className="max-h-64 overflow-y-auto">
+                  <div className="max-h-64 overflow-y-auto" role="listbox" aria-label="Available devices">
                     {searchResults
                       .filter(r => !selectedIds.includes(r.device.deviceId))
                       .map(result => (
                         <button
                           key={result.device.deviceId}
                           onClick={() => addDevice(result.device.deviceId)}
+                          role="option"
+                          aria-selected={false}
                           className="w-full px-4 py-2.5 text-left hover:bg-bg-tertiary text-sm text-text-primary"
                         >
                           {result.device.modelName} <span className="text-text-secondary">- {result.vendor.name}</span>
@@ -190,12 +209,14 @@ export function ComparePage() {
           )}
           <button
             onClick={() => setSelectedIds([])}
+            aria-label="Clear all devices"
             className="px-4 py-2 bg-bg-secondary hover:bg-bg-tertiary text-text-secondary text-sm rounded-lg transition-colors border border-border-subtle"
           >
             Clear
           </button>
           <button
             onClick={handleExportCSV}
+            aria-label="Export comparison as CSV"
             className="px-4 py-2 bg-bg-secondary hover:bg-bg-tertiary text-text-secondary text-sm rounded-lg transition-colors border border-border-subtle"
           >
             Export CSV
@@ -205,7 +226,7 @@ export function ComparePage() {
 
       {/* Comparison table */}
       <div className="overflow-x-auto bg-bg-card/30 border border-border-subtle/50 rounded-xl">
-        <table className="w-full">
+        <table className="w-full" aria-label="Device comparison">
           <thead>
             <tr className="border-b border-border-subtle/50">
               <th className="text-left px-4 py-3 text-xs font-semibold text-text-secondary uppercase w-40">Spec</th>
@@ -216,6 +237,7 @@ export function ComparePage() {
                   </Link>
                   <button
                     onClick={() => removeDevice(d.device.deviceId)}
+                    aria-label={`Remove ${d.device.modelName}`}
                     className="block mx-auto mt-1 text-xs text-text-muted hover:text-red-400"
                   >
                     Remove

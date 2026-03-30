@@ -10,10 +10,10 @@ function TopsCalculator() {
   const [precision, setPrecision] = useState<'fp4' | 'int8' | 'fp8' | 'fp16' | 'fp32'>('int8')
   const [opsPerClockPerCore, setOpsPerClockPerCore] = useState('256')
 
-  const precisionMultiplier: Record<string, number> = { fp4: 2, int8: 1, fp8: 1, fp16: 0.5, fp32: 0.25 }
   const precisionLabel: Record<string, string> = { fp4: 'FP4 (4-bit)', int8: 'INT8 (8-bit integer)', fp8: 'FP8 (8-bit float)', fp16: 'FP16 (16-bit)', fp32: 'FP32 (32-bit)' }
 
   const result = useMemo(() => {
+    const precisionMultiplier: Record<string, number> = { fp4: 2, int8: 1, fp8: 1, fp16: 0.5, fp32: 0.25 }
     const cores = parseFloat(tensorCores) || 0
     const clock = parseFloat(clockGhz) || 0
     const ops = parseFloat(opsPerClockPerCore) || 256
@@ -136,20 +136,20 @@ function EfficiencyCalculator() {
 
 // ── Memory Bandwidth Estimator ──
 
+const DEFAULT_MEM_RATES: Record<string, number> = {
+  gddr6: 14, gddr6x: 20, gddr7: 28, hbm2: 2.4, hbm2e: 3.2, hbm3: 4.8, hbm3e: 6.4, lpddr5: 6.4, lpddr5x: 8.5,
+}
+
 function MemoryBandwidthEstimator() {
   const [busWidth, setBusWidth] = useState('')
   const [memType, setMemType] = useState<'gddr6' | 'gddr6x' | 'gddr7' | 'hbm2' | 'hbm2e' | 'hbm3' | 'hbm3e' | 'lpddr5' | 'lpddr5x'>('gddr6x')
   const [transferRate, setTransferRate] = useState('')
 
-  const defaultRates: Record<string, number> = {
-    gddr6: 14, gddr6x: 20, gddr7: 28, hbm2: 2.4, hbm2e: 3.2, hbm3: 4.8, hbm3e: 6.4, lpddr5: 6.4, lpddr5x: 8.5,
-  }
-
-  const effectiveRate = parseFloat(transferRate) || defaultRates[memType] || 0
   const bandwidth = useMemo(() => {
+    const effectiveRate = parseFloat(transferRate) || DEFAULT_MEM_RATES[memType] || 0
     const bw = parseFloat(busWidth) || 0
     return bw > 0 && effectiveRate > 0 ? (bw * effectiveRate) / 8 : 0
-  }, [busWidth, effectiveRate])
+  }, [busWidth, transferRate, memType])
 
   const aiWorkloadNote = useMemo(() => {
     if (bandwidth <= 0) return ''
@@ -171,12 +171,12 @@ function MemoryBandwidthEstimator() {
         <div>
           <label className="block text-xs text-text-secondary mb-1">Memory Type</label>
           <select value={memType} onChange={e => { setMemType(e.target.value as typeof memType); setTransferRate('') }} className="w-full px-3 py-2 bg-bg-secondary border border-border-subtle rounded-lg text-sm text-text-primary">
-            {Object.keys(defaultRates).map(k => <option key={k} value={k}>{k.toUpperCase()} ({defaultRates[k]} Gbps/pin)</option>)}
+            {Object.keys(DEFAULT_MEM_RATES).map(k => <option key={k} value={k}>{k.toUpperCase()} ({DEFAULT_MEM_RATES[k]} Gbps/pin)</option>)}
           </select>
         </div>
         <div>
           <label className="block text-xs text-text-secondary mb-1">Transfer Rate (Gbps/pin)</label>
-          <input type="number" step="0.1" value={transferRate} onChange={e => setTransferRate(e.target.value)} placeholder={defaultRates[memType].toString()} className="w-full px-3 py-2 bg-bg-secondary border border-border-subtle rounded-lg text-sm text-text-primary" />
+          <input type="number" step="0.1" value={transferRate} onChange={e => setTransferRate(e.target.value)} placeholder={DEFAULT_MEM_RATES[memType].toString()} className="w-full px-3 py-2 bg-bg-secondary border border-border-subtle rounded-lg text-sm text-text-primary" />
         </div>
       </div>
       <div className="bg-bg-tertiary/50 rounded-lg p-4 text-center">

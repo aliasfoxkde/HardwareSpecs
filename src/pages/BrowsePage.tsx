@@ -6,8 +6,7 @@ import type { DeviceCategory, FilterState } from '@/types'
 
 const CATEGORIES: DeviceCategory[] = ['CPU', 'GPU', 'SBC', 'NPU', 'ASIC', 'SoC', 'System']
 
-const SORT_KEYS = ['launchDate', 'name', 'tdp', 'price', 'tops', 'topsPerDollar', 'topsPerWatt', 'perfPerDollar', 'perfPerWatt', 'dataCompleteness', 'ram', 'ramPerDollar'] as const
-type SortKey = typeof SORT_KEYS[number]
+type SortKey = 'launchDate' | 'name' | 'tdp' | 'price' | 'tops' | 'topsPerDollar' | 'topsPerWatt' | 'perfPerDollar' | 'perfPerWatt' | 'dataCompleteness' | 'ram' | 'ramPerDollar'
 
 const COLUMNS: { key: SortKey; label: string; align: 'left' | 'right'; className?: string }[] = [
   { key: 'name', label: 'Device', align: 'left' },

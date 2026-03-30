@@ -13,6 +13,7 @@ interface ApiEndpoint {
   exampleUrl: string
   exampleCurl: string
   exampleResponse: string
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   fn: (...args: any[]) => unknown
 }
 

@@ -23,14 +23,14 @@ import {
 import { getDeviceMetrics } from './computed'
 
 // In-memory data store (populated from seed data)
-let vendorData = [...seedVendors]
-let familyData = [...seedFamilies]
-let deviceData = [...seedDevices]
-let sourceData = [...seedSources]
-let benchmarkTypeData = [...seedBenchmarkTypes]
-let benchmarkData = [...seedBenchmarks]
-let specData = [...seedSpecs]
-let priceData = [...seedPrices]
+const vendorData = [...seedVendors]
+const familyData = [...seedFamilies]
+const deviceData = [...seedDevices]
+const sourceData = [...seedSources]
+const benchmarkTypeData = [...seedBenchmarkTypes]
+const benchmarkData = [...seedBenchmarks]
+const specData = [...seedSpecs]
+const priceData = [...seedPrices]
 
 // Lookup maps
 const vendorMap = new Map(vendorData.map(v => [v.vendorId, v]))

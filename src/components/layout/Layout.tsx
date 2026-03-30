@@ -32,7 +32,7 @@ export function Layout() {
   const [searchResults, setSearchResults] = useState<ReturnType<typeof searchDevices>>([])
   const [showSearch, setShowSearch] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const [stats, setStats] = useState<Awaited<ReturnType<typeof getStats>> | null>(null)
+  const [stats] = useState<Awaited<ReturnType<typeof getStats>> | null>(() => getStats())
   const { theme, toggleTheme } = useTheme()
   const location = useLocation()
   const navigate = useNavigate()
@@ -41,10 +41,13 @@ export function Layout() {
   const menuRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    setStats(getStats())
-    setMobileMenuOpen(false)
-    setShowSearch(false)
-    setSearchQuery('')
+    // Reset UI state on navigation using microtask to avoid synchronous setState in effect
+    const id = queueMicrotask(() => {
+      setMobileMenuOpen(false)
+      setShowSearch(false)
+      setSearchQuery('')
+    })
+    return () => clearTimeout(id as unknown as number)
   }, [location.pathname])
 
   useEffect(() => {

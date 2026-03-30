@@ -3,16 +3,13 @@ import { useEffect, useState, useRef } from 'react'
 import { getStats, getDevicesByCategory, getDevices } from '@/lib/api'
 
 function useAnimatedCounter(target: number, duration = 1500, startOnMount = false): number {
-  const [value, setValue] = useState(0)
+  const prefersReducedMotion = typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  const [value, setValue] = useState(() => prefersReducedMotion ? target : 0)
   const started = useRef(false)
 
   useEffect(() => {
-    if (!startOnMount || started.current) return
+    if (!startOnMount || started.current || prefersReducedMotion) return
     started.current = true
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      setValue(target)
-      return
-    }
     const start = performance.now()
     const step = (now: number) => {
       const elapsed = now - start
@@ -22,7 +19,7 @@ function useAnimatedCounter(target: number, duration = 1500, startOnMount = fals
       if (progress < 1) requestAnimationFrame(step)
     }
     requestAnimationFrame(step)
-  }, [target, duration, startOnMount])
+  }, [target, duration, startOnMount, prefersReducedMotion])
 
   return value
 }
@@ -119,34 +116,30 @@ const categoryIcons: Record<string, string> = {
 }
 
 export function LandingPage() {
-  const [stats, setStats] = useState<Awaited<ReturnType<typeof getStats>> | null>(null)
-  const [topGpus, setTopGpus] = useState<ReturnType<typeof getDevicesByCategory>>([])
-  const [categoryCounts, setCategoryCounts] = useState<Record<string, number>>({})
-  const [topValueDevices, setTopValueDevices] = useState<ReturnType<typeof getDevicesByCategory>>([])
+  const [stats] = useState(() => getStats())
+  const [topGpus] = useState(() =>
+    getDevicesByCategory('GPU')
+      .filter(d => d.metrics.effectiveInt8Tops > 0)
+      .sort((a, b) => b.metrics.effectiveInt8Tops - a.metrics.effectiveInt8Tops)
+      .slice(0, 5),
+  )
 
-  useEffect(() => {
-    const s = getStats()
-    setStats(s)
-    setTopGpus(
-      getDevicesByCategory('GPU')
-        .filter(d => d.metrics.effectiveInt8Tops > 0)
-        .sort((a, b) => b.metrics.effectiveInt8Tops - a.metrics.effectiveInt8Tops)
-        .slice(0, 5),
-    )
-
-    // Count devices per category
-    const cats = ['CPU', 'GPU', 'SBC', 'NPU', 'ASIC', 'SoC', 'System', 'Memory', 'Storage'] as const
+  // Count devices per category
+  const cats = ['CPU', 'GPU', 'SBC', 'NPU', 'ASIC', 'SoC', 'System', 'Memory', 'Storage'] as const
+  const [categoryCounts] = useState<Record<string, number>>(() => {
     const counts: Record<string, number> = {}
     for (const cat of cats) {
       counts[cat] = getDevicesByCategory(cat).length
     }
-    setCategoryCounts(counts)
+    return counts
+  })
 
-    // Top value devices (best TOPS/$) — across all categories
+  // Top value devices (best TOPS/$) — across all categories
+  const [topValueDevices] = useState(() => {
     const { devices: allDevicesSorted } = getDevices({ sortBy: 'topsPerDollar', sortOrder: 'desc', pageSize: 1000 })
     const withValue = allDevicesSorted.filter(d => d.metrics.topsPerDollar != null && d.metrics.topsPerDollar > 0)
-    setTopValueDevices(withValue.slice(0, 5))
-  }, [])
+    return withValue.slice(0, 5)
+  })
 
   const features = [
     {

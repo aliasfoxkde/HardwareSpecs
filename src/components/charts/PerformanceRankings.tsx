@@ -3,7 +3,7 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 import { getDeviceMetricsTable, getVendors } from '@/lib/api'
 import { getVendorColor, CHART_STYLES, formatNumber } from './chartUtils'
 
-function shortName(name: string, _vendorName: string): string {
+function shortName(name: string): string {
   // Strip vendor prefix for brevity, keep the actual model name
   let short = name
   const prefixes = [
@@ -35,7 +35,7 @@ export function TopTopsBarChart({ limit = 20 }: { limit?: number }) {
       .slice(0, limit)
       .map(m => ({
         deviceId: m.deviceId,
-        name: shortName(m.modelName, vendorNameMap[m.vendorId] ?? ''),
+        name: shortName(m.modelName),
         fullName: m.modelName,
         vendorId: m.vendorId,
         vendorName: vendorNameMap[m.vendorId] ?? m.vendorId,
@@ -72,13 +72,6 @@ export function TopTopsBarChart({ limit = 20 }: { limit?: number }) {
 }
 
 export function TopTopsPerDollarChart({ limit = 20 }: { limit?: number }) {
-  const vendors = useMemo(() => getVendors(), [])
-  const vendorNameMap = useMemo(() => {
-    const m: Record<string, string> = {}
-    for (const v of vendors) m[v.vendorId] = v.name
-    return m
-  }, [vendors])
-
   const data = useMemo(() => {
     return getDeviceMetricsTable()
       .filter(m => m.topsPerDollar != null && m.topsPerDollar > 0)
@@ -86,12 +79,12 @@ export function TopTopsPerDollarChart({ limit = 20 }: { limit?: number }) {
       .slice(0, limit)
       .map(m => ({
         deviceId: m.deviceId,
-        name: shortName(m.modelName, vendorNameMap[m.vendorId] ?? ''),
+        name: shortName(m.modelName),
         fullName: m.modelName,
         vendorId: m.vendorId,
         topsPerDollar: m.topsPerDollar,
       }))
-  }, [limit, vendorNameMap])
+  }, [limit])
 
   if (data.length === 0) return <div className="flex items-center justify-center h-full text-text-muted">No TOPS/$ data available</div>
 
@@ -118,13 +111,6 @@ export function TopTopsPerDollarChart({ limit = 20 }: { limit?: number }) {
 }
 
 export function TopTopsPerWattChart({ limit = 20 }: { limit?: number }) {
-  const vendors = useMemo(() => getVendors(), [])
-  const vendorNameMap = useMemo(() => {
-    const m: Record<string, string> = {}
-    for (const v of vendors) m[v.vendorId] = v.name
-    return m
-  }, [vendors])
-
   const data = useMemo(() => {
     return getDeviceMetricsTable()
       .filter(m => m.topsPerWatt != null && m.topsPerWatt > 0)
@@ -132,12 +118,12 @@ export function TopTopsPerWattChart({ limit = 20 }: { limit?: number }) {
       .slice(0, limit)
       .map(m => ({
         deviceId: m.deviceId,
-        name: shortName(m.modelName, vendorNameMap[m.vendorId] ?? ''),
+        name: shortName(m.modelName),
         fullName: m.modelName,
         vendorId: m.vendorId,
         topsPerWatt: m.topsPerWatt,
       }))
-  }, [limit, vendorNameMap])
+  }, [limit])
 
   if (data.length === 0) return <div className="flex items-center justify-center h-full text-text-muted">No TOPS/W data available</div>
 

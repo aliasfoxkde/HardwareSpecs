@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import { RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, Legend, ResponsiveContainer, Tooltip } from 'recharts'
-import { getDeviceMetricsTable, getVendors } from '@/lib/api'
+import { getDeviceMetricsTable } from '@/lib/api'
 import { CHART_STYLES } from './chartUtils'
 
 const RADAR_METRICS = [
@@ -15,13 +15,6 @@ const RADAR_METRICS = [
 const RADAR_COLORS = ['#3b82f6', '#22c55e', '#ef4444', '#a855f7', '#f59e0b', '#06b6d4']
 
 export function RadarComparisonChart({ deviceIds }: { deviceIds: string[] }) {
-  const vendors = useMemo(() => getVendors(), [])
-  const vendorNameMap = useMemo(() => {
-    const m: Record<string, string> = {}
-    for (const v of vendors) m[v.vendorId] = v.name
-    return m
-  }, [vendors])
-
   const { chartData, devices } = useMemo(() => {
     const table = getDeviceMetricsTable()
     const selected = deviceIds
@@ -49,7 +42,7 @@ export function RadarComparisonChart({ deviceIds }: { deviceIds: string[] }) {
     })
 
     return { chartData, devices: selected }
-  }, [deviceIds, vendorNameMap])
+  }, [deviceIds])
 
   if (devices.length === 0) {
     return <div className="flex items-center justify-center h-full text-text-muted">Select devices to compare</div>
@@ -88,13 +81,6 @@ export function RadarComparisonChart({ deviceIds }: { deviceIds: string[] }) {
 }
 
 export function TopDevicesRadar({ category }: { category: string }) {
-  const vendors = useMemo(() => getVendors(), [])
-  const vendorNameMap = useMemo(() => {
-    const m: Record<string, string> = {}
-    for (const v of vendors) m[v.vendorId] = v.name
-    return m
-  }, [vendors])
-
   const { chartData, deviceNames } = useMemo(() => {
     const table = getDeviceMetricsTable().filter(m => m.categoryName === category)
 
@@ -124,7 +110,7 @@ export function TopDevicesRadar({ category }: { category: string }) {
     })
 
     return { chartData, deviceNames: top.map(d => d.modelName) }
-  }, [category, vendorNameMap])
+  }, [category])
 
   if (chartData.length === 0) {
     return <div className="flex items-center justify-center h-full text-text-muted">No compute data for {category}</div>
