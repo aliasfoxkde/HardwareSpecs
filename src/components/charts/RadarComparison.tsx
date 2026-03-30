@@ -57,7 +57,7 @@ export function RadarComparisonChart({ deviceIds }: { deviceIds: string[] }) {
 
   return (
     <ResponsiveContainer width="100%" height={400}>
-      <RadarChart data={chartData} cx="50%" cy="50%" outerRadius="70%">
+      <RadarChart aria-label="Device multi-metric radar comparison" data={chartData} cx="50%" cy="50%" outerRadius="70%">
         <PolarGrid stroke={CHART_STYLES.gridStroke} />
         <PolarAngleAxis dataKey="metric" tick={{ fill: CHART_STYLES.axisTick, fontSize: 11 }} />
         <PolarRadiusAxis angle={30} domain={[0, 100]} tick={{ fill: CHART_STYLES.axisTick, fontSize: 10 }} />
@@ -132,7 +132,7 @@ export function TopDevicesRadar({ category }: { category: string }) {
 
   return (
     <ResponsiveContainer width="100%" height={400}>
-      <RadarChart data={chartData} cx="50%" cy="50%" outerRadius="70%">
+      <RadarChart aria-label="Top 5 devices radar comparison" data={chartData} cx="50%" cy="50%" outerRadius="70%">
         <PolarGrid stroke={CHART_STYLES.gridStroke} />
         <PolarAngleAxis dataKey="metric" tick={{ fill: CHART_STYLES.axisTick, fontSize: 11 }} />
         <PolarRadiusAxis angle={30} domain={[0, 100]} tick={{ fill: CHART_STYLES.axisTick, fontSize: 10 }} />

@@ -25,7 +25,7 @@ export function MultiMetricComparison({ category }: { category: string }) {
 
   return (
     <ResponsiveContainer width="100%" height={Math.max(300, data.length * 32)}>
-      <BarChart data={data} layout="vertical" margin={{ top: 10, right: 30, bottom: 20, left: 140 }}>
+      <BarChart aria-label="Multi-metric comparison stacked bar chart" data={data} layout="vertical" margin={{ top: 10, right: 30, bottom: 20, left: 140 }}>
         <CartesianGrid strokeDasharray="3 3" stroke={CHART_STYLES.gridStroke} />
         <XAxis type="number" tick={{ fill: CHART_STYLES.axisTick, fontSize: 11 }} />
         <YAxis type="category" dataKey="name" tick={{ fill: CHART_STYLES.axisTick, fontSize: 11 }} width={135} />
@@ -69,7 +69,7 @@ export function PricePerfStacked({ category }: { category: string }) {
 
   return (
     <ResponsiveContainer width="100%" height={Math.max(300, data.length * 32)}>
-      <BarChart data={data} layout="vertical" margin={{ top: 10, right: 30, bottom: 20, left: 140 }}>
+      <BarChart aria-label="Price-performance stacked bar chart" data={data} layout="vertical" margin={{ top: 10, right: 30, bottom: 20, left: 140 }}>
         <CartesianGrid strokeDasharray="3 3" stroke={CHART_STYLES.gridStroke} />
         <XAxis type="number" tick={{ fill: CHART_STYLES.axisTick, fontSize: 11 }} />
         <YAxis type="category" dataKey="name" tick={{ fill: CHART_STYLES.axisTick, fontSize: 11 }} width={135} />

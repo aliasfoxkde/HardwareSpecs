@@ -23,7 +23,7 @@ export function VendorDistributionPie({ category }: { category: string }) {
 
   return (
     <ResponsiveContainer width="100%" height={300}>
-      <PieChart>
+      <PieChart aria-label="Vendor distribution pie chart">
         <Pie
           data={data}
           cx="50%"
@@ -68,7 +68,7 @@ export function CategoryDistributionPie() {
 
   return (
     <ResponsiveContainer width="100%" height={300}>
-      <PieChart>
+      <PieChart aria-label="Category distribution pie chart">
         <Pie
           data={data}
           cx="50%"
@@ -124,7 +124,7 @@ export function PriceBandPie({ category }: { category: string }) {
 
   return (
     <ResponsiveContainer width="100%" height={300}>
-      <PieChart>
+      <PieChart aria-label="Price band distribution pie chart">
         <Pie
           data={data}
           cx="50%"

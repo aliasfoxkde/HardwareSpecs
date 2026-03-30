@@ -47,7 +47,7 @@ export function TopTopsBarChart({ limit = 20 }: { limit?: number }) {
 
   return (
     <ResponsiveContainer width="100%" height={Math.max(300, data.length * 28)}>
-      <BarChart data={data} layout="vertical" margin={{ top: 10, right: 30, bottom: 20, left: 140 }}>
+      <BarChart data={data} layout="vertical" margin={{ top: 10, right: 30, bottom: 20, left: 140 }} aria-label="Top devices ranked by INT8 TOPS performance">
         <CartesianGrid strokeDasharray="3 3" stroke={CHART_STYLES.gridStroke} />
         <XAxis type="number" tick={{ fill: CHART_STYLES.axisTick, fontSize: 11 }} />
         <YAxis type="category" dataKey="name" tick={{ fill: CHART_STYLES.axisTick, fontSize: 11 }} width={135} />
@@ -97,7 +97,7 @@ export function TopTopsPerDollarChart({ limit = 20 }: { limit?: number }) {
 
   return (
     <ResponsiveContainer width="100%" height={Math.max(300, data.length * 28)}>
-      <BarChart data={data} layout="vertical" margin={{ top: 10, right: 30, bottom: 20, left: 140 }}>
+      <BarChart data={data} layout="vertical" margin={{ top: 10, right: 30, bottom: 20, left: 140 }} aria-label="Top devices ranked by TOPS per dollar value">
         <CartesianGrid strokeDasharray="3 3" stroke={CHART_STYLES.gridStroke} />
         <XAxis type="number" tick={{ fill: CHART_STYLES.axisTick, fontSize: 11 }} />
         <YAxis type="category" dataKey="name" tick={{ fill: CHART_STYLES.axisTick, fontSize: 11 }} width={135} />
@@ -143,7 +143,7 @@ export function TopTopsPerWattChart({ limit = 20 }: { limit?: number }) {
 
   return (
     <ResponsiveContainer width="100%" height={Math.max(300, data.length * 28)}>
-      <BarChart data={data} layout="vertical" margin={{ top: 10, right: 30, bottom: 20, left: 140 }}>
+      <BarChart data={data} layout="vertical" margin={{ top: 10, right: 30, bottom: 20, left: 140 }} aria-label="Top devices ranked by TOPS per watt efficiency">
         <CartesianGrid strokeDasharray="3 3" stroke={CHART_STYLES.gridStroke} />
         <XAxis type="number" tick={{ fill: CHART_STYLES.axisTick, fontSize: 11 }} />
         <YAxis type="category" dataKey="name" tick={{ fill: CHART_STYLES.axisTick, fontSize: 11 }} width={135} />

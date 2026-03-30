@@ -50,19 +50,60 @@ const CompletenessBar = memo(function CompletenessBar({ value }: { value: number
   )
 })
 
+function readFiltersFromUrl(sp: URLSearchParams): Partial<FilterState> {
+  const f: Partial<FilterState> = {}
+  const cat = sp.get('category')
+  if (cat) f.categories = [cat as DeviceCategory]
+  const vendor = sp.get('vendor')
+  if (vendor) f.vendors = vendor.split(',')
+  const q = sp.get('q')
+  if (q) f.searchQuery = q
+  const sort = sp.get('sort')
+  if (sort) f.sortBy = sort
+  const order = sp.get('order')
+  if (order === 'asc' || order === 'desc') f.sortOrder = order
+  const page = sp.get('page')
+  if (page) f.page = Math.max(1, Number(page) || 1)
+  const tdpMin = sp.get('tdpMin')
+  if (tdpMin) f.minTdp = Number(tdpMin) || undefined
+  const tdpMax = sp.get('tdpMax')
+  if (tdpMax) f.maxTdp = Number(tdpMax) < 700 ? Number(tdpMax) : undefined
+  const priceMin = sp.get('priceMin')
+  if (priceMin) f.minPrice = Number(priceMin) || undefined
+  const priceMax = sp.get('priceMax')
+  if (priceMax) f.maxPrice = Number(priceMax) < 50000 ? Number(priceMax) : undefined
+  return f
+}
+
+function writeFiltersToUrl(filters: FilterState): Record<string, string> {
+  const p: Record<string, string> = {}
+  if (filters.categories.length > 0) p.category = filters.categories[0]
+  if (filters.vendors.length > 0) p.vendor = filters.vendors.join(',')
+  if (filters.searchQuery) p.q = filters.searchQuery
+  if (filters.sortBy !== 'launchDate') p.sort = filters.sortBy
+  if (filters.sortOrder !== 'desc') p.order = filters.sortOrder
+  if (filters.page > 1) p.page = String(filters.page)
+  if (filters.minTdp && filters.minTdp > 0) p.tdpMin = String(filters.minTdp)
+  if (filters.maxTdp && filters.maxTdp < 700) p.tdpMax = String(filters.maxTdp)
+  if (filters.minPrice && filters.minPrice > 0) p.priceMin = String(filters.minPrice)
+  if (filters.maxPrice && filters.maxPrice < 50000) p.priceMax = String(filters.maxPrice)
+  return p
+}
+
 export function BrowsePage() {
   useEffect(() => { document.title = 'Browse Hardware | SiliconRank'; return () => { document.title = 'SiliconRank' } }, [])
-  const [searchParams] = useSearchParams()
-  const [filters, setFilters] = useState<FilterState>({
+  const [searchParams, setSearchParams] = useSearchParams()
+  const [filters, setFilters] = useState<FilterState>(() => ({
     vendors: [],
-    categories: searchParams.get('category') ? [searchParams.get('category') as DeviceCategory] : [],
+    categories: [],
     architectures: [],
     searchQuery: '',
     sortBy: 'launchDate',
     sortOrder: 'desc',
     page: 1,
     pageSize: 25,
-  })
+    ...readFiltersFromUrl(searchParams),
+  }))
 
   const vendors = useMemo(() => getVendors(), [])
   const families = useMemo(() => getFamilies(), [])
@@ -70,12 +111,11 @@ export function BrowsePage() {
 
   const totalPages = Math.ceil(total / filters.pageSize)
 
+  // Sync filters to URL (replace to avoid history pollution)
   useEffect(() => {
-    const cat = searchParams.get('category')
-    if (cat) {
-      setFilters(f => ({ ...f, categories: [cat as DeviceCategory], page: 1 }))
-    }
-  }, [searchParams])
+    const params = writeFiltersToUrl(filters)
+    setSearchParams(params, { replace: true })
+  }, [filters, setSearchParams])
 
   const handleSort = (key: SortKey) => {
     setFilters(f => ({
@@ -417,8 +457,15 @@ export function BrowsePage() {
         </div>
 
         {devices.length === 0 && (
-          <div className="px-4 py-12 text-center text-text-muted">
-            No devices match your filters.
+          <div className="px-4 py-12 text-center">
+            <p className="text-text-muted text-lg mb-2">No devices match your current filters.</p>
+            <p className="text-text-muted/60 text-sm mb-4">Try removing some filters or broadening your search.</p>
+            <button
+              onClick={() => setFilters(f => ({ ...f, categories: [], vendors: [], searchQuery: '', minTdp: undefined, maxTdp: undefined, minPrice: undefined, maxPrice: undefined, page: 1 }))}
+              className="px-4 py-2 rounded-lg bg-brand-600 text-text-primary text-sm font-medium hover:bg-brand-500 transition-colors"
+            >
+              Clear all filters
+            </button>
           </div>
         )}
 

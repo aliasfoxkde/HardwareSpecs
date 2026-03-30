@@ -55,7 +55,7 @@ export function TdpOverTimeChart({ category }: { category: string }) {
 
   return (
     <ResponsiveContainer width="100%" height={400}>
-      <LineChart data={seriesData} margin={{ top: 20, right: 30, bottom: 20, left: 20 }}>
+      <LineChart aria-label="TDP trend over time" data={seriesData} margin={{ top: 20, right: 30, bottom: 20, left: 20 }}>
         <CartesianGrid strokeDasharray="3 3" stroke={CHART_STYLES.gridStroke} />
         <XAxis
           dataKey="year"
@@ -144,7 +144,7 @@ export function TopsOverTimeChart({ category }: { category: string }) {
 
   return (
     <ResponsiveContainer width="100%" height={400}>
-      <LineChart data={seriesData} margin={{ top: 20, right: 30, bottom: 20, left: 20 }}>
+      <LineChart aria-label="INT8 TOPS trend over time" data={seriesData} margin={{ top: 20, right: 30, bottom: 20, left: 20 }}>
         <CartesianGrid strokeDasharray="3 3" stroke={CHART_STYLES.gridStroke} />
         <XAxis
           dataKey="year"
@@ -233,7 +233,7 @@ export function PriceOverTimeChart({ category }: { category: string }) {
 
   return (
     <ResponsiveContainer width="100%" height={400}>
-      <LineChart data={seriesData} margin={{ top: 20, right: 30, bottom: 20, left: 20 }}>
+      <LineChart aria-label="Average price trend over time" data={seriesData} margin={{ top: 20, right: 30, bottom: 20, left: 20 }}>
         <CartesianGrid strokeDasharray="3 3" stroke={CHART_STYLES.gridStroke} />
         <XAxis
           dataKey="year"
@@ -318,7 +318,7 @@ export function ProcessOverTimeChart({ category }: { category: string }) {
 
   return (
     <ResponsiveContainer width="100%" height={400}>
-      <LineChart data={seriesData} margin={{ top: 20, right: 30, bottom: 20, left: 20 }}>
+      <LineChart aria-label="Process node trend over time" data={seriesData} margin={{ top: 20, right: 30, bottom: 20, left: 20 }}>
         <CartesianGrid strokeDasharray="3 3" stroke={CHART_STYLES.gridStroke} />
         <XAxis
           dataKey="year"

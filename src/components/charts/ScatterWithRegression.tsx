@@ -34,7 +34,7 @@ export function PerfVsPriceChart({ category }: { category: string }) {
 
   return (
     <ResponsiveContainer width="100%" height={400}>
-      <ComposedChart margin={{ top: 20, right: 30, bottom: 20, left: 20 }}>
+      <ComposedChart aria-label="Performance score vs price scatter plot" margin={{ top: 20, right: 30, bottom: 20, left: 20 }}>
         <CartesianGrid strokeDasharray="3 3" stroke={CHART_STYLES.gridStroke} />
         <XAxis
           type="number"
@@ -120,7 +120,7 @@ export function TopsVsPriceChart({ category }: { category: string }) {
 
   return (
     <ResponsiveContainer width="100%" height={400}>
-      <ComposedChart margin={{ top: 20, right: 30, bottom: 20, left: 20 }}>
+      <ComposedChart aria-label="INT8 TOPS vs price scatter plot" margin={{ top: 20, right: 30, bottom: 20, left: 20 }}>
         <CartesianGrid strokeDasharray="3 3" stroke={CHART_STYLES.gridStroke} />
         <XAxis
           type="number"

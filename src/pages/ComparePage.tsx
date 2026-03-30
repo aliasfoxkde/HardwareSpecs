@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react'
+import { useState, useMemo, useEffect, memo } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { compareDevices, searchDevices, getDeviceMetrics } from '@/lib/api'
 import { downloadCSV } from '@/lib/export'
@@ -10,9 +10,9 @@ function fmtNum(n: number | null | undefined, decimals = 2): string {
   return n.toFixed(decimals)
 }
 
-function BestBadge() {
+const BestBadge = memo(function BestBadge() {
   return <span className="ml-1 inline-block px-1.5 py-0.5 text-[10px] font-bold rounded bg-green-500/20 text-green-400 uppercase">Best</span>
-}
+})
 
 export function ComparePage() {
   useEffect(() => { document.title = 'Compare Devices | SiliconRank'; return () => { document.title = 'SiliconRank' } }, [])

@@ -1,6 +1,7 @@
 import { useParams, Link } from 'react-router-dom'
 import { useMemo, useEffect } from 'react'
 import { getDevice, getDevicesByCategory, getDeviceMetrics } from '@/lib/api'
+import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
 
 function fmtNum(n: number | null | undefined, decimals = 2): string {
   if (n == null) return '-'
@@ -322,22 +323,45 @@ export function DevicePage() {
           </div>
 
           {/* Price History */}
-          {device.prices.length > 0 && (
-            <div className="bg-bg-card/30 border border-border-subtle/50 rounded-xl p-6">
-              <h3 className="text-sm font-semibold text-text-secondary uppercase tracking-wider mb-4">Price History</h3>
-              <div className="space-y-2">
-                {device.prices.sort((a, b) => new Date(b.observedAt).getTime() - new Date(a.observedAt).getTime()).map(price => (
-                  <div key={price.priceId} className="flex justify-between items-center py-1.5">
-                    <div>
-                      <div className="text-sm text-text-primary">${price.priceUsd.toLocaleString()}</div>
-                      <div className="text-xs text-text-muted">{price.condition} &middot; {price.region}</div>
-                    </div>
-                    <div className="text-xs text-text-muted">{price.observedAt}</div>
+          {device.prices.length > 0 && (() => {
+            const sortedPrices = [...device.prices].sort((a, b) =>
+              new Date(a.observedAt).getTime() - new Date(b.observedAt).getTime()
+            )
+            const chartData = sortedPrices.map(p => ({ date: p.observedAt, price: p.priceUsd, condition: p.condition }))
+            return (
+              <div className="bg-bg-card/30 border border-border-subtle/50 rounded-xl p-6">
+                <h3 className="text-sm font-semibold text-text-secondary uppercase tracking-wider mb-4">Price History</h3>
+                {sortedPrices.length >= 2 && (
+                  <div className="mb-4" style={{ width: '100%', height: 160 }}>
+                    <ResponsiveContainer width="100%" height="100%">
+                      <LineChart data={chartData}>
+                        <XAxis dataKey="date" tick={{ fontSize: 10, fill: 'var(--color-text-muted)' }} stroke="var(--color-border-subtle)" />
+                        <YAxis tick={{ fontSize: 10, fill: 'var(--color-text-muted)' }} stroke="var(--color-border-subtle)" tickFormatter={v => `$${v.toLocaleString()}`} />
+                        <Tooltip
+                          contentStyle={{ backgroundColor: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', borderRadius: '8px', fontSize: '12px' }}
+                          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                          formatter={(value: any) => [`$${Number(value ?? 0).toLocaleString()}`, 'Price']}
+                          labelFormatter={label => `Date: ${label}`}
+                        />
+                        <Line type="monotone" dataKey="price" stroke="var(--color-brand-500)" strokeWidth={2} dot={{ r: 3 }} />
+                      </LineChart>
+                    </ResponsiveContainer>
                   </div>
-                ))}
+                )}
+                <div className="space-y-2">
+                  {sortedPrices.reverse().map(price => (
+                    <div key={price.priceId} className="flex justify-between items-center py-1.5">
+                      <div>
+                        <div className="text-sm text-text-primary">${price.priceUsd.toLocaleString()}</div>
+                        <div className="text-xs text-text-muted">{price.condition} &middot; {price.region}</div>
+                      </div>
+                      <div className="text-xs text-text-muted">{price.observedAt}</div>
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
-          )}
+            )
+          })()}
 
           {/* Similar Devices */}
           {similar.length > 0 && (
