@@ -2,14 +2,15 @@ import { useMemo } from 'react'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts'
 import { getDevicesByCategory, getVendors } from '@/lib/api'
 import { getVendorColor, CHART_STYLES } from './chartUtils'
+import type { DeviceCategory } from '@/types'
 
-export function TdpOverTimeChart({ category }: { category: string }) {
+export function TdpOverTimeChart({ category }: { category: DeviceCategory }) {
   const { seriesData, vendors, vendorNameMap } = useMemo(() => {
     const vendors = getVendors()
     const vendorNameMap: Record<string, string> = {}
     for (const v of vendors) vendorNameMap[v.vendorId] = v.name
 
-    const devices = getDevicesByCategory(category as any)
+    const devices = getDevicesByCategory(category)
     const filtered = devices.filter(d => d.device.tdpWatts && d.device.launchDate)
 
     const vendorData: Record<string, Map<string, { avg: number; count: number }>> = {}
@@ -92,13 +93,13 @@ export function TdpOverTimeChart({ category }: { category: string }) {
   )
 }
 
-export function TopsOverTimeChart({ category }: { category: string }) {
+export function TopsOverTimeChart({ category }: { category: DeviceCategory }) {
   const { seriesData, vendors, vendorNameMap } = useMemo(() => {
     const vendors = getVendors()
     const vendorNameMap: Record<string, string> = {}
     for (const v of vendors) vendorNameMap[v.vendorId] = v.name
 
-    const devices = getDevicesByCategory(category as any)
+    const devices = getDevicesByCategory(category)
     const filtered = devices.filter(d => d.metrics.effectiveInt8Tops > 0 && d.device.launchDate)
 
     const vendorData: Record<string, Map<string, { max: number; count: number }>> = {}
@@ -181,13 +182,13 @@ export function TopsOverTimeChart({ category }: { category: string }) {
   )
 }
 
-export function PriceOverTimeChart({ category }: { category: string }) {
+export function PriceOverTimeChart({ category }: { category: DeviceCategory }) {
   const { seriesData, vendors, vendorNameMap } = useMemo(() => {
     const vendors = getVendors()
     const vendorNameMap: Record<string, string> = {}
     for (const v of vendors) vendorNameMap[v.vendorId] = v.name
 
-    const devices = getDevicesByCategory(category as any)
+    const devices = getDevicesByCategory(category)
     const filtered = devices.filter(d => d.latestPrice && d.device.launchDate)
 
     const vendorData: Record<string, Map<string, { avg: number; count: number }>> = {}
@@ -271,13 +272,13 @@ export function PriceOverTimeChart({ category }: { category: string }) {
   )
 }
 
-export function ProcessOverTimeChart({ category }: { category: string }) {
+export function ProcessOverTimeChart({ category }: { category: DeviceCategory }) {
   const { seriesData, vendors, vendorNameMap } = useMemo(() => {
     const vendors = getVendors()
     const vendorNameMap: Record<string, string> = {}
     for (const v of vendors) vendorNameMap[v.vendorId] = v.name
 
-    const devices = getDevicesByCategory(category as any)
+    const devices = getDevicesByCategory(category)
     const filtered = devices.filter(d => d.device.processNm && d.device.launchDate)
 
     const vendorData: Record<string, Map<string, { avg: number; count: number }>> = {}

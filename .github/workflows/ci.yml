@@ -16,5 +16,7 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npx tsc -b --noEmit
+      - name: Lint (advisory)
+        run: npm run lint -- --quiet 2>&1 | tail -20; true
       - run: npx vitest run
       - run: npm run build

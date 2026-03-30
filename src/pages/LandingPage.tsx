@@ -9,6 +9,10 @@ function useAnimatedCounter(target: number, duration = 1500, startOnMount = fals
   useEffect(() => {
     if (!startOnMount || started.current) return
     started.current = true
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      setValue(target)
+      return
+    }
     const start = performance.now()
     const step = (now: number) => {
       const elapsed = now - start
@@ -39,6 +43,7 @@ function Particles() {
   useEffect(() => {
     const canvas = canvasRef.current
     if (!canvas) return
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
     const ctx = canvas.getContext('2d')
     if (!ctx) return
 

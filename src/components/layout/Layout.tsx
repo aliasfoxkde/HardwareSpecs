@@ -37,6 +37,8 @@ export function Layout() {
   const location = useLocation()
   const navigate = useNavigate()
   const debounceRef = useRef<ReturnType<typeof setTimeout>>(undefined)
+  const menuButtonRef = useRef<HTMLButtonElement>(null)
+  const menuRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     setStats(getStats())
@@ -50,6 +52,39 @@ export function Layout() {
       if (debounceRef.current) clearTimeout(debounceRef.current)
     }
   }, [])
+
+  // Focus trap + Escape key for mobile menu
+  useEffect(() => {
+    if (!mobileMenuOpen) return
+    const menu = menuRef.current
+    if (!menu) return
+
+    const focusable = menu.querySelectorAll<HTMLElement>(
+      'a[href], button, input, [tabindex]:not([tabindex="-1"])',
+    )
+    if (focusable.length > 0) focusable[0].focus()
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setMobileMenuOpen(false)
+        menuButtonRef.current?.focus()
+        return
+      }
+      if (e.key !== 'Tab') return
+      const first = focusable[0]
+      const last = focusable[focusable.length - 1]
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault()
+        last.focus()
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault()
+        first.focus()
+      }
+    }
+
+    document.addEventListener('keydown', handleKeyDown)
+    return () => document.removeEventListener('keydown', handleKeyDown)
+  }, [mobileMenuOpen])
 
   const doSearch = useCallback((query: string) => {
     if (query.length >= 2) {
@@ -179,6 +214,7 @@ export function Layout() {
                 <ThemeIcon mode={theme} />
               </button>
               <button
+                ref={menuButtonRef}
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                 aria-expanded={mobileMenuOpen}
                 aria-controls="mobile-menu"
@@ -198,7 +234,7 @@ export function Layout() {
 
           {/* Mobile menu */}
           {mobileMenuOpen && (
-            <div id="mobile-menu" className="lg:hidden pb-4 animate-fade-in">
+            <div ref={menuRef} id="mobile-menu" className="lg:hidden pb-4 animate-fade-in">
               <div className="relative mb-3">
                 <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />

@@ -1,10 +1,11 @@
 import { useMemo } from 'react'
 import { getDevicesByCategory } from '@/lib/api'
 import { getVendorColor, formatNumber } from './chartUtils'
+import type { DeviceCategory } from '@/types'
 
-export function PriceTdpHeatmap({ category }: { category: string }) {
+export function PriceTdpHeatmap({ category }: { category: DeviceCategory }) {
   const data = useMemo(() => {
-    const devices = getDevicesByCategory(category as any)
+    const devices = getDevicesByCategory(category)
     return devices
       .filter(d => d.latestPrice && d.device.tdpWatts)
       .map(d => ({
@@ -73,9 +74,9 @@ export function PriceTdpHeatmap({ category }: { category: string }) {
   )
 }
 
-export function VendorPerfHeatmap({ category }: { category: string }) {
+export function VendorPerfHeatmap({ category }: { category: DeviceCategory }) {
   const data = useMemo(() => {
-    const devices = getDevicesByCategory(category as any)
+    const devices = getDevicesByCategory(category)
     const vendorMap: Record<string, { tops: number; topsPerDollar: number; topsPerWatt: number; count: number; name: string }> = {}
 
     for (const d of devices) {

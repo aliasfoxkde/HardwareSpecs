@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { getVendors, getFamilies, getDevices, getDevice, getDevicesByCategory, searchDevices, getStats, compareDevices, getBenchmarkTypes, getSources, getDeviceMetrics, getDeviceMetricsTable } from '@/lib/api'
+import type { DeviceCategory, FilterState } from '@/types'
 
 const API_BASE = 'https://siliconrank.cyopsys.com'
 
@@ -39,7 +40,7 @@ const endpoints: ApiEndpoint[] = [
     exampleUrl: `${API_BASE}/api/families?category=GPU`,
     exampleCurl: `curl -s "${API_BASE}/api/families?category=GPU" | jq '.[0:2]'`,
     exampleResponse: JSON.stringify([{ familyId: 'nvidia-geforce-rtx-40', vendorId: 'nvidia', category: 'GPU', familyName: 'GeForce RTX 40 Series', architecture: 'Ada Lovelace' }], null, 2),
-    fn: (opts?: { vendorId?: string; category?: string }) => getFamilies(opts as any),
+    fn: (opts?: { vendorId?: string; category?: string }) => getFamilies(opts as { vendorId?: string; category?: DeviceCategory }),
   },
   {
     name: 'getDevices',
@@ -58,7 +59,7 @@ const endpoints: ApiEndpoint[] = [
     exampleUrl: `${API_BASE}/api/devices?categories=GPU&sortBy=topsPerDollar&sortOrder=desc&pageSize=5`,
     exampleCurl: `curl -s "${API_BASE}/api/devices?categories=GPU&sortBy=topsPerDollar&sortOrder=desc&pageSize=5" | jq`,
     exampleResponse: '{ "devices": [...], "total": 163 }',
-    fn: (opts?: Record<string, unknown>) => getDevices(opts as any),
+    fn: (opts?: Record<string, unknown>) => getDevices(opts as Partial<FilterState>),
   },
   {
     name: 'getDevice',
@@ -98,7 +99,7 @@ const endpoints: ApiEndpoint[] = [
     exampleUrl: `${API_BASE}/api/categories/GPU/devices`,
     exampleCurl: `curl -s ${API_BASE}/api/categories/GPU/devices | jq '.[0:2]'`,
     exampleResponse: '[{ "device": {...}, "vendor": {...}, "metrics": {...} }]',
-    fn: (cat: string) => getDevicesByCategory(cat as any),
+    fn: (cat: string) => getDevicesByCategory(cat as DeviceCategory),
   },
   {
     name: 'compareDevices',
@@ -207,7 +208,7 @@ export function DocsPage() {
 
     const start = performance.now()
     try {
-      const result = ep.fn(input as any)
+      const result = ep.fn(input)
       const elapsed = performance.now() - start
       setLiveResult({ data: result, time: elapsed })
     } catch (e) {
@@ -260,11 +261,22 @@ export function DocsPage() {
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-1 mb-6">
+      <div role="tablist" aria-label="Documentation tabs" className="flex gap-1 mb-6">
         {(['endpoints', 'types'] as const).map(tab => (
           <button
             key={tab}
+            role="tab"
+            id={`docs-tab-${tab}`}
+            aria-selected={activeTab === tab}
+            aria-controls={`docs-panel-${tab}`}
+            tabIndex={activeTab === tab ? 0 : -1}
             onClick={() => setActiveTab(tab)}
+            onKeyDown={(e) => {
+              const tabs = ['endpoints', 'types'] as const
+              const idx = tabs.indexOf(tab)
+              if (e.key === 'ArrowRight') { const next = tabs[(idx + 1) % tabs.length]; setActiveTab(next); document.getElementById(`docs-tab-${next}`)?.focus() }
+              if (e.key === 'ArrowLeft') { const prev = tabs[(idx - 1 + tabs.length) % tabs.length]; setActiveTab(prev); document.getElementById(`docs-tab-${prev}`)?.focus() }
+            }}
             className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
               activeTab === tab
                 ? 'bg-brand-600 text-text-primary'
@@ -276,6 +288,7 @@ export function DocsPage() {
         ))}
       </div>
 
+      <div role="tabpanel" id="docs-panel-endpoints" aria-labelledby="docs-tab-endpoints" hidden={activeTab !== 'endpoints'}>
       {activeTab === 'endpoints' && (
         <div className="grid lg:grid-cols-[260px_1fr] gap-6">
           {/* Sidebar */}
@@ -412,7 +425,8 @@ export function DocsPage() {
           </div>
         </div>
       )}
-
+      </div>
+      <div role="tabpanel" id="docs-panel-types" aria-labelledby="docs-tab-types" hidden={activeTab !== 'types'}>
       {activeTab === 'types' && (
         <div className="space-y-4">
           {typeDocs.map(type => (
@@ -439,6 +453,7 @@ export function DocsPage() {
           ))}
         </div>
       )}
+      </div>
     </div>
   )
 }

@@ -837,11 +837,21 @@ export function ReportsPage() {
       <div className="flex flex-col lg:flex-row gap-6">
         {/* Sidebar */}
         <div className="lg:w-56 shrink-0">
-          <div className="flex lg:flex-col gap-1 overflow-x-auto lg:overflow-visible">
+          <div role="tablist" aria-label="Report selection" className="flex lg:flex-col gap-1 overflow-x-auto lg:overflow-visible">
             {REPORTS.map(report => (
               <button
                 key={report.id}
+                role="tab"
+                id={`report-tab-${report.id}`}
+                aria-selected={activeReport === report.id}
+                aria-controls={`report-panel-${report.id}`}
+                tabIndex={activeReport === report.id ? 0 : -1}
                 onClick={() => setActiveReport(report.id)}
+                onKeyDown={(e) => {
+                  const idx = REPORTS.findIndex(r => r.id === report.id)
+                  if (e.key === 'ArrowDown') { const next = REPORTS[(idx + 1) % REPORTS.length]; setActiveReport(next.id); document.getElementById(`report-tab-${next.id}`)?.focus() }
+                  if (e.key === 'ArrowUp') { const prev = REPORTS[(idx - 1 + REPORTS.length) % REPORTS.length]; setActiveReport(prev.id); document.getElementById(`report-tab-${prev.id}`)?.focus() }
+                }}
                 className={`px-4 py-3 rounded-lg text-left text-sm whitespace-nowrap transition-colors ${
                   activeReport === report.id
                     ? 'bg-brand-600/20 text-brand-400 border border-brand-500/30'
@@ -856,7 +866,7 @@ export function ReportsPage() {
         </div>
 
         {/* Active report */}
-        <div className="flex-1 bg-bg-card/30 border border-border-subtle/50 rounded-xl p-6 min-w-0">
+        <div role="tabpanel" id={`report-panel-${activeReport}`} aria-labelledby={`report-tab-${activeReport}`} className="flex-1 bg-bg-card/30 border border-border-subtle/50 rounded-xl p-6 min-w-0">
           <ActiveComponent />
         </div>
       </div>

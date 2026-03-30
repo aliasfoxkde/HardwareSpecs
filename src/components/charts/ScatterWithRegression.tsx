@@ -2,10 +2,11 @@ import { useMemo } from 'react'
 import { Scatter, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ComposedChart, Line, Cell } from 'recharts'
 import { getDevicesByCategory } from '@/lib/api'
 import { getVendorColor, CHART_STYLES, formatNumber, linearRegression } from './chartUtils'
+import type { DeviceCategory } from '@/types'
 
-export function PerfVsPriceChart({ category }: { category: string }) {
+export function PerfVsPriceChart({ category }: { category: DeviceCategory }) {
   const { scatterData, regression } = useMemo(() => {
-    const devices = getDevicesByCategory(category as any)
+    const devices = getDevicesByCategory(category)
     const data = devices
       .filter(d => d.latestPrice && d.metrics.perfPerDollar != null && d.metrics.perfPerDollar > 0)
       .map(d => ({
@@ -89,9 +90,9 @@ export function PerfVsPriceChart({ category }: { category: string }) {
   )
 }
 
-export function TopsVsPriceChart({ category }: { category: string }) {
+export function TopsVsPriceChart({ category }: { category: DeviceCategory }) {
   const { scatterData, regression } = useMemo(() => {
-    const devices = getDevicesByCategory(category as any)
+    const devices = getDevicesByCategory(category)
     const data = devices
       .filter(d => d.latestPrice && d.metrics.effectiveInt8Tops > 0)
       .map(d => ({

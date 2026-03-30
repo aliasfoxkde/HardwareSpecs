@@ -2,10 +2,11 @@ import { useMemo } from 'react'
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend } from 'recharts'
 import { getDevicesByCategory, getVendors, getFamilies } from '@/lib/api'
 import { getVendorColor, CHART_STYLES } from './chartUtils'
+import type { DeviceCategory } from '@/types'
 
-export function VendorDistributionPie({ category }: { category: string }) {
+export function VendorDistributionPie({ category }: { category: DeviceCategory }) {
   const data = useMemo(() => {
-    const devices = getDevicesByCategory(category as any)
+    const devices = getDevicesByCategory(category)
     const counts: Record<string, number> = {}
     for (const d of devices) {
       counts[d.vendor.vendorId] = (counts[d.vendor.vendorId] || 0) + 1
@@ -98,9 +99,9 @@ export function CategoryDistributionPie() {
   )
 }
 
-export function PriceBandPie({ category }: { category: string }) {
+export function PriceBandPie({ category }: { category: DeviceCategory }) {
   const data = useMemo(() => {
-    const devices = getDevicesByCategory(category as any)
+    const devices = getDevicesByCategory(category)
     const bands = [
       { name: 'Under $100', min: 0, max: 100 },
       { name: '$100-$300', min: 100, max: 300 },
