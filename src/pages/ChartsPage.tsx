@@ -46,6 +46,7 @@ export function ChartsPage() {
           {categories.map(cat => (
             <button
               key={cat}
+              aria-pressed={activeCategory === cat}
               onClick={() => setActiveCategory(cat)}
               className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
                 activeCategory === cat

@@ -2,13 +2,7 @@ import { useState, useMemo, useEffect, useRef, memo } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { compareDevices, searchDevices, getDeviceMetrics } from '@/lib/api'
 import { downloadCSV } from '@/lib/export'
-
-function fmtNum(n: number | null | undefined, decimals = 2): string {
-  if (n == null) return '-'
-  if (n >= 1000) return `${(n / 1000).toFixed(decimals)}k`
-  if (Number.isInteger(n)) return n.toLocaleString()
-  return n.toFixed(decimals)
-}
+import { fmtNum } from '@/lib/utils'
 
 const BestBadge = memo(function BestBadge() {
   return <span className="ml-1 inline-block px-1.5 py-0.5 text-[10px] font-bold rounded bg-green-500/20 text-green-400 uppercase">Best</span>

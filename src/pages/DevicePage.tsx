@@ -1,14 +1,8 @@
 import { useParams, Link } from 'react-router-dom'
 import { useMemo, useEffect } from 'react'
 import { getDevice, getDevicesByCategory, getDeviceMetrics } from '@/lib/api'
+import { fmtNum } from '@/lib/utils'
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
-
-function fmtNum(n: number | null | undefined, decimals = 2): string {
-  if (n == null) return '-'
-  if (n >= 1000) return `${(n / 1000).toFixed(decimals)}k`
-  if (Number.isInteger(n)) return n.toLocaleString()
-  return n.toFixed(decimals)
-}
 
 export function DevicePage() {
   const { deviceId } = useParams<{ deviceId: string }>()
@@ -99,6 +93,7 @@ export function DevicePage() {
                   href={device.device.referenceUrl}
                   target="_blank"
                   rel="noopener noreferrer"
+                  aria-label={`Source: ${device.device.referenceUrl}`}
                   className="px-3 py-1.5 text-xs font-medium rounded-lg bg-bg-tertiary/50 text-text-secondary hover:text-brand-400 border border-border-subtle/50 hover:border-brand-500/30 transition-colors"
                 >
                   Source &nearr;
@@ -109,6 +104,7 @@ export function DevicePage() {
                   href={device.device.purchaseUrl}
                   target="_blank"
                   rel="noopener noreferrer"
+                  aria-label={`Buy ${device.device.modelName}`}
                   className="px-3 py-1.5 text-xs font-medium rounded-lg bg-green-600/20 text-green-400 hover:bg-green-600/30 border border-green-500/20 hover:border-green-500/30 transition-colors"
                 >
                   Buy &nearr;
@@ -200,8 +196,8 @@ export function DevicePage() {
 
           {/* Key Specifications */}
           <div className="bg-bg-card/30 border border-border-subtle/50 rounded-xl p-6">
-            <h2 className="text-lg font-semibold text-text-primary mb-4">Specifications</h2>
-            <div className="grid sm:grid-cols-2 gap-4">
+            <h2 id="specs-section" className="text-lg font-semibold text-text-primary mb-4">Specifications</h2>
+            <div role="table" aria-label="Device specifications" className="grid sm:grid-cols-2 gap-4">
               {[
                 { label: 'Cores / Threads', value: device.device.cores && device.device.threads ? `${device.device.cores}C / ${device.device.threads}T` : undefined },
                 { label: 'Process Node', value: device.device.processNm ? `${device.device.processNm}nm` : undefined },
@@ -223,8 +219,8 @@ export function DevicePage() {
           {/* AI / Compute Specs */}
           {device.specs.length > 0 && (
             <div className="bg-bg-card/30 border border-border-subtle/50 rounded-xl p-6">
-              <h2 className="text-lg font-semibold text-text-primary mb-4">Compute Capabilities</h2>
-              <div className="grid sm:grid-cols-2 gap-4">
+              <h2 id="compute-section" className="text-lg font-semibold text-text-primary mb-4">Compute Capabilities</h2>
+              <div role="table" aria-label="Compute capabilities" className="grid sm:grid-cols-2 gap-4">
                 {device.specs.map(spec => (
                   <div key={spec.snapshotId} className="space-y-3 py-2 border-b border-border-subtle/30">
                     {spec.int8Tops !== undefined && (
@@ -266,8 +262,8 @@ export function DevicePage() {
           {/* Benchmarks */}
           {device.benchmarks.length > 0 && (
             <div className="bg-bg-card/30 border border-border-subtle/50 rounded-xl p-6">
-              <h2 className="text-lg font-semibold text-text-primary mb-4">Benchmarks</h2>
-              <div className="space-y-3">
+              <h2 id="benchmarks-section" className="text-lg font-semibold text-text-primary mb-4">Benchmarks</h2>
+              <div role="table" aria-label="Benchmark results" className="space-y-3">
                 {device.benchmarks.map(bm => (
                   <div key={bm.resultId} className="flex items-center justify-between py-3 border-b border-border-subtle/30">
                     <div>
@@ -372,6 +368,7 @@ export function DevicePage() {
                   <Link
                     key={item.device.deviceId}
                     to={`/device/${item.device.deviceId}`}
+                    aria-label={`${item.device.modelName} details`}
                     className="block px-2 py-1.5 rounded hover:bg-bg-tertiary/50 transition-colors"
                   >
                     <div className="text-sm font-medium text-brand-400">{item.device.modelName}</div>

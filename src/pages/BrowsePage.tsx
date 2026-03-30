@@ -1,7 +1,8 @@
-import { useState, useEffect, useMemo, memo } from 'react'
+import { useState, useEffect, useMemo, useRef, memo } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { getDevices, getVendors, getFamilies } from '@/lib/api'
 import { downloadCSV, downloadJSON } from '@/lib/export'
+import { fmtNum, fmtRam } from '@/lib/utils'
 import type { DeviceCategory, FilterState } from '@/types'
 
 const CATEGORIES: DeviceCategory[] = ['CPU', 'GPU', 'SBC', 'NPU', 'ASIC', 'SoC', 'System']
@@ -21,20 +22,6 @@ const COLUMNS: { key: SortKey; label: string; align: 'left' | 'right'; className
   { key: 'price', label: 'Price', align: 'right' },
   { key: 'dataCompleteness', label: 'Data', align: 'left' },
 ]
-
-function fmtNum(n: number | null | undefined, decimals = 1): string {
-  if (n == null) return '-'
-  if (n >= 1000) return `${(n / 1000).toFixed(decimals)}k`
-  if (n >= 100) return Math.round(n).toLocaleString()
-  return n.toFixed(decimals)
-}
-
-function fmtRam(gb: number | null | undefined): string {
-  if (gb == null) return '-'
-  if (gb >= 1024) return `${(gb / 1024).toFixed(1)} TB`
-  if (Number.isInteger(gb)) return `${gb} GB`
-  return `${gb.toFixed(1)} GB`
-}
 
 const CompletenessBar = memo(function CompletenessBar({ value }: { value: number }) {
   const pct = Math.round(value * 100)
@@ -104,6 +91,7 @@ export function BrowsePage() {
     ...readFiltersFromUrl(searchParams),
   }))
 
+  const searchDebounceRef = useRef<ReturnType<typeof setTimeout>>(undefined)
   const vendors = useMemo(() => getVendors(), [])
   const families = useMemo(() => getFamilies(), [])
   const { devices, total } = useMemo(() => getDevices(filters), [filters])
@@ -193,7 +181,7 @@ export function BrowsePage() {
       <div className="flex items-center justify-between mb-3 shrink-0">
         <div>
           <h1 className="text-2xl font-bold text-text-primary">Browse Devices</h1>
-          <p className="text-sm text-text-secondary">{total} devices found</p>
+          <p role="status" aria-live="polite" className="text-sm text-text-secondary">{total} devices found</p>
         </div>
       </div>
 
@@ -202,9 +190,17 @@ export function BrowsePage() {
         {/* Search */}
         <input
           type="text"
+          aria-label="Search devices"
           placeholder="Search by name, vendor, or family..."
           value={filters.searchQuery}
-          onChange={e => setFilters(f => ({ ...f, searchQuery: e.target.value, page: 1 }))}
+          onChange={e => {
+            const val = e.target.value
+            setFilters(f => ({ ...f, searchQuery: val, page: 1 }))
+            if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current)
+            searchDebounceRef.current = setTimeout(() => {
+              setFilters(f => ({ ...f, searchQuery: val, page: 1 }))
+            }, 200)
+          }}
           className="w-full px-4 py-2 bg-bg-secondary border border-border-subtle rounded-lg text-sm text-text-primary placeholder-text-muted focus:outline-none focus:ring-2 focus:ring-brand-500"
         />
 
@@ -212,12 +208,12 @@ export function BrowsePage() {
           {/* TDP Range Slider */}
           <div className="flex items-center gap-2">
             <span className="text-xs font-medium text-text-secondary whitespace-nowrap">TDP</span>
-            <input type="range" min={0} max={700} step={5} value={filters.minTdp ?? 0}
+            <input type="range" aria-label="Minimum TDP" aria-valuemin={0} aria-valuemax={700} min={0} max={700} step={5} value={filters.minTdp ?? 0}
               onChange={e => setFilters(f => ({ ...f, minTdp: Number(e.target.value) || undefined, page: 1 }))}
               className="w-20 h-1.5 accent-brand-500" />
             <span className="text-xs text-text-muted w-12 text-right">{filters.minTdp ?? 0}W</span>
             <span className="text-text-muted/40">–</span>
-            <input type="range" min={0} max={700} step={5} value={filters.maxTdp ?? 700}
+            <input type="range" aria-label="Maximum TDP" aria-valuemin={0} aria-valuemax={700} min={0} max={700} step={5} value={filters.maxTdp ?? 700}
               onChange={e => setFilters(f => ({ ...f, maxTdp: Number(e.target.value) < 700 ? Number(e.target.value) : undefined, page: 1 }))}
               className="w-20 h-1.5 accent-brand-500" />
             <span className="text-xs text-text-muted w-14 text-right">{filters.maxTdp ? `${filters.maxTdp}W` : '∞'}</span>
@@ -226,12 +222,12 @@ export function BrowsePage() {
           {/* Price Range Slider */}
           <div className="flex items-center gap-2">
             <span className="text-xs font-medium text-text-secondary whitespace-nowrap">Price</span>
-            <input type="range" min={0} max={50000} step={50} value={filters.minPrice ?? 0}
+            <input type="range" aria-label="Minimum price" aria-valuemin={0} aria-valuemax={50000} min={0} max={50000} step={50} value={filters.minPrice ?? 0}
               onChange={e => setFilters(f => ({ ...f, minPrice: Number(e.target.value) || undefined, page: 1 }))}
               className="w-20 h-1.5 accent-green-500" />
             <span className="text-xs text-text-muted w-14 text-right">${(filters.minPrice ?? 0).toLocaleString()}</span>
             <span className="text-text-muted/40">–</span>
-            <input type="range" min={0} max={50000} step={50} value={filters.maxPrice ?? 50000}
+            <input type="range" aria-label="Maximum price" aria-valuemin={0} aria-valuemax={50000} min={0} max={50000} step={50} value={filters.maxPrice ?? 50000}
               onChange={e => setFilters(f => ({ ...f, maxPrice: Number(e.target.value) < 50000 ? Number(e.target.value) : undefined, page: 1 }))}
               className="w-20 h-1.5 accent-green-500" />
             <span className="text-xs text-text-muted w-14 text-right">{filters.maxPrice ? `$${filters.maxPrice.toLocaleString()}` : '∞'}</span>
@@ -243,6 +239,7 @@ export function BrowsePage() {
           {CATEGORIES.map(cat => (
             <button
               key={cat}
+              aria-pressed={filters.categories.includes(cat)}
               onClick={() => toggleCategory(cat)}
               className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
                 filters.categories.includes(cat)
@@ -258,6 +255,7 @@ export function BrowsePage() {
           {activeVendors.map(vendor => vendor && (
             <button
               key={vendor.vendorId}
+              aria-pressed={filters.vendors.includes(vendor.vendorId)}
               onClick={() => toggleVendor(vendor.vendorId)}
               className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
                 filters.vendors.includes(vendor.vendorId)
@@ -282,12 +280,14 @@ export function BrowsePage() {
           {/* Export buttons */}
           <div className="flex gap-1 ml-auto">
             <button
+              aria-label="Export CSV"
               onClick={handleExportCSV}
               className="px-3 py-1.5 text-xs font-medium rounded-lg bg-bg-secondary text-text-secondary hover:text-text-primary border border-border-subtle transition-colors"
             >
               CSV
             </button>
             <button
+              aria-label="Export JSON"
               onClick={handleExportJSON}
               className="px-3 py-1.5 text-xs font-medium rounded-lg bg-bg-secondary text-text-secondary hover:text-text-primary border border-border-subtle transition-colors"
             >
@@ -301,7 +301,7 @@ export function BrowsePage() {
       <div className="bg-bg-card/30 border border-border-subtle/50 rounded-xl overflow-hidden flex flex-col flex-1 min-h-0">
         {/* Desktop table */}
         <div className="hidden lg:flex flex-col flex-1 min-h-0 overflow-auto">
-          <table className="w-full">
+          <table aria-label="Device list" className="w-full">
             <thead className="sticky top-0 z-10">
               <tr className="border-b border-border-subtle/50 bg-bg-secondary">
                 {COLUMNS.map(col => (
@@ -476,6 +476,7 @@ export function BrowsePage() {
             </div>
             <div className="flex gap-1">
               <button
+                aria-label="Previous page"
                 onClick={() => setFilters(f => ({ ...f, page: Math.max(1, f.page - 1) }))}
                 disabled={filters.page <= 1}
                 className="px-3 py-1.5 bg-bg-secondary border border-border-subtle rounded-lg text-sm text-text-secondary disabled:opacity-30 hover:text-text-primary"
@@ -496,6 +497,7 @@ export function BrowsePage() {
                 return (
                   <button
                     key={page}
+                    aria-label={`Page ${page}`}
                     onClick={() => setFilters(f => ({ ...f, page }))}
                     className={`px-3 py-1.5 rounded-lg text-sm ${
                       page === filters.page
@@ -508,6 +510,7 @@ export function BrowsePage() {
                 )
               })}
               <button
+                aria-label="Next page"
                 onClick={() => setFilters(f => ({ ...f, page: Math.min(totalPages, f.page + 1) }))}
                 disabled={filters.page >= totalPages}
                 className="px-3 py-1.5 bg-bg-secondary border border-border-subtle rounded-lg text-sm text-text-secondary disabled:opacity-30 hover:text-text-primary"
