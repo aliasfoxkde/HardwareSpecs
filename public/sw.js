@@ -1,4 +1,4 @@
-const CACHE_NAME = 'siliconrank-v2'
+const CACHE_NAME = 'siliconrank-v3'
 const PRECACHE_URLS = [
   '/',
   '/browse',

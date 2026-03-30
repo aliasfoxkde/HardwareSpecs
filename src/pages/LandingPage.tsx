@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import { useEffect, useState, useRef } from 'react'
-import { getStats, getDevicesByCategory } from '@/lib/api'
+import { getStats, getDevicesByCategory, getDevices } from '@/lib/api'
 
 function useAnimatedCounter(target: number, duration = 1500, startOnMount = false): number {
   const [value, setValue] = useState(0)
@@ -60,6 +60,19 @@ function Particles() {
     }))
 
     let frameId: number
+    let paused = false
+
+    const onVisibility = () => {
+      if (document.hidden) {
+        paused = true
+        cancelAnimationFrame(frameId)
+      } else if (paused) {
+        paused = false
+        frameId = requestAnimationFrame(animate)
+      }
+    }
+    document.addEventListener('visibilitychange', onVisibility)
+
     const animate = () => {
       ctx.clearRect(0, 0, canvas.offsetWidth, canvas.offsetHeight)
       for (const p of particles) {
@@ -81,6 +94,7 @@ function Particles() {
     return () => {
       cancelAnimationFrame(frameId)
       window.removeEventListener('resize', resize)
+      document.removeEventListener('visibilitychange', onVisibility)
     }
   }, [])
 
@@ -108,7 +122,12 @@ export function LandingPage() {
   useEffect(() => {
     const s = getStats()
     setStats(s)
-    setTopGpus(getDevicesByCategory('GPU').slice(0, 5))
+    setTopGpus(
+      getDevicesByCategory('GPU')
+        .filter(d => d.metrics.effectiveInt8Tops > 0)
+        .sort((a, b) => b.metrics.effectiveInt8Tops - a.metrics.effectiveInt8Tops)
+        .slice(0, 5),
+    )
 
     // Count devices per category
     const cats = ['CPU', 'GPU', 'SBC', 'NPU', 'ASIC', 'SoC', 'System', 'Memory', 'Storage'] as const
@@ -118,10 +137,9 @@ export function LandingPage() {
     }
     setCategoryCounts(counts)
 
-    // Top value devices (best TOPS/$)
-    const allDevices = getDevicesByCategory('GPU')
-    const withValue = allDevices.filter(d => d.metrics.topsPerDollar != null && d.metrics.topsPerDollar > 0)
-    withValue.sort((a, b) => (b.metrics.topsPerDollar ?? 0) - (a.metrics.topsPerDollar ?? 0))
+    // Top value devices (best TOPS/$) — across all categories
+    const { devices: allDevicesSorted } = getDevices({ sortBy: 'topsPerDollar', sortOrder: 'desc', pageSize: 1000 })
+    const withValue = allDevicesSorted.filter(d => d.metrics.topsPerDollar != null && d.metrics.topsPerDollar > 0)
     setTopValueDevices(withValue.slice(0, 5))
   }, [])
 

@@ -1,6 +1,7 @@
 import { lazy, Suspense } from 'react'
 import { Routes, Route } from 'react-router-dom'
 import { Layout } from '@/components/layout/Layout'
+import { ErrorBoundary } from '@/components/ErrorBoundary'
 
 const LandingPage = lazy(() => import('@/pages/LandingPage').then(m => ({ default: m.LandingPage })))
 const BrowsePage = lazy(() => import('@/pages/BrowsePage').then(m => ({ default: m.BrowsePage })))
@@ -23,21 +24,23 @@ function PageLoader() {
 
 export default function App() {
   return (
-    <Suspense fallback={<PageLoader />}>
-      <Routes>
-        <Route element={<Layout />}>
-          <Route path="/" element={<LandingPage />} />
-          <Route path="/browse" element={<BrowsePage />} />
-          <Route path="/device/:deviceId" element={<DevicePage />} />
-          <Route path="/compare" element={<ComparePage />} />
-          <Route path="/charts" element={<ChartsPage />} />
-          <Route path="/studio" element={<StudioPage />} />
-          <Route path="/tools" element={<ToolsPage />} />
-          <Route path="/reports" element={<ReportsPage />} />
-          <Route path="/docs" element={<DocsPage />} />
-          <Route path="*" element={<NotFoundPage />} />
-        </Route>
-      </Routes>
-    </Suspense>
+    <ErrorBoundary>
+      <Suspense fallback={<PageLoader />}>
+        <Routes>
+          <Route element={<Layout />}>
+            <Route path="/" element={<ErrorBoundary><LandingPage /></ErrorBoundary>} />
+            <Route path="/browse" element={<ErrorBoundary><BrowsePage /></ErrorBoundary>} />
+            <Route path="/device/:deviceId" element={<ErrorBoundary><DevicePage /></ErrorBoundary>} />
+            <Route path="/compare" element={<ErrorBoundary><ComparePage /></ErrorBoundary>} />
+            <Route path="/charts" element={<ErrorBoundary><ChartsPage /></ErrorBoundary>} />
+            <Route path="/studio" element={<ErrorBoundary><StudioPage /></ErrorBoundary>} />
+            <Route path="/tools" element={<ErrorBoundary><ToolsPage /></ErrorBoundary>} />
+            <Route path="/reports" element={<ErrorBoundary><ReportsPage /></ErrorBoundary>} />
+            <Route path="/docs" element={<ErrorBoundary><DocsPage /></ErrorBoundary>} />
+            <Route path="*" element={<ErrorBoundary><NotFoundPage /></ErrorBoundary>} />
+          </Route>
+        </Routes>
+      </Suspense>
+    </ErrorBoundary>
   )
 }
