@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { getAllDeviceMetrics } from '@/lib/api'
 import { getDevices } from '@/lib/api'
 
@@ -349,6 +349,7 @@ const TOOLS = [
 ] as const
 
 export function ToolsPage() {
+  useEffect(() => { document.title = 'Hardware Tools | SiliconRank'; return () => { document.title = 'SiliconRank' } }, [])
   const [activeTool, setActiveTool] = useState<string>('tops')
   const ActiveComponent = TOOLS.find(t => t.id === activeTool)?.component ?? TopsCalculator
 

@@ -60,12 +60,14 @@ export function DevicePage() {
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-fade-in">
       {/* Breadcrumb */}
-      <nav className="flex items-center gap-2 text-sm text-text-secondary mb-6">
+      <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-sm text-text-secondary mb-6">
+        <Link to="/" className="hover:text-text-primary">Home</Link>
+        <span className="text-text-muted/40">/</span>
         <Link to="/browse" className="hover:text-text-primary">Browse</Link>
-        <span>/</span>
-        <span className="text-text-muted">{device.family.category}</span>
-        <span>/</span>
-        <span className="text-text-primary">{device.device.modelName}</span>
+        <span className="text-text-muted/40">/</span>
+        <Link to={`/browse?category=${device.family.category}`} className="hover:text-text-primary">{device.family.category}</Link>
+        <span className="text-text-muted/40">/</span>
+        <span className="text-text-primary font-medium">{device.device.modelName}</span>
       </nav>
 
       {/* Header */}

@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { getVendors, getDevicesByCategory } from '@/lib/api'
 import { ChartContainer } from '@/components/charts/ChartContainer'
 import { VendorDistributionPie, CategoryDistributionPie, PriceBandPie } from '@/components/charts/MarketPieCharts'
@@ -27,6 +27,7 @@ const tabs = [
 type TabId = typeof tabs[number]['id']
 
 export function ChartsPage() {
+  useEffect(() => { document.title = 'Charts & Visualizations | SiliconRank'; return () => { document.title = 'SiliconRank' } }, [])
   const [activeCategory, setActiveCategory] = useState<DeviceCategory>('GPU')
   const [activeTab, setActiveTab] = useState<TabId>('overview')
 

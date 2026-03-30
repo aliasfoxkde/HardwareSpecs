@@ -1,9 +1,13 @@
-const CACHE_NAME = 'siliconrank-v1'
+const CACHE_NAME = 'siliconrank-v2'
 const PRECACHE_URLS = [
   '/',
   '/browse',
   '/compare',
   '/charts',
+  '/studio',
+  '/tools',
+  '/reports',
+  '/docs',
   '/manifest.json',
   '/favicon.svg',
 ]

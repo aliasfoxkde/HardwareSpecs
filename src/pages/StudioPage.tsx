@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from 'react'
+import { useState, useMemo, useCallback, useEffect } from 'react'
 import {
   useReactTable,
   getCoreRowModel,
@@ -577,6 +577,7 @@ function StatCard({ label, value }: { label: string; value: string }) {
 
 // ─── Main Studio Page ───────────────────────────────
 export function StudioPage() {
+  useEffect(() => { document.title = 'Analytics Studio | SiliconRank'; return () => { document.title = 'SiliconRank' } }, [])
   const [savedState, setSavedState] = useState<StudioState>(() => {
     const saved = getItem<StudioState>(STORAGE_KEY, { columnVisibility: DEFAULT_VISIBILITY, globalFilter: '', activePanel: 'none' })
     return {

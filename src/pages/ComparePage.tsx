@@ -15,6 +15,7 @@ function BestBadge() {
 }
 
 export function ComparePage() {
+  useEffect(() => { document.title = 'Compare Devices | SiliconRank'; return () => { document.title = 'SiliconRank' } }, [])
   const [searchParams, setSearchParams] = useSearchParams()
   const [selectedIds, setSelectedIds] = useState<string[]>(() => {
     const param = searchParams.get('devices')

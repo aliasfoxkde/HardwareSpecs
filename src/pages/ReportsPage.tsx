@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, PieChart, Pie, ScatterChart, Scatter, LineChart, Line } from 'recharts'
 import { getDevices, getVendors, getFamilies, getAllDeviceMetrics, getDeviceMetricsTable } from '@/lib/api'
 import type { DeviceCategory } from '@/types'
@@ -823,6 +823,7 @@ const REPORTS = [
 ] as const
 
 export function ReportsPage() {
+  useEffect(() => { document.title = 'Data Reports | SiliconRank'; return () => { document.title = 'SiliconRank' } }, [])
   const [activeReport, setActiveReport] = useState<string>('overview')
   const ActiveComponent = REPORTS.find(r => r.id === activeReport)?.component ?? CompletenessChart
 

@@ -13,7 +13,16 @@ export default defineConfig({
   },
   build: {
     outDir: 'dist',
-    sourcemap: true,
+    sourcemap: false,
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.includes('node_modules/recharts')) return 'recharts'
+          if (id.includes('node_modules/react-dom') || id.includes('node_modules/react-router')) return 'react-vendor'
+          if (id.includes('node_modules/react/')) return 'react-vendor'
+        },
+      },
+    },
   },
   test: {
     globals: true,

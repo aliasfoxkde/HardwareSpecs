@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { getVendors, getFamilies, getDevices, getDevice, getDevicesByCategory, searchDevices, getStats, compareDevices, getBenchmarkTypes, getSources, getDeviceMetrics, getDeviceMetricsTable } from '@/lib/api'
 
 const API_BASE = 'https://siliconrank.cyopsys.com'
@@ -190,6 +190,7 @@ const typeDocs = [
 const METHOD_COLORS: Record<string, string> = { GET: 'bg-green-500/20 text-green-400', POST: 'bg-blue-500/20 text-blue-400' }
 
 export function DocsPage() {
+  useEffect(() => { document.title = 'API Documentation | SiliconRank'; return () => { document.title = 'SiliconRank' } }, [])
   const [activeTab, setActiveTab] = useState<'endpoints' | 'types'>('endpoints')
   const [selectedEndpoint, setSelectedEndpoint] = useState<string | null>(null)
   const [liveInput, setLiveInput] = useState('')

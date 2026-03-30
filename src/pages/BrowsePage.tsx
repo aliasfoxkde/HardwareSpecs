@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, memo } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { getDevices, getVendors, getFamilies } from '@/lib/api'
 import { downloadCSV, downloadJSON } from '@/lib/export'
@@ -37,7 +37,7 @@ function fmtRam(gb: number | null | undefined): string {
   return `${gb.toFixed(1)} GB`
 }
 
-function CompletenessBar({ value }: { value: number }) {
+const CompletenessBar = memo(function CompletenessBar({ value }: { value: number }) {
   const pct = Math.round(value * 100)
   const color = pct >= 70 ? 'bg-green-500' : pct >= 40 ? 'bg-yellow-500' : 'bg-red-500'
   return (
@@ -48,9 +48,10 @@ function CompletenessBar({ value }: { value: number }) {
       <span className="text-xs text-text-muted">{pct}%</span>
     </div>
   )
-}
+})
 
 export function BrowsePage() {
+  useEffect(() => { document.title = 'Browse Hardware | SiliconRank'; return () => { document.title = 'SiliconRank' } }, [])
   const [searchParams] = useSearchParams()
   const [filters, setFilters] = useState<FilterState>({
     vendors: [],
@@ -267,6 +268,8 @@ export function BrowsePage() {
                 {COLUMNS.map(col => (
                   <th
                     key={col.key}
+                    role="columnheader"
+                    aria-sort={filters.sortBy === col.key ? (filters.sortOrder === 'desc' ? 'descending' : 'ascending') : 'none'}
                     onClick={() => handleSort(col.key)}
                     className={`px-4 py-3 text-xs font-semibold text-text-secondary uppercase tracking-wider cursor-pointer select-none hover:text-text-primary whitespace-nowrap transition-colors ${col.align === 'right' ? 'text-right' : 'text-left'}`}
                   >

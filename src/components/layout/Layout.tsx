@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom'
 import { searchDevices, getStats } from '@/lib/api'
 import { useTheme } from '@/hooks/useTheme'
@@ -36,6 +36,7 @@ export function Layout() {
   const { theme, toggleTheme } = useTheme()
   const location = useLocation()
   const navigate = useNavigate()
+  const debounceRef = useRef<ReturnType<typeof setTimeout>>(undefined)
 
   useEffect(() => {
     setStats(getStats())
@@ -45,15 +46,27 @@ export function Layout() {
   }, [location.pathname])
 
   useEffect(() => {
-    if (searchQuery.length >= 2) {
-      const results = searchDevices(searchQuery, 8)
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current)
+    }
+  }, [])
+
+  const doSearch = useCallback((query: string) => {
+    if (query.length >= 2) {
+      const results = searchDevices(query, 8)
       setSearchResults(results)
       setShowSearch(true)
     } else {
       setSearchResults([])
       setShowSearch(false)
     }
-  }, [searchQuery])
+  }, [])
+
+  const handleSearchChange = useCallback((value: string) => {
+    setSearchQuery(value)
+    if (debounceRef.current) clearTimeout(debounceRef.current)
+    debounceRef.current = setTimeout(() => doSearch(value), 200)
+  }, [doSearch])
 
   const navLinks = [
     { path: '/', label: 'Home' },
@@ -66,10 +79,20 @@ export function Layout() {
     { path: '/docs', label: 'Docs' },
   ]
 
+  const isActive = (path: string) => location.pathname === path
+
   return (
     <div className="min-h-screen bg-bg-primary flex flex-col">
+      {/* Skip to content */}
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[100] focus:px-4 focus:py-2 focus:bg-brand-600 focus:text-white focus:rounded-lg focus:text-sm focus:font-medium"
+      >
+        Skip to content
+      </a>
+
       {/* Navbar */}
-      <nav className="sticky top-0 z-50 bg-bg-primary/95 backdrop-blur-md border-b border-border-default">
+      <nav aria-label="Main navigation" className="sticky top-0 z-50 bg-bg-primary/95 backdrop-blur-md border-b border-border-default">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
@@ -84,8 +107,9 @@ export function Layout() {
                 <Link
                   key={link.path}
                   to={link.path}
+                  aria-current={isActive(link.path) ? 'page' : undefined}
                   className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                    location.pathname === link.path
+                    isActive(link.path)
                       ? 'bg-brand-600/20 text-brand-400'
                       : 'text-text-secondary hover:text-text-primary hover:bg-bg-tertiary'
                   }`}
@@ -105,7 +129,7 @@ export function Layout() {
                   type="text"
                   placeholder="Search devices..."
                   value={searchQuery}
-                  onChange={e => setSearchQuery(e.target.value)}
+                  onChange={e => handleSearchChange(e.target.value)}
                   onFocus={() => searchQuery.length >= 2 && setShowSearch(true)}
                   onBlur={() => setTimeout(() => setShowSearch(false), 200)}
                   className="w-full pl-10 pr-4 py-2 bg-bg-secondary border border-border-subtle rounded-lg text-sm text-text-primary placeholder-text-muted focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent"
@@ -120,10 +144,11 @@ export function Layout() {
                 <ThemeIcon mode={theme} />
               </button>
               {showSearch && searchResults.length > 0 && (
-                <div className="absolute top-full mt-1 w-full bg-bg-secondary border border-border-subtle rounded-lg shadow-xl overflow-hidden z-50">
+                <div role="listbox" aria-label="Search results" className="absolute top-full mt-1 w-full bg-bg-secondary border border-border-subtle rounded-lg shadow-xl overflow-hidden z-50">
                   {searchResults.map(result => (
                     <button
                       key={result.device.deviceId}
+                      role="option"
                       onClick={() => {
                         navigate(`/device/${result.device.deviceId}`)
                         setShowSearch(false)
@@ -155,7 +180,10 @@ export function Layout() {
               </button>
               <button
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                aria-expanded={mobileMenuOpen}
+                aria-controls="mobile-menu"
                 className="p-2 text-text-secondary hover:text-text-primary"
+                aria-label="Toggle navigation menu"
               >
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   {mobileMenuOpen ? (
@@ -170,7 +198,7 @@ export function Layout() {
 
           {/* Mobile menu */}
           {mobileMenuOpen && (
-            <div className="lg:hidden pb-4 animate-fade-in">
+            <div id="mobile-menu" className="lg:hidden pb-4 animate-fade-in">
               <div className="relative mb-3">
                 <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -179,7 +207,7 @@ export function Layout() {
                   type="text"
                   placeholder="Search devices..."
                   value={searchQuery}
-                  onChange={e => setSearchQuery(e.target.value)}
+                  onChange={e => handleSearchChange(e.target.value)}
                   className="w-full pl-10 pr-4 py-2 bg-bg-secondary border border-border-subtle rounded-lg text-sm text-text-primary placeholder-text-muted focus:outline-none focus:ring-2 focus:ring-brand-500"
                 />
               </div>
@@ -200,13 +228,15 @@ export function Layout() {
                   ))}
                 </div>
               )}
-              <div className="flex flex-col gap-1">
+              <div role="menu" className="flex flex-col gap-1">
                 {navLinks.map(link => (
                   <Link
                     key={link.path}
                     to={link.path}
+                    role="menuitem"
+                    aria-current={isActive(link.path) ? 'page' : undefined}
                     className={`px-4 py-2 rounded-lg text-sm font-medium ${
-                      location.pathname === link.path
+                      isActive(link.path)
                         ? 'bg-brand-600/20 text-brand-400'
                         : 'text-text-secondary hover:text-text-primary'
                     }`}
@@ -221,12 +251,12 @@ export function Layout() {
       </nav>
 
       {/* Main content */}
-      <main className="flex-1">
+      <main id="main-content" className="flex-1">
         <Outlet />
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-border-default bg-bg-primary">
+      <footer aria-label="Site footer" className="border-t border-border-default bg-bg-primary">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             <div>
