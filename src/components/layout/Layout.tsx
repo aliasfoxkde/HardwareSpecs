@@ -166,6 +166,7 @@ export function Layout() {
                 <input
                   type="text"
                   placeholder="Search devices..."
+                  aria-label="Search devices"
                   value={searchQuery}
                   onChange={e => handleSearchChange(e.target.value)}
                   onFocus={() => searchQuery.length >= 2 && setShowSearch(true)}
@@ -245,16 +246,18 @@ export function Layout() {
                 <input
                   type="text"
                   placeholder="Search devices..."
+                  aria-label="Search devices"
                   value={searchQuery}
                   onChange={e => handleSearchChange(e.target.value)}
                   className="w-full pl-10 pr-4 py-2 bg-bg-secondary border border-border-subtle rounded-lg text-sm text-text-primary placeholder-text-muted focus:outline-none focus:ring-2 focus:ring-brand-500"
                 />
               </div>
               {showSearch && searchResults.length > 0 && (
-                <div className="mb-3 bg-bg-secondary border border-border-subtle rounded-lg overflow-hidden">
+                <div role="listbox" aria-label="Search results" className="mb-3 bg-bg-secondary border border-border-subtle rounded-lg overflow-hidden">
                   {searchResults.slice(0, 5).map(result => (
                     <button
                       key={result.device.deviceId}
+                      role="option"
                       onClick={() => {
                         navigate(`/device/${result.device.deviceId}`)
                         setMobileMenuOpen(false)

@@ -300,6 +300,7 @@ export function DocsPage() {
                 <button
                   key={ep.name}
                   onClick={() => { setSelectedEndpoint(ep.name); setLiveResult(null); setLiveInput('') }}
+                  aria-current={selectedEndpoint === ep.name ? 'true' : undefined}
                   className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors ${
                     selectedEndpoint === ep.name
                       ? 'bg-brand-600/20 text-brand-400'
@@ -391,6 +392,7 @@ export function DocsPage() {
                   <div className="flex gap-2 mb-3">
                     <input
                       type="text"
+                      aria-label="API parameter input"
                       placeholder={endpoint.params[0] ? `e.g. ${endpoint.params[0].name}${endpoint.params[0].required ? '' : ' (optional)'}` : 'No parameters needed'}
                       value={liveInput}
                       onChange={e => setLiveInput(e.target.value)}

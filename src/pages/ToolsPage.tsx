@@ -28,25 +28,25 @@ function TopsCalculator() {
       <p className="text-sm text-text-secondary">Estimate compute throughput from tensor core specifications. Formula: TOPS = cores &times; clock (GHz) &times; 2 (MAC) &times; ops/clock &times; precision multiplier / 1000</p>
       <div className="grid sm:grid-cols-2 gap-4">
         <div>
-          <label className="block text-xs text-text-secondary mb-1">Tensor Cores</label>
-          <input type="number" value={tensorCores} onChange={e => setTensorCores(e.target.value)} placeholder="e.g. 680" className="w-full px-3 py-2 bg-bg-secondary border border-border-subtle rounded-lg text-sm text-text-primary" />
+          <label htmlFor="tops-cores" className="block text-xs text-text-secondary mb-1">Tensor Cores</label>
+          <input id="tops-cores" type="number" value={tensorCores} onChange={e => setTensorCores(e.target.value)} placeholder="e.g. 680" className="w-full px-3 py-2 bg-bg-secondary border border-border-subtle rounded-lg text-sm text-text-primary" />
         </div>
         <div>
-          <label className="block text-xs text-text-secondary mb-1">Clock Speed (GHz)</label>
-          <input type="number" step="0.01" value={clockGhz} onChange={e => setClockGhz(e.target.value)} placeholder="e.g. 2.52" className="w-full px-3 py-2 bg-bg-secondary border border-border-subtle rounded-lg text-sm text-text-primary" />
+          <label htmlFor="tops-clock" className="block text-xs text-text-secondary mb-1">Clock Speed (GHz)</label>
+          <input id="tops-clock" type="number" step="0.01" value={clockGhz} onChange={e => setClockGhz(e.target.value)} placeholder="e.g. 2.52" className="w-full px-3 py-2 bg-bg-secondary border border-border-subtle rounded-lg text-sm text-text-primary" />
         </div>
         <div>
-          <label className="block text-xs text-text-secondary mb-1">Precision</label>
-          <select value={precision} onChange={e => setPrecision(e.target.value as typeof precision)} className="w-full px-3 py-2 bg-bg-secondary border border-border-subtle rounded-lg text-sm text-text-primary">
+          <label htmlFor="tops-precision" className="block text-xs text-text-secondary mb-1">Precision</label>
+          <select id="tops-precision" value={precision} onChange={e => setPrecision(e.target.value as typeof precision)} className="w-full px-3 py-2 bg-bg-secondary border border-border-subtle rounded-lg text-sm text-text-primary">
             {Object.entries(precisionLabel).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
           </select>
         </div>
         <div>
-          <label className="block text-xs text-text-secondary mb-1">Ops/Clock/Core (default: 256)</label>
-          <input type="number" value={opsPerClockPerCore} onChange={e => setOpsPerClockPerCore(e.target.value)} placeholder="256" className="w-full px-3 py-2 bg-bg-secondary border border-border-subtle rounded-lg text-sm text-text-primary" />
+          <label htmlFor="tops-ops" className="block text-xs text-text-secondary mb-1">Ops/Clock/Core (default: 256)</label>
+          <input id="tops-ops" type="number" value={opsPerClockPerCore} onChange={e => setOpsPerClockPerCore(e.target.value)} placeholder="256" className="w-full px-3 py-2 bg-bg-secondary border border-border-subtle rounded-lg text-sm text-text-primary" />
         </div>
       </div>
-      <div className="bg-bg-tertiary/50 rounded-lg p-4 text-center">
+      <div role="status" className="bg-bg-tertiary/50 rounded-lg p-4 text-center">
         <div className="text-xs text-text-secondary mb-1">Estimated TOPS ({precisionLabel[precision]})</div>
         <div className="text-3xl font-bold text-brand-400">
           {result > 0 ? result >= 1000 ? `${(result / 1000).toFixed(2)}k` : result.toFixed(1) : '-'}
@@ -92,27 +92,27 @@ function EfficiencyCalculator() {
       <p className="text-sm text-text-secondary">Compute efficiency metrics and power cost estimates.</p>
       <div className="grid sm:grid-cols-2 gap-4">
         <div>
-          <label className="block text-xs text-text-secondary mb-1">INT8 TOPS</label>
-          <input type="number" value={tops} onChange={e => setTops(e.target.value)} placeholder="e.g. 661" className="w-full px-3 py-2 bg-bg-secondary border border-border-subtle rounded-lg text-sm text-text-primary" />
+          <label htmlFor="eff-tops" className="block text-xs text-text-secondary mb-1">INT8 TOPS</label>
+          <input id="eff-tops" type="number" value={tops} onChange={e => setTops(e.target.value)} placeholder="e.g. 661" className="w-full px-3 py-2 bg-bg-secondary border border-border-subtle rounded-lg text-sm text-text-primary" />
         </div>
         <div>
-          <label className="block text-xs text-text-secondary mb-1">TDP (Watts)</label>
-          <input type="number" value={tdpW} onChange={e => setTdpW(e.target.value)} placeholder="e.g. 450" className="w-full px-3 py-2 bg-bg-secondary border border-border-subtle rounded-lg text-sm text-text-primary" />
+          <label htmlFor="eff-tdp" className="block text-xs text-text-secondary mb-1">TDP (Watts)</label>
+          <input id="eff-tdp" type="number" value={tdpW} onChange={e => setTdpW(e.target.value)} placeholder="e.g. 450" className="w-full px-3 py-2 bg-bg-secondary border border-border-subtle rounded-lg text-sm text-text-primary" />
         </div>
         <div>
-          <label className="block text-xs text-text-secondary mb-1">Price (USD)</label>
-          <input type="number" value={price} onChange={e => setPrice(e.target.value)} placeholder="e.g. 1599" className="w-full px-3 py-2 bg-bg-secondary border border-border-subtle rounded-lg text-sm text-text-primary" />
+          <label htmlFor="eff-price" className="block text-xs text-text-secondary mb-1">Price (USD)</label>
+          <input id="eff-price" type="number" value={price} onChange={e => setPrice(e.target.value)} placeholder="e.g. 1599" className="w-full px-3 py-2 bg-bg-secondary border border-border-subtle rounded-lg text-sm text-text-primary" />
         </div>
         <div>
-          <label className="block text-xs text-text-secondary mb-1">Usage (hours/day)</label>
-          <input type="number" value={hoursPerDay} onChange={e => setHoursPerDay(e.target.value)} className="w-full px-3 py-2 bg-bg-secondary border border-border-subtle rounded-lg text-sm text-text-primary" />
+          <label htmlFor="eff-hours" className="block text-xs text-text-secondary mb-1">Usage (hours/day)</label>
+          <input id="eff-hours" type="number" value={hoursPerDay} onChange={e => setHoursPerDay(e.target.value)} className="w-full px-3 py-2 bg-bg-secondary border border-border-subtle rounded-lg text-sm text-text-primary" />
         </div>
         <div>
-          <label className="block text-xs text-text-secondary mb-1">Electricity Rate ($/kWh)</label>
-          <input type="number" step="0.01" value={electricityRate} onChange={e => setElectricityRate(e.target.value)} className="w-full px-3 py-2 bg-bg-secondary border border-border-subtle rounded-lg text-sm text-text-primary" />
+          <label htmlFor="eff-rate" className="block text-xs text-text-secondary mb-1">Electricity Rate ($/kWh)</label>
+          <input id="eff-rate" type="number" step="0.01" value={electricityRate} onChange={e => setElectricityRate(e.target.value)} className="w-full px-3 py-2 bg-bg-secondary border border-border-subtle rounded-lg text-sm text-text-primary" />
         </div>
       </div>
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+      <div role="status" className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         <div className="bg-bg-tertiary/50 rounded-lg p-3 text-center">
           <div className="text-xs text-text-secondary mb-1">TOPS/W</div>
           <div className="text-lg font-bold text-blue-400">{topsPerWatt ? topsPerWatt.toFixed(2) : '-'}</div>
@@ -165,21 +165,21 @@ function MemoryBandwidthEstimator() {
       <p className="text-sm text-text-secondary">Estimate memory bandwidth from bus width and transfer rate. Formula: BW = busWidth (bits) &times; transferRate (Gbps) / 8</p>
       <div className="grid sm:grid-cols-3 gap-4">
         <div>
-          <label className="block text-xs text-text-secondary mb-1">Bus Width (bits)</label>
-          <input type="number" value={busWidth} onChange={e => setBusWidth(e.target.value)} placeholder="e.g. 384" className="w-full px-3 py-2 bg-bg-secondary border border-border-subtle rounded-lg text-sm text-text-primary" />
+          <label htmlFor="mem-bus" className="block text-xs text-text-secondary mb-1">Bus Width (bits)</label>
+          <input id="mem-bus" type="number" value={busWidth} onChange={e => setBusWidth(e.target.value)} placeholder="e.g. 384" className="w-full px-3 py-2 bg-bg-secondary border border-border-subtle rounded-lg text-sm text-text-primary" />
         </div>
         <div>
-          <label className="block text-xs text-text-secondary mb-1">Memory Type</label>
-          <select value={memType} onChange={e => { setMemType(e.target.value as typeof memType); setTransferRate('') }} className="w-full px-3 py-2 bg-bg-secondary border border-border-subtle rounded-lg text-sm text-text-primary">
+          <label htmlFor="mem-type" className="block text-xs text-text-secondary mb-1">Memory Type</label>
+          <select id="mem-type" value={memType} onChange={e => { setMemType(e.target.value as typeof memType); setTransferRate('') }} className="w-full px-3 py-2 bg-bg-secondary border border-border-subtle rounded-lg text-sm text-text-primary">
             {Object.keys(DEFAULT_MEM_RATES).map(k => <option key={k} value={k}>{k.toUpperCase()} ({DEFAULT_MEM_RATES[k]} Gbps/pin)</option>)}
           </select>
         </div>
         <div>
-          <label className="block text-xs text-text-secondary mb-1">Transfer Rate (Gbps/pin)</label>
-          <input type="number" step="0.1" value={transferRate} onChange={e => setTransferRate(e.target.value)} placeholder={DEFAULT_MEM_RATES[memType].toString()} className="w-full px-3 py-2 bg-bg-secondary border border-border-subtle rounded-lg text-sm text-text-primary" />
+          <label htmlFor="mem-rate" className="block text-xs text-text-secondary mb-1">Transfer Rate (Gbps/pin)</label>
+          <input id="mem-rate" type="number" step="0.1" value={transferRate} onChange={e => setTransferRate(e.target.value)} placeholder={DEFAULT_MEM_RATES[memType].toString()} className="w-full px-3 py-2 bg-bg-secondary border border-border-subtle rounded-lg text-sm text-text-primary" />
         </div>
       </div>
-      <div className="bg-bg-tertiary/50 rounded-lg p-4 text-center">
+      <div role="status" className="bg-bg-tertiary/50 rounded-lg p-4 text-center">
         <div className="text-xs text-text-secondary mb-1">Estimated Bandwidth</div>
         <div className="text-3xl font-bold text-purple-400">
           {bandwidth > 0 ? `${bandwidth.toFixed(0)} GB/s` : '-'}
@@ -223,31 +223,31 @@ function TcoCalculator() {
       <p className="text-sm text-text-secondary">Total Cost of Ownership over the device lifetime including electricity.</p>
       <div className="grid sm:grid-cols-3 gap-4">
         <div>
-          <label className="block text-xs text-text-secondary mb-1">Purchase Price (USD)</label>
-          <input type="number" value={purchasePrice} onChange={e => setPurchasePrice(e.target.value)} placeholder="e.g. 1599" className="w-full px-3 py-2 bg-bg-secondary border border-border-subtle rounded-lg text-sm text-text-primary" />
+          <label htmlFor="tco-price" className="block text-xs text-text-secondary mb-1">Purchase Price (USD)</label>
+          <input id="tco-price" type="number" value={purchasePrice} onChange={e => setPurchasePrice(e.target.value)} placeholder="e.g. 1599" className="w-full px-3 py-2 bg-bg-secondary border border-border-subtle rounded-lg text-sm text-text-primary" />
         </div>
         <div>
-          <label className="block text-xs text-text-secondary mb-1">TDP (Watts)</label>
-          <input type="number" value={tdpW} onChange={e => setTdpW(e.target.value)} placeholder="e.g. 450" className="w-full px-3 py-2 bg-bg-secondary border border-border-subtle rounded-lg text-sm text-text-primary" />
+          <label htmlFor="tco-tdp" className="block text-xs text-text-secondary mb-1">TDP (Watts)</label>
+          <input id="tco-tdp" type="number" value={tdpW} onChange={e => setTdpW(e.target.value)} placeholder="e.g. 450" className="w-full px-3 py-2 bg-bg-secondary border border-border-subtle rounded-lg text-sm text-text-primary" />
         </div>
         <div>
-          <label className="block text-xs text-text-secondary mb-1">Usage (hours/day)</label>
-          <input type="number" value={hoursPerDay} onChange={e => setHoursPerDay(e.target.value)} className="w-full px-3 py-2 bg-bg-secondary border border-border-subtle rounded-lg text-sm text-text-primary" />
+          <label htmlFor="tco-hours" className="block text-xs text-text-secondary mb-1">Usage (hours/day)</label>
+          <input id="tco-hours" type="number" value={hoursPerDay} onChange={e => setHoursPerDay(e.target.value)} className="w-full px-3 py-2 bg-bg-secondary border border-border-subtle rounded-lg text-sm text-text-primary" />
         </div>
         <div>
-          <label className="block text-xs text-text-secondary mb-1">Lifespan (years)</label>
-          <input type="number" value={years} onChange={e => setYears(e.target.value)} className="w-full px-3 py-2 bg-bg-secondary border border-border-subtle rounded-lg text-sm text-text-primary" />
+          <label htmlFor="tco-years" className="block text-xs text-text-secondary mb-1">Lifespan (years)</label>
+          <input id="tco-years" type="number" value={years} onChange={e => setYears(e.target.value)} className="w-full px-3 py-2 bg-bg-secondary border border-border-subtle rounded-lg text-sm text-text-primary" />
         </div>
         <div>
-          <label className="block text-xs text-text-secondary mb-1">Electricity ($/kWh)</label>
-          <input type="number" step="0.01" value={electricityRate} onChange={e => setElectricityRate(e.target.value)} className="w-full px-3 py-2 bg-bg-secondary border border-border-subtle rounded-lg text-sm text-text-primary" />
+          <label htmlFor="tco-rate" className="block text-xs text-text-secondary mb-1">Electricity ($/kWh)</label>
+          <input id="tco-rate" type="number" step="0.01" value={electricityRate} onChange={e => setElectricityRate(e.target.value)} className="w-full px-3 py-2 bg-bg-secondary border border-border-subtle rounded-lg text-sm text-text-primary" />
         </div>
         <div>
-          <label className="block text-xs text-text-secondary mb-1">PUE (Power Usage Effectiveness)</label>
-          <input type="number" step="0.01" value={pue} onChange={e => setPue(e.target.value)} className="w-full px-3 py-2 bg-bg-secondary border border-border-subtle rounded-lg text-sm text-text-primary" />
+          <label htmlFor="tco-pue" className="block text-xs text-text-secondary mb-1">PUE (Power Usage Effectiveness)</label>
+          <input id="tco-pue" type="number" step="0.01" value={pue} onChange={e => setPue(e.target.value)} className="w-full px-3 py-2 bg-bg-secondary border border-border-subtle rounded-lg text-sm text-text-primary" />
         </div>
       </div>
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+      <div role="status" className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         <div className="bg-bg-tertiary/50 rounded-lg p-3 text-center">
           <div className="text-xs text-text-secondary mb-1">Monthly Power</div>
           <div className="text-lg font-bold text-yellow-400">${results.monthlyPower.toFixed(2)}</div>
@@ -299,13 +299,14 @@ function DeviceQuickLookup() {
       <input
         type="text"
         placeholder="Search devices..."
+        aria-label="Search devices"
         value={query}
         onChange={e => setQuery(e.target.value)}
         className="w-full px-4 py-2 bg-bg-secondary border border-border-subtle rounded-lg text-sm text-text-primary placeholder-text-muted focus:outline-none focus:ring-2 focus:ring-brand-500"
       />
       {results.length > 0 && (
         <div className="overflow-auto">
-          <table className="w-full text-sm">
+          <table aria-label="Device lookup results" className="w-full text-sm">
             <thead>
               <tr className="border-b border-border-subtle/50">
                 <th className="px-3 py-2 text-left text-xs text-text-secondary">Device</th>

@@ -100,7 +100,7 @@ function Particles() {
     }
   }, [])
 
-  return <canvas ref={canvasRef} className="absolute inset-0 w-full h-full pointer-events-none" />
+  return <canvas ref={canvasRef} aria-hidden="true" className="absolute inset-0 w-full h-full pointer-events-none" />
 }
 
 const categoryIcons: Record<string, string> = {
@@ -267,6 +267,7 @@ export function LandingPage() {
               <Link
                 key={cat}
                 to={`/browse?category=${cat}`}
+                aria-label={`${cat}: ${count} devices`}
                 className="bg-bg-card/50 border border-border-subtle/50 rounded-xl p-5 hover:border-brand-500/30 transition-all hover:scale-[1.02] text-center group"
               >
                 <div className="text-3xl mb-2">{categoryIcons[cat] ?? '📦'}</div>
@@ -319,6 +320,7 @@ export function LandingPage() {
                   <Link
                     key={item.device.deviceId}
                     to={`/device/${item.device.deviceId}`}
+                    aria-label={`#${i + 1} ${item.device.modelName}: ${item.metrics.topsPerDollar?.toFixed(1)} TOPS per dollar`}
                     className="flex items-center justify-between hover:bg-bg-card rounded-lg px-3 py-2 -mx-3 transition-colors"
                   >
                     <div className="flex items-center gap-3">
@@ -362,6 +364,7 @@ export function LandingPage() {
                     <Link
                       key={item.device.deviceId}
                       to={`/device/${item.device.deviceId}`}
+                      aria-label={`${item.device.modelName}: ${item.metrics.effectiveInt8Tops.toFixed(0)} TOPS`}
                       className="flex items-center justify-between hover:bg-bg-card rounded-lg px-3 py-2 -mx-3 transition-colors"
                     >
                       <div>

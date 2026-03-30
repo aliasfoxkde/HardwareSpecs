@@ -102,4 +102,18 @@ describe('Layout', () => {
     const main = document.getElementById('main-content')
     expect(main).toBeDefined()
   })
+
+  it('search inputs have aria-label', () => {
+    render(
+      <MemoryRouter initialEntries={['/browse']}>
+        <Routes>
+          <Route element={<Layout />}>
+            <Route path="/browse" element={<div>Test Page</div>} />
+          </Route>
+        </Routes>
+      </MemoryRouter>
+    )
+    const searchInputs = screen.getAllByLabelText('Search devices')
+    expect(searchInputs.length).toBeGreaterThanOrEqual(1) // desktop always visible, mobile only when open
+  })
 })

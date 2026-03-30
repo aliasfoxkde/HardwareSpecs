@@ -36,6 +36,21 @@ const priceData = [...seedPrices]
 const vendorMap = new Map(vendorData.map(v => [v.vendorId, v]))
 const familyMap = new Map(familyData.map(f => [f.familyId, f]))
 
+// Pre-computed latest price cache (avoids re-sorting on every call)
+const latestPriceCache = new Map<string, PriceSnapshot>()
+const pricesByDevice = new Map<string, PriceSnapshot[]>()
+for (const p of priceData) {
+  const arr = pricesByDevice.get(p.deviceId) ?? []
+  arr.push(p)
+  pricesByDevice.set(p.deviceId, arr)
+}
+for (const [deviceId, devicePrices] of pricesByDevice) {
+  const sorted = devicePrices.sort((a, b) =>
+    new Date(b.observedAt).getTime() - new Date(a.observedAt).getTime()
+  )
+  latestPriceCache.set(deviceId, sorted[0])
+}
+
 function getDeviceBenchmarks(deviceId: string) {
   return benchmarkData.filter(b => b.deviceId === deviceId)
 }
@@ -48,12 +63,8 @@ function getDevicePrices(deviceId: string) {
   return priceData.filter(p => p.deviceId === deviceId)
 }
 
-function getLatestPrice(deviceId: string) {
-  const devicePrices = getDevicePrices(deviceId)
-  if (devicePrices.length === 0) return undefined
-  return devicePrices.sort((a, b) =>
-    new Date(b.observedAt).getTime() - new Date(a.observedAt).getTime()
-  )[0]
+function getLatestPrice(deviceId: string): PriceSnapshot | undefined {
+  return latestPriceCache.get(deviceId)
 }
 
 export interface DeviceListItem {
@@ -76,6 +87,24 @@ export interface DeviceDetail extends DeviceListItem {
   benchmarks: BenchmarkResult[]
   specs: SpecSnapshot[]
   prices: PriceSnapshot[]
+}
+
+function mapToDeviceListItem(d: DeviceVariant): DeviceListItem {
+  const m = getDeviceMetrics(d.deviceId)
+  return {
+    device: d,
+    vendor: vendorMap.get(familyMap.get(d.familyId)?.vendorId ?? '')!,
+    family: familyMap.get(d.familyId)!,
+    latestPrice: getLatestPrice(d.deviceId),
+    metrics: {
+      effectiveInt8Tops: m?.effectiveInt8Tops ?? 0,
+      topsPerDollar: m?.topsPerDollar ?? null,
+      topsPerWatt: m?.topsPerWatt ?? null,
+      perfPerDollar: m?.perfPerDollar ?? null,
+      perfPerWatt: m?.perfPerWatt ?? null,
+      dataCompleteness: m?.dataCompleteness ?? 0,
+    },
+  }
 }
 
 // --- API Functions ---
@@ -231,24 +260,10 @@ export function getDevices(options?: Partial<FilterState>): { devices: DeviceLis
   const start = (page - 1) * pageSize
   const paginatedResult = result.slice(start, start + pageSize)
 
-  const devices: DeviceListItem[] = paginatedResult.map(d => {
-    const m = getDeviceMetrics(d.deviceId)
-    return {
-      device: d,
-      vendor: vendorMap.get(familyMap.get(d.familyId)?.vendorId ?? '')!,
-      family: familyMap.get(d.familyId)!,
-      latestPrice: getLatestPrice(d.deviceId),
-      topBenchmark: getDeviceBenchmarks(d.deviceId).sort((a, b) => b.normalizedScore! - a.normalizedScore!)[0],
-      metrics: {
-        effectiveInt8Tops: m?.effectiveInt8Tops ?? 0,
-        topsPerDollar: m?.topsPerDollar ?? null,
-        topsPerWatt: m?.topsPerWatt ?? null,
-        perfPerDollar: m?.perfPerDollar ?? null,
-        perfPerWatt: m?.perfPerWatt ?? null,
-        dataCompleteness: m?.dataCompleteness ?? 0,
-      },
-    }
-  })
+  const devices: DeviceListItem[] = paginatedResult.map(d => ({
+    ...mapToDeviceListItem(d),
+    topBenchmark: getDeviceBenchmarks(d.deviceId).sort((a, b) => b.normalizedScore! - a.normalizedScore!)[0],
+  }))
 
   return { devices, total }
 }
@@ -297,23 +312,7 @@ export function searchDevices(query: string, limit = 20): DeviceListItem[] {
       )
     })
     .slice(0, limit)
-    .map(d => {
-      const m = getDeviceMetrics(d.deviceId)
-      return {
-        device: d,
-        vendor: vendorMap.get(familyMap.get(d.familyId)?.vendorId ?? '')!,
-        family: familyMap.get(d.familyId)!,
-        latestPrice: getLatestPrice(d.deviceId),
-        metrics: {
-          effectiveInt8Tops: m?.effectiveInt8Tops ?? 0,
-          topsPerDollar: m?.topsPerDollar ?? null,
-          topsPerWatt: m?.topsPerWatt ?? null,
-          perfPerDollar: m?.perfPerDollar ?? null,
-          perfPerWatt: m?.perfPerWatt ?? null,
-          dataCompleteness: m?.dataCompleteness ?? 0,
-        },
-      }
-    })
+    .map(d => mapToDeviceListItem(d))
 }
 
 export function compareDevices(deviceIds: string[]): DeviceDetail[] {
@@ -353,21 +352,5 @@ export function getDevicesByCategory(category: DeviceCategory): DeviceListItem[]
   )
   return deviceData
     .filter(d => familyIds.has(d.familyId))
-    .map(d => {
-      const m = getDeviceMetrics(d.deviceId)
-      return {
-        device: d,
-        vendor: vendorMap.get(familyMap.get(d.familyId)?.vendorId ?? '')!,
-        family: familyMap.get(d.familyId)!,
-        latestPrice: getLatestPrice(d.deviceId),
-        metrics: {
-          effectiveInt8Tops: m?.effectiveInt8Tops ?? 0,
-          topsPerDollar: m?.topsPerDollar ?? null,
-          topsPerWatt: m?.topsPerWatt ?? null,
-          perfPerDollar: m?.perfPerDollar ?? null,
-          perfPerWatt: m?.perfPerWatt ?? null,
-          dataCompleteness: m?.dataCompleteness ?? 0,
-        },
-      }
-    })
+    .map(d => mapToDeviceListItem(d))
 }

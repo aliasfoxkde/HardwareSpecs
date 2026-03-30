@@ -38,12 +38,14 @@ export function NotFoundPage() {
           <input
             type="text"
             placeholder="Search devices..."
+            aria-label="Search devices"
             value={query}
             onChange={e => setQuery(e.target.value)}
             className="flex-1 px-4 py-2 bg-bg-secondary border border-border-subtle rounded-lg text-sm text-text-primary placeholder-text-muted focus:outline-none focus:ring-2 focus:ring-brand-500"
           />
           <button
             type="submit"
+            aria-label="Search"
             className="px-4 py-2 bg-brand-600 text-white rounded-lg text-sm font-medium hover:bg-brand-500 transition-colors"
           >
             Search
