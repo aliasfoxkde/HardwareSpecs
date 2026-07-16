@@ -2,6 +2,7 @@ import { useParams, Link } from 'react-router-dom'
 import { useMemo, useEffect } from 'react'
 import { getDevice, getDevicesByCategory, getDeviceMetrics } from '@/lib/api'
 import { fmtNum } from '@/lib/utils'
+import { useMetaDescription } from '@/hooks/useMetaDescription'
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
 
 export function DevicePage() {
@@ -14,26 +15,25 @@ export function DevicePage() {
     return sameCategory.filter(d => d.device.deviceId !== device.device.deviceId).slice(0, 5)
   }, [device])
 
-  useEffect(() => {
-    if (!device) return
-    const tops = metrics?.effectiveInt8Tops ? `${metrics.effectiveInt8Tops.toLocaleString()} TOPS` : ''
-    const price = device.latestPrice?.priceUsd ? `$${device.latestPrice.priceUsd.toLocaleString()}` : ''
-    document.title = `${device.device.modelName}${tops ? ` - ${tops}` : ''}${price ? ` - ${price}` : ''} | SiliconRank`
-    const desc = [
+  const tops = metrics?.effectiveInt8Tops ? `${metrics.effectiveInt8Tops.toLocaleString()} TOPS` : ''
+  const price = device?.latestPrice?.priceUsd ? `$${device.latestPrice.priceUsd.toLocaleString()}` : ''
+  const desc = useMemo(() => {
+    if (!device) return ''
+    return [
       `${device.device.modelName}:`,
       tops,
       price,
       device.device.tdpWatts ? `${device.device.tdpWatts}W TDP` : '',
-    ].filter(Boolean).join(', ')
-    let meta = document.querySelector('meta[name="description"]')
-    if (!meta) {
-      meta = document.createElement('meta')
-      meta.setAttribute('name', 'description')
-      document.head.appendChild(meta)
-    }
-    meta.setAttribute('content', `${desc}. Compare specs, benchmarks, and efficiency metrics.`)
+    ].filter(Boolean).join(', ') + '. Compare specs, benchmarks, and efficiency metrics.'
+  }, [device, tops, price])
+
+  useMetaDescription(desc)
+
+  useEffect(() => {
+    if (!device) return
+    document.title = `${device.device.modelName}${tops ? ` - ${tops}` : ''}${price ? ` - ${price}` : ''} | SiliconRank`
     return () => { document.title = 'SiliconRank' }
-  }, [device, metrics])
+  }, [device, tops, price])
 
   if (!device) {
     return (

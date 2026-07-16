@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect } from 'react'
 import { getAllDeviceMetrics } from '@/lib/api'
 import { getDevices } from '@/lib/api'
+import { useMetaDescription } from '@/hooks/useMetaDescription'
 
 // ── TOPS Calculator ──
 
@@ -350,6 +351,7 @@ const TOOLS = [
 ] as const
 
 export function ToolsPage() {
+  useMetaDescription('Hardware calculators: TOPS calculator, efficiency estimator, memory bandwidth calculator, and TCO comparison tool.')
   useEffect(() => { document.title = 'Hardware Tools | SiliconRank'; return () => { document.title = 'SiliconRank' } }, [])
   const [activeTool, setActiveTool] = useState<string>('tops')
   const ActiveComponent = TOOLS.find(t => t.id === activeTool)?.component ?? TopsCalculator

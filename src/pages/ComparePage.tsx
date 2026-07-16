@@ -2,6 +2,7 @@ import { useState, useMemo, useEffect, useRef, memo } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { compareDevices, searchDevices, getDeviceMetrics } from '@/lib/api'
 import { downloadCSV } from '@/lib/export'
+import { useMetaDescription } from '@/hooks/useMetaDescription'
 import { fmtNum } from '@/lib/utils'
 
 const BestBadge = memo(function BestBadge() {
@@ -9,6 +10,7 @@ const BestBadge = memo(function BestBadge() {
 })
 
 export function ComparePage() {
+  useMetaDescription('Compare up to 6 hardware devices side-by-side with TOPS, TOPS/$, TOPS/W, pricing, and efficiency metrics.')
   useEffect(() => { document.title = 'Compare Devices | SiliconRank'; return () => { document.title = 'SiliconRank' } }, [])
   const [searchParams, setSearchParams] = useSearchParams()
   const [selectedIds, setSelectedIds] = useState<string[]>(() => {

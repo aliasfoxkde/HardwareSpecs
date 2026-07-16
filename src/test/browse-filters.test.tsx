@@ -62,4 +62,15 @@ describe('BrowsePage', () => {
     // After category filter is applied, clear button should appear
     expect(screen.getByText('Clear all filters')).toBeDefined()
   })
+
+  it('sets meta description for SEO', () => {
+    render(
+      <MemoryRouter>
+        <BrowsePage />
+      </MemoryRouter>
+    )
+    const meta = document.querySelector('meta[name="description"]')
+    expect(meta).toBeTruthy()
+    expect(meta?.getAttribute('content')).toContain('Browse and filter')
+  })
 })

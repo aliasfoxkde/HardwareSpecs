@@ -1,4 +1,5 @@
 import { useState, useMemo, useCallback, useEffect } from 'react'
+import { useMetaDescription } from '@/hooks/useMetaDescription'
 import {
   useReactTable,
   getCoreRowModel,
@@ -125,6 +126,7 @@ const PANELS = [
 
 // ─── Main Studio Page ───────────────────────────────
 export function StudioPage() {
+  useMetaDescription('Analytics studio with advanced filtering, saved views, and custom analysis of hardware device metrics.')
   useEffect(() => { document.title = 'Analytics Studio | SiliconRank'; return () => { document.title = 'SiliconRank' } }, [])
   const [savedState, setSavedState] = useState<StudioState>(() => {
     const saved = getItem<StudioState>(STORAGE_KEY, { columnVisibility: DEFAULT_VISIBILITY, globalFilter: '', activePanel: 'none' })

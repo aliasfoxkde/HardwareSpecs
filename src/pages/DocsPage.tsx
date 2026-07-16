@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { getVendors, getFamilies, getDevices, getDevice, getDevicesByCategory, searchDevices, getStats, compareDevices, getBenchmarkTypes, getSources, getDeviceMetrics, getDeviceMetricsTable } from '@/lib/api'
+import { useMetaDescription } from '@/hooks/useMetaDescription'
 import type { DeviceCategory, FilterState } from '@/types'
 
 const API_BASE = 'https://siliconrank.cyopsys.com'
@@ -192,6 +193,7 @@ const typeDocs = [
 const METHOD_COLORS: Record<string, string> = { GET: 'bg-green-500/20 text-green-400', POST: 'bg-blue-500/20 text-blue-400' }
 
 export function DocsPage() {
+  useMetaDescription('API documentation for SiliconRank hardware database. Query devices, metrics, and benchmarks programmatically.')
   useEffect(() => { document.title = 'API Documentation | SiliconRank'; return () => { document.title = 'SiliconRank' } }, [])
   const [activeTab, setActiveTab] = useState<'endpoints' | 'types'>('endpoints')
   const [selectedEndpoint, setSelectedEndpoint] = useState<string | null>(null)

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useMetaDescription } from '@/hooks/useMetaDescription'
 import { CompletenessChart } from '@/components/reports/CompletenessChart'
 import { CategoryCoverageChart } from '@/components/reports/CategoryCoverageChart'
 import { VendorDistributionChart } from '@/components/reports/VendorDistributionChart'
@@ -24,6 +25,7 @@ const REPORTS = [
 ] as const
 
 export function ReportsPage() {
+  useMetaDescription('Data quality reports covering category coverage, price analysis, process nodes, vendor breakdowns, and launch timelines.')
   useEffect(() => { document.title = 'Data Reports | SiliconRank'; return () => { document.title = 'SiliconRank' } }, [])
   const [activeReport, setActiveReport] = useState<string>('overview')
   const ActiveComponent = REPORTS.find(r => r.id === activeReport)?.component ?? CompletenessChart

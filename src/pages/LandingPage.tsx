@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { useEffect, useState, useRef } from 'react'
 import { getStats, getDevicesByCategory, getDevices } from '@/lib/api'
+import { useMetaDescription } from '@/hooks/useMetaDescription'
 
 function useAnimatedCounter(target: number, duration = 1500, startOnMount = false): number {
   const prefersReducedMotion = typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -116,6 +117,7 @@ const categoryIcons: Record<string, string> = {
 }
 
 export function LandingPage() {
+  useMetaDescription('Compare 300+ CPUs, GPUs, NPUs, SBCs, and AI accelerators with normalized INT8 TOPS benchmarks, efficiency metrics, and pricing. Free, open source hardware database.')
   const [stats] = useState(() => getStats())
   const [topGpus] = useState(() =>
     getDevicesByCategory('GPU')

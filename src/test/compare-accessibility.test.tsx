@@ -30,4 +30,16 @@ describe('ComparePage accessibility', () => {
     const input = document.querySelector('input[aria-label="Search devices to compare"]')
     expect(input).toBeTruthy()
   })
+
+  it('sets meta description for SEO', () => {
+    render(<ComparePage />, { wrapper: Wrapper })
+    const meta = document.querySelector('meta[name="description"]')
+    expect(meta).toBeTruthy()
+    expect(meta?.getAttribute('content')).toContain('Compare up to 6')
+  })
+
+  it('renders heading', () => {
+    render(<ComparePage />, { wrapper: Wrapper })
+    expect(document.querySelector('h1')).toBeTruthy()
+  })
 })

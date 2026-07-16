@@ -3,6 +3,7 @@ import { Link, useSearchParams } from 'react-router-dom'
 import { getDevices, getVendors, getFamilies } from '@/lib/api'
 import { downloadCSV, downloadJSON } from '@/lib/export'
 import { fmtNum, fmtRam } from '@/lib/utils'
+import { useMetaDescription } from '@/hooks/useMetaDescription'
 import type { DeviceCategory, FilterState } from '@/types'
 
 const CATEGORIES: DeviceCategory[] = ['CPU', 'GPU', 'SBC', 'NPU', 'ASIC', 'SoC', 'System']
@@ -77,6 +78,7 @@ function writeFiltersToUrl(filters: FilterState): Record<string, string> {
 }
 
 export function BrowsePage() {
+  useMetaDescription('Browse and filter 300+ hardware devices by vendor, category, and price. Sort by TOPS, efficiency, and value metrics.')
   useEffect(() => { document.title = 'Browse Hardware | SiliconRank'; return () => { document.title = 'SiliconRank' } }, [])
   const [searchParams, setSearchParams] = useSearchParams()
   const [filters, setFilters] = useState<FilterState>(() => ({

@@ -1,5 +1,6 @@
 import { useState, useMemo, useEffect } from 'react'
 import { getVendors, getDevicesByCategory } from '@/lib/api'
+import { useMetaDescription } from '@/hooks/useMetaDescription'
 import { ChartContainer } from '@/components/charts/ChartContainer'
 import { VendorDistributionPie, CategoryDistributionPie, PriceBandPie } from '@/components/charts/MarketPieCharts'
 import { TopTopsBarChart, TopTopsPerDollarChart, TopTopsPerWattChart } from '@/components/charts/PerformanceRankings'
@@ -27,6 +28,7 @@ const tabs = [
 type TabId = typeof tabs[number]['id']
 
 export function ChartsPage() {
+  useMetaDescription('Interactive charts for hardware performance, pricing, efficiency, and trends. Compare vendors and categories visually.')
   useEffect(() => { document.title = 'Charts & Visualizations | SiliconRank'; return () => { document.title = 'SiliconRank' } }, [])
   const [activeCategory, setActiveCategory] = useState<DeviceCategory>('GPU')
   const [activeTab, setActiveTab] = useState<TabId>('overview')
