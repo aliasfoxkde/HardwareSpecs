@@ -335,8 +335,7 @@ export function DevicePage() {
                         <YAxis tick={{ fontSize: 10, fill: 'var(--color-text-muted)' }} stroke="var(--color-border-subtle)" tickFormatter={v => `$${v.toLocaleString()}`} />
                         <Tooltip
                           contentStyle={{ backgroundColor: 'var(--color-bg-secondary)', border: '1px solid var(--color-border-subtle)', borderRadius: '8px', fontSize: '12px' }}
-                          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                          formatter={(value: any) => [`$${Number(value ?? 0).toLocaleString()}`, 'Price']}
+                          formatter={(value) => [`$${Number(value ?? 0).toLocaleString()}`, 'Price']}
                           labelFormatter={label => `Date: ${label}`}
                         />
                         <Line type="monotone" dataKey="price" stroke="var(--color-brand-500)" strokeWidth={2} dot={{ r: 3 }} />

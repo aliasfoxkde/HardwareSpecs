@@ -183,7 +183,7 @@ export function BrowsePage() {
       <div className="flex items-center justify-between mb-3 shrink-0">
         <div>
           <h1 className="text-2xl font-bold text-text-primary">Browse Devices</h1>
-          <p role="status" aria-live="polite" className="text-sm text-text-secondary">{total} devices found</p>
+          <div role="status" aria-live="polite" className="text-sm text-text-secondary">{total} devices found</div>
         </div>
       </div>
 

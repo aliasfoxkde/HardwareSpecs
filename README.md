@@ -64,6 +64,36 @@ npm run deploy
 
 Deployed at [siliconrank.pages.dev](https://siliconrank.pages.dev)
 
+## Contributing
+
+### Data Model
+
+```
+Vendor → Family → Device → BenchmarkResult
+                           → PricePoint
+                           → DeviceMetrics (computed)
+```
+
+- **Vendor** — company (e.g., NVIDIA, AMD, Intel)
+- **Family** — product line (e.g., GeForce RTX 40 Series)
+- **Device** — individual SKU (e.g., RTX 5090)
+- **BenchmarkResult** — raw benchmark scores from a source
+- **PricePoint** — price history entries
+- **DeviceMetrics** — computed derived values (TOPS, TOPS/$, TOPS/W)
+
+### Adding New Devices
+
+1. Add vendor/family/device to `src/lib/data/seed.ts`
+2. Run `npm run build:api` to update MCP server data
+3. Add tests for new data paths
+
+### Architecture Notes
+
+- All data is in-memory (no database) — `src/lib/data/seed.ts` is the source of truth
+- Metrics like TOPS, TOPS/$, TOPS/W are computed in `src/lib/api/computed.ts`
+- Scores are normalized across heterogeneous benchmarks in `src/lib/normalization/index.ts`
+- URL query params drive BrowsePage filter state
+
 ## License
 
 MIT License — see [LICENSE](LICENSE) for details.

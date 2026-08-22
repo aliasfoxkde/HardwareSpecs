@@ -101,9 +101,8 @@ export function ChartsPage() {
       </div>
 
       {/* Overview */}
-      <div role="tabpanel" id="chart-panel-overview" aria-labelledby="chart-tab-overview" hidden={activeTab !== 'overview'}>
       {activeTab === 'overview' && (
-        <div className="grid lg:grid-cols-2 gap-6">
+        <div role="tabpanel" id="chart-panel-overview" aria-labelledby="chart-tab-overview" className="grid lg:grid-cols-2 gap-6">
           <ChartContainer title={`Vendor Share — ${activeCategory}`}>
             <VendorDistributionPie category={activeCategory} />
           </ChartContainer>
@@ -120,10 +119,8 @@ export function ChartsPage() {
       )}
 
       {/* Performance */}
-      </div>
-      <div role="tabpanel" id="chart-panel-performance" aria-labelledby="chart-tab-performance" hidden={activeTab !== 'performance'}>
       {activeTab === 'performance' && (
-        <div className="grid lg:grid-cols-2 gap-6">
+        <div role="tabpanel" id="chart-panel-performance" aria-labelledby="chart-tab-performance" className="grid lg:grid-cols-2 gap-6">
           <ChartContainer title={`TOP 20 INT8 TOPS — ${activeCategory}`}>
             <TopTopsBarChart limit={20} />
           </ChartContainer>
@@ -140,10 +137,8 @@ export function ChartsPage() {
       )}
 
       {/* Value */}
-      </div>
-      <div role="tabpanel" id="chart-panel-value" aria-labelledby="chart-tab-value" hidden={activeTab !== 'value'}>
       {activeTab === 'value' && (
-        <div className="grid lg:grid-cols-2 gap-6">
+        <div role="tabpanel" id="chart-panel-value" aria-labelledby="chart-tab-value" className="grid lg:grid-cols-2 gap-6">
           <ChartContainer title={`TOP 20 TOPS/$ — ${activeCategory}`}>
             <TopTopsPerDollarChart limit={20} />
           </ChartContainer>
@@ -160,10 +155,8 @@ export function ChartsPage() {
       )}
 
       {/* Efficiency */}
-      </div>
-      <div role="tabpanel" id="chart-panel-efficiency" aria-labelledby="chart-tab-efficiency" hidden={activeTab !== 'efficiency'}>
       {activeTab === 'efficiency' && (
-        <div className="grid lg:grid-cols-2 gap-6">
+        <div role="tabpanel" id="chart-panel-efficiency" aria-labelledby="chart-tab-efficiency" className="grid lg:grid-cols-2 gap-6">
           <ChartContainer title={`TOPS/$ Rankings — ${activeCategory}`}>
             <TopTopsPerDollarChart limit={20} />
           </ChartContainer>
@@ -180,10 +173,8 @@ export function ChartsPage() {
       )}
 
       {/* Trends */}
-      </div>
-      <div role="tabpanel" id="chart-panel-trends" aria-labelledby="chart-tab-trends" hidden={activeTab !== 'trends'}>
       {activeTab === 'trends' && (
-        <div className="grid lg:grid-cols-2 gap-6">
+        <div role="tabpanel" id="chart-panel-trends" aria-labelledby="chart-tab-trends" className="grid lg:grid-cols-2 gap-6">
           <ChartContainer title={`TDP Trend by Vendor — ${activeCategory}`}>
             <TdpOverTimeChart category={activeCategory} />
           </ChartContainer>
@@ -200,10 +191,8 @@ export function ChartsPage() {
       )}
 
       {/* Compare (Radar) */}
-      </div>
-      <div role="tabpanel" id="chart-panel-compare" aria-labelledby="chart-tab-compare" hidden={activeTab !== 'compare'}>
       {activeTab === 'compare' && (
-        <div className="grid lg:grid-cols-2 gap-6">
+        <div role="tabpanel" id="chart-panel-compare" aria-labelledby="chart-tab-compare" className="grid lg:grid-cols-2 gap-6">
           <ChartContainer title={`Top 5 Radar — ${activeCategory}`}>
             <TopDevicesRadar category={activeCategory} />
           </ChartContainer>
@@ -220,10 +209,8 @@ export function ChartsPage() {
       )}
 
       {/* Report */}
-      </div>
-      <div role="tabpanel" id="chart-panel-report" aria-labelledby="chart-tab-report" hidden={activeTab !== 'report'}>
       {activeTab === 'report' && (
-        <div className="grid lg:grid-cols-3 gap-6">
+        <div role="tabpanel" id="chart-panel-report" aria-labelledby="chart-tab-report" className="grid lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2">
             <ChartContainer title={`${activeCategory} Report`}>
               <InfographicPanel category={activeCategory} />
@@ -239,7 +226,6 @@ export function ChartsPage() {
           </div>
         </div>
       )}
-      </div>
     </div>
   )
 }

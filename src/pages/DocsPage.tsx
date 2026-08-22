@@ -5,6 +5,20 @@ import type { DeviceCategory, FilterState } from '@/types'
 
 const API_BASE = 'https://siliconrank.cyopsys.com'
 
+type ApiFn =
+  | (() => ReturnType<typeof getVendors>)
+  | ((opts?: { vendorId?: string; category?: DeviceCategory }) => ReturnType<typeof getFamilies>)
+  | ((filters?: Partial<FilterState>) => ReturnType<typeof getDevices>)
+  | ((id: string) => ReturnType<typeof getDevice>)
+  | ((category: DeviceCategory) => ReturnType<typeof getDevicesByCategory>)
+  | ((query: string, limit?: number) => ReturnType<typeof searchDevices>)
+  | (() => ReturnType<typeof getStats>)
+  | ((ids: string[]) => ReturnType<typeof compareDevices>)
+  | (() => ReturnType<typeof getBenchmarkTypes>)
+  | (() => ReturnType<typeof getSources>)
+  | ((id: string) => ReturnType<typeof getDeviceMetrics>)
+  | ((category?: DeviceCategory) => ReturnType<typeof getDeviceMetricsTable>)
+
 interface ApiEndpoint {
   name: string
   method: 'GET' | 'POST'
@@ -14,8 +28,7 @@ interface ApiEndpoint {
   exampleUrl: string
   exampleCurl: string
   exampleResponse: string
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  fn: (...args: any[]) => unknown
+  fn: ApiFn
 }
 
 const endpoints: ApiEndpoint[] = [
@@ -211,7 +224,7 @@ export function DocsPage() {
 
     const start = performance.now()
     try {
-      const result = ep.fn(input)
+      const result = (ep.fn as (arg: unknown) => unknown)(input)
       const elapsed = performance.now() - start
       setLiveResult({ data: result, time: elapsed })
     } catch (e) {

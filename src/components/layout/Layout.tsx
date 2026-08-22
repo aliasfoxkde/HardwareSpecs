@@ -41,13 +41,12 @@ export function Layout() {
   const menuRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    // Reset UI state on navigation using microtask to avoid synchronous setState in effect
-    const id = queueMicrotask(() => {
+    // Reset UI state on navigation
+    queueMicrotask(() => {
       setMobileMenuOpen(false)
       setShowSearch(false)
       setSearchQuery('')
     })
-    return () => clearTimeout(id as unknown as number)
   }, [location.pathname])
 
   useEffect(() => {
@@ -71,6 +70,19 @@ export function Layout() {
       if (e.key === 'Escape') {
         setMobileMenuOpen(false)
         menuButtonRef.current?.focus()
+        return
+      }
+      // Arrow key navigation between menu items
+      if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+        const menuItems = menu.querySelectorAll<HTMLElement>('[role="menuitem"]')
+        if (menuItems.length === 0) return
+        const current = Array.from(menuItems).indexOf(document.activeElement as HTMLElement)
+        e.preventDefault()
+        if (current === -1 || current === menuItems.length - 1) {
+          menuItems[0].focus()
+        } else {
+          menuItems[current + 1].focus()
+        }
         return
       }
       if (e.key !== 'Tab') return
