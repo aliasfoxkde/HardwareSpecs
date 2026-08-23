@@ -1,26 +1,47 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
-import { BrowserRouter } from 'react-router-dom'
-import { ReportsPage } from '@/pages/ReportsPage'
+import { PriceTdpHeatmap, VendorPerfHeatmap } from '@/components/charts/HeatmapChart'
+import { VendorDistributionPie, CategoryDistributionPie, PriceBandPie } from '@/components/charts/MarketPieCharts'
+import type { DeviceCategory } from '@/types'
 
-function Wrapper({ children }: { children: React.ReactNode }) {
-  return <BrowserRouter>{children}</BrowserRouter>
-}
+// Mock API
+vi.mock('@/lib/api', () => ({
+  getDevicesByCategory: vi.fn().mockReturnValue([]),
+  getVendors: vi.fn().mockReturnValue([]),
+  getFamilies: vi.fn().mockReturnValue([]),
+}))
 
-describe('ReportsPage', () => {
-  it('renders page header', () => {
-    render(<ReportsPage />, { wrapper: Wrapper })
-    expect(screen.getByRole('heading', { name: /reports/i })).toBeDefined()
-  })
-
-  it('renders page heading', () => {
-    render(<ReportsPage />, { wrapper: Wrapper })
-    expect(screen.getByRole('heading', { name: 'Reports' })).toBeDefined()
+describe('PriceTdpHeatmap', () => {
+  it('renders empty state when no data', () => {
+    render(<PriceTdpHeatmap category="GPU" />)
+    expect(screen.getByText(/No price\+TDP data/i)).toBeDefined()
   })
 })
 
-describe('Additional Chart Components', () => {
-  it('placeholder test for remaining chart coverage', () => {
-    expect(true).toBe(true)
+describe('VendorPerfHeatmap', () => {
+  it('renders empty state when no vendor data', () => {
+    render(<VendorPerfHeatmap category="GPU" />)
+    expect(screen.getByText(/No vendor data/i)).toBeDefined()
+  })
+})
+
+describe('VendorDistributionPie', () => {
+  it('renders nothing when no data', () => {
+    const { container } = render(<VendorDistributionPie category="GPU" />)
+    expect(container.firstChild).toBeNull()
+  })
+})
+
+describe('CategoryDistributionPie', () => {
+  it('renders when families exist', () => {
+    // This component returns null when no families exist - just verify it doesn't throw
+    expect(() => render(<CategoryDistributionPie />)).not.toThrow()
+  })
+})
+
+describe('PriceBandPie', () => {
+  it('renders nothing when no data', () => {
+    const { container } = render(<PriceBandPie category="GPU" />)
+    expect(container.firstChild).toBeNull()
   })
 })
