@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { render, screen, act } from '@testing-library/react'
+import { render, screen, act, fireEvent } from '@testing-library/react'
 import { BrowserRouter } from 'react-router-dom'
 import { ToolsPage } from '@/pages/ToolsPage'
 
@@ -58,5 +58,17 @@ describe('ToolsPage', () => {
       screen.getByRole('tab', { name: /Device Quick Lookup/i }).click()
     })
     expect(screen.getByLabelText('Search devices')).toBeDefined()
+  })
+
+  it('TOPS Calculator shows result status', () => {
+    render(<ToolsPage />, { wrapper: Wrapper })
+    expect(screen.getByRole('status')).toBeDefined()
+  })
+
+  it('TOPS Calculator accepts numeric input', () => {
+    render(<ToolsPage />, { wrapper: Wrapper })
+    const input = screen.getByLabelText('Tensor Cores')
+    fireEvent.change(input, { target: { value: '1000' } })
+    expect((input as HTMLInputElement).value).toBe('1000')
   })
 })
