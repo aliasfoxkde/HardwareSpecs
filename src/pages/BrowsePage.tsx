@@ -8,6 +8,9 @@ import type { DeviceCategory, FilterState } from '@/types'
 
 const CATEGORIES: DeviceCategory[] = ['CPU', 'GPU', 'SBC', 'NPU', 'ASIC', 'SoC', 'System']
 
+const MAX_TDP = 700
+const MAX_PRICE = 50000
+
 type SortKey = 'launchDate' | 'name' | 'tdp' | 'price' | 'tops' | 'topsPerDollar' | 'topsPerWatt' | 'perfPerDollar' | 'perfPerWatt' | 'dataCompleteness' | 'ram' | 'ramPerDollar'
 
 const COLUMNS: { key: SortKey; label: string; align: 'left' | 'right'; className?: string }[] = [
@@ -37,6 +40,11 @@ const CompletenessBar = memo(function CompletenessBar({ value }: { value: number
   )
 })
 
+function SortIcon({ col, sortBy, sortOrder }: { col: SortKey; sortBy: string; sortOrder: string }) {
+  if (sortBy !== col) return <span className="text-text-muted/40 ml-1">↕</span>
+  return <span className="text-brand-400 ml-1">{sortOrder === 'desc' ? '↓' : '↑'}</span>
+}
+
 function readFiltersFromUrl(sp: URLSearchParams): Partial<FilterState> {
   const f: Partial<FilterState> = {}
   const cat = sp.get('category')
@@ -54,11 +62,11 @@ function readFiltersFromUrl(sp: URLSearchParams): Partial<FilterState> {
   const tdpMin = sp.get('tdpMin')
   if (tdpMin) f.minTdp = Number(tdpMin) || undefined
   const tdpMax = sp.get('tdpMax')
-  if (tdpMax) f.maxTdp = Number(tdpMax) < 700 ? Number(tdpMax) : undefined
+  if (tdpMax) f.maxTdp = Number(tdpMax) < MAX_TDP ? Number(tdpMax) : undefined
   const priceMin = sp.get('priceMin')
   if (priceMin) f.minPrice = Number(priceMin) || undefined
   const priceMax = sp.get('priceMax')
-  if (priceMax) f.maxPrice = Number(priceMax) < 50000 ? Number(priceMax) : undefined
+  if (priceMax) f.maxPrice = Number(priceMax) < MAX_PRICE ? Number(priceMax) : undefined
   return f
 }
 
@@ -71,9 +79,9 @@ function writeFiltersToUrl(filters: FilterState): Record<string, string> {
   if (filters.sortOrder !== 'desc') p.order = filters.sortOrder
   if (filters.page > 1) p.page = String(filters.page)
   if (filters.minTdp && filters.minTdp > 0) p.tdpMin = String(filters.minTdp)
-  if (filters.maxTdp && filters.maxTdp < 700) p.tdpMax = String(filters.maxTdp)
+  if (filters.maxTdp && filters.maxTdp < MAX_TDP) p.tdpMax = String(filters.maxTdp)
   if (filters.minPrice && filters.minPrice > 0) p.priceMin = String(filters.minPrice)
-  if (filters.maxPrice && filters.maxPrice < 50000) p.priceMax = String(filters.maxPrice)
+  if (filters.maxPrice && filters.maxPrice < MAX_PRICE) p.priceMax = String(filters.maxPrice)
   return p
 }
 
@@ -140,12 +148,7 @@ export function BrowsePage() {
     .map(id => vendors.find(v => v.vendorId === id))
     .filter(Boolean)
 
-  const SortIcon = ({ col }: { col: SortKey }) => {
-    if (filters.sortBy !== col) return <span className="text-text-muted/40 ml-1">↕</span>
-    return <span className="text-brand-400 ml-1">{filters.sortOrder === 'desc' ? '↓' : '↑'}</span>
-  }
-
-  const handleExportCSV = () => {
+  const handleExportCsv = () => {
     const rows = devices.map(item => ({
       Device: item.device.modelName,
       Vendor: item.vendor.name,
@@ -197,7 +200,6 @@ export function BrowsePage() {
           value={filters.searchQuery}
           onChange={e => {
             const val = e.target.value
-            setFilters(f => ({ ...f, searchQuery: val, page: 1 }))
             if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current)
             searchDebounceRef.current = setTimeout(() => {
               setFilters(f => ({ ...f, searchQuery: val, page: 1 }))
@@ -210,13 +212,13 @@ export function BrowsePage() {
           {/* TDP Range Slider */}
           <div className="flex items-center gap-2">
             <span className="text-xs font-medium text-text-secondary whitespace-nowrap">TDP</span>
-            <input type="range" aria-label="Minimum TDP" aria-valuemin={0} aria-valuemax={700} min={0} max={700} step={5} value={filters.minTdp ?? 0}
+            <input type="range" aria-label="Minimum TDP" aria-valuemin={0} aria-valuemax={MAX_TDP} min={0} max={MAX_TDP} step={5} value={filters.minTdp ?? 0}
               onChange={e => setFilters(f => ({ ...f, minTdp: Number(e.target.value) || undefined, page: 1 }))}
               className="w-20 h-1.5 accent-brand-500" />
             <span className="text-xs text-text-muted w-12 text-right">{filters.minTdp ?? 0}W</span>
             <span className="text-text-muted/40">–</span>
-            <input type="range" aria-label="Maximum TDP" aria-valuemin={0} aria-valuemax={700} min={0} max={700} step={5} value={filters.maxTdp ?? 700}
-              onChange={e => setFilters(f => ({ ...f, maxTdp: Number(e.target.value) < 700 ? Number(e.target.value) : undefined, page: 1 }))}
+            <input type="range" aria-label="Maximum TDP" aria-valuemin={0} aria-valuemax={MAX_TDP} min={0} max={MAX_TDP} step={5} value={filters.maxTdp ?? MAX_TDP}
+              onChange={e => setFilters(f => ({ ...f, maxTdp: Number(e.target.value) < MAX_TDP ? Number(e.target.value) : undefined, page: 1 }))}
               className="w-20 h-1.5 accent-brand-500" />
             <span className="text-xs text-text-muted w-14 text-right">{filters.maxTdp ? `${filters.maxTdp}W` : '∞'}</span>
           </div>
@@ -224,13 +226,13 @@ export function BrowsePage() {
           {/* Price Range Slider */}
           <div className="flex items-center gap-2">
             <span className="text-xs font-medium text-text-secondary whitespace-nowrap">Price</span>
-            <input type="range" aria-label="Minimum price" aria-valuemin={0} aria-valuemax={50000} min={0} max={50000} step={50} value={filters.minPrice ?? 0}
+            <input type="range" aria-label="Minimum price" aria-valuemin={0} aria-valuemax={MAX_PRICE} min={0} max={MAX_PRICE} step={50} value={filters.minPrice ?? 0}
               onChange={e => setFilters(f => ({ ...f, minPrice: Number(e.target.value) || undefined, page: 1 }))}
               className="w-20 h-1.5 accent-green-500" />
             <span className="text-xs text-text-muted w-14 text-right">${(filters.minPrice ?? 0).toLocaleString()}</span>
             <span className="text-text-muted/40">–</span>
-            <input type="range" aria-label="Maximum price" aria-valuemin={0} aria-valuemax={50000} min={0} max={50000} step={50} value={filters.maxPrice ?? 50000}
-              onChange={e => setFilters(f => ({ ...f, maxPrice: Number(e.target.value) < 50000 ? Number(e.target.value) : undefined, page: 1 }))}
+            <input type="range" aria-label="Maximum price" aria-valuemin={0} aria-valuemax={MAX_PRICE} min={0} max={MAX_PRICE} step={50} value={filters.maxPrice ?? MAX_PRICE}
+              onChange={e => setFilters(f => ({ ...f, maxPrice: Number(e.target.value) < MAX_PRICE ? Number(e.target.value) : undefined, page: 1 }))}
               className="w-20 h-1.5 accent-green-500" />
             <span className="text-xs text-text-muted w-14 text-right">{filters.maxPrice ? `$${filters.maxPrice.toLocaleString()}` : '∞'}</span>
           </div>
@@ -283,7 +285,7 @@ export function BrowsePage() {
           <div className="flex gap-1 ml-auto">
             <button
               aria-label="Export CSV"
-              onClick={handleExportCSV}
+              onClick={handleExportCsv}
               className="px-3 py-1.5 text-xs font-medium rounded-lg bg-bg-secondary text-text-secondary hover:text-text-primary border border-border-subtle transition-colors"
             >
               CSV
@@ -316,7 +318,7 @@ export function BrowsePage() {
                   >
                     <span className="inline-flex items-center gap-0.5">
                       {col.label}
-                      <SortIcon col={col.key} />
+                      <SortIcon col={col.key} sortBy={filters.sortBy} sortOrder={filters.sortOrder} />
                     </span>
                   </th>
                 ))}
