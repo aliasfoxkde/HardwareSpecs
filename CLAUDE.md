@@ -82,3 +82,27 @@ Core types in `src/types/index.ts`:
 - Tests live in `src/test/` alongside source files
 - Run a single test file: `npm test -- <filename>`
 - Coverage report: `npm run test:coverage`
+
+## Best Practices
+
+### Component Patterns
+- Small, focused components with clear responsibilities
+- Memoize expensive computations with `useMemo`
+- Extract event handlers with `useCallback`
+- Use `memo()` for pure presentational components
+
+### Code Quality
+- **Magic numbers**: Extract to named constants (e.g., `MAX_TDP`, `MAX_PRICE`)
+- **No duplicate logic**: Reuse functions across components
+- **WCAG AAA contrast**: Dark mode text uses `#c4cdd9` (secondary) and `#8899aa` (muted)
+
+### Accessibility
+- Skip-to-content link for keyboard users
+- `aria-current="page"` on active nav links
+- Focus trap for modals and mobile menus
+- `aria-live="polite"` for dynamic content updates
+
+### CI/CD
+- Parallel job execution (lint, test, build run independently)
+- node_modules and Vite caching for faster CI
+- Coverage thresholds enforced in CI (65% lines, 55% branches)
