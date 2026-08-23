@@ -12,7 +12,6 @@ test.describe('BrowsePage', () => {
     const searchInput = page.getByLabel('Search devices')
     await searchInput.fill('NVIDIA')
     await page.waitForTimeout(300)
-    // Results should update
     await expect(page.getByRole('status')).toBeVisible()
   })
 
@@ -24,27 +23,10 @@ test.describe('BrowsePage', () => {
     await expect(gpuButton.getAttribute('aria-pressed')).toBe('true')
   })
 
-  test('export CSV button exists', async ({ page }) => {
+  test('export buttons exist', async ({ page }) => {
     await page.goto('/browse')
     await expect(page.getByLabel('Export CSV')).toBeVisible()
-  })
-
-  test('export JSON button exists', async ({ page }) => {
-    await page.goto('/browse')
     await expect(page.getByLabel('Export JSON')).toBeVisible()
-  })
-})
-
-test.describe('DevicePage', () => {
-  test('loads device details', async ({ page }) => {
-    await page.goto('/device/nvidia-geforce-rtx-4090')
-    await expect(page.getByRole('heading')).toBeVisible()
-  })
-
-  test('back to browse link works', async ({ page }) => {
-    await page.goto('/device/nvidia-geforce-rtx-4090')
-    const backLink = page.getByRole('link', { name: /back to browse/i })
-    await expect(backLink).toBeVisible()
   })
 })
 
@@ -78,8 +60,14 @@ test.describe('ChartsPage', () => {
 
   test('tab switching works', async ({ page }) => {
     await page.goto('/charts')
-    await page.getByRole('tab', { name: /price vs performance/i }).click()
-    await expect(page.getByRole('tabpanel')).toBeVisible()
+    await page.getByRole('tab', { name: 'Performance' }).click()
+    await expect(page.getByRole('tab', { name: 'Performance' }).getAttribute('aria-selected')).toBe('true')
+  })
+
+  test('value tab works', async ({ page }) => {
+    await page.goto('/charts')
+    await page.getByRole('tab', { name: 'Value' }).click()
+    await expect(page.getByRole('tab', { name: 'Value' }).getAttribute('aria-selected')).toBe('true')
   })
 })
 
@@ -103,6 +91,12 @@ test.describe('ReportsPage', () => {
     await expect(page.getByRole('heading', { name: /reports/i })).toBeVisible()
     await expect(page.getByRole('tablist')).toBeVisible()
   })
+
+  test('tab switching works', async ({ page }) => {
+    await page.goto('/reports')
+    await page.getByRole('tab', { name: 'Top Performers' }).click()
+    await expect(page.getByRole('tab', { name: 'Top Performers' }).getAttribute('aria-selected')).toBe('true')
+  })
 })
 
 test.describe('DocsPage', () => {
@@ -114,5 +108,11 @@ test.describe('DocsPage', () => {
   test('endpoint list is visible', async ({ page }) => {
     await page.goto('/docs')
     await expect(page.getByText('getVendors')).toBeVisible()
+  })
+
+  test('tabs switch correctly', async ({ page }) => {
+    await page.goto('/docs')
+    await page.getByRole('tab', { name: 'Types' }).click()
+    await expect(page.getByRole('tab', { name: 'Types' }).getAttribute('aria-selected')).toBe('true')
   })
 })

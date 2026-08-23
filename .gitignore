@@ -59,6 +59,10 @@ CLAUDE.md
 # Test coverage
 coverage/
 
+# Playwright
+playwright-report/
+test-results/
+
 # Temp files
 *.tmp
 *.bak
