@@ -2,6 +2,7 @@ import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import { PriceTdpHeatmap, VendorPerfHeatmap } from '@/components/charts/HeatmapChart'
 import { VendorDistributionPie, CategoryDistributionPie, PriceBandPie } from '@/components/charts/MarketPieCharts'
+import { MultiMetricComparison, PricePerfStacked } from '@/components/charts/StackedMetrics'
 import type { DeviceCategory } from '@/types'
 
 // Mock API
@@ -9,6 +10,7 @@ vi.mock('@/lib/api', () => ({
   getDevicesByCategory: vi.fn().mockReturnValue([]),
   getVendors: vi.fn().mockReturnValue([]),
   getFamilies: vi.fn().mockReturnValue([]),
+  getDeviceMetricsTable: vi.fn().mockReturnValue([]),
 }))
 
 describe('PriceTdpHeatmap', () => {
@@ -43,5 +45,19 @@ describe('PriceBandPie', () => {
   it('renders nothing when no data', () => {
     const { container } = render(<PriceBandPie category="GPU" />)
     expect(container.firstChild).toBeNull()
+  })
+})
+
+describe('MultiMetricComparison', () => {
+  it('renders empty state when no data', () => {
+    render(<MultiMetricComparison category="GPU" />)
+    expect(screen.getByText(/No compute data for GPU/i)).toBeDefined()
+  })
+})
+
+describe('PricePerfStacked', () => {
+  it('renders empty state when no data', () => {
+    render(<PricePerfStacked category="GPU" />)
+    expect(screen.getByText(/No value data for GPU/i)).toBeDefined()
   })
 })
