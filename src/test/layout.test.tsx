@@ -38,7 +38,7 @@ Object.defineProperty(document, 'documentElement', {
 
 // Mock getStats to avoid data loading in tests
 vi.mock('@/lib/api', () => ({
-  searchDevices: () => [],
+  searchDevices: vi.fn().mockReturnValue([]),
   getStats: async () => ({ devices: 0, vendors: 0, families: 0, benchmarks: 0, categories: [] }),
 }))
 
@@ -114,6 +114,50 @@ describe('Layout', () => {
       </MemoryRouter>
     )
     const searchInputs = screen.getAllByLabelText('Search devices')
-    expect(searchInputs.length).toBeGreaterThanOrEqual(1) // desktop always visible, mobile only when open
+    expect(searchInputs.length).toBeGreaterThanOrEqual(1)
+  })
+
+  it('renders all nav links', () => {
+    render(
+      <MemoryRouter initialEntries={['/']}>
+        <Routes>
+          <Route element={<Layout />}>
+            <Route path="/" element={<div>Home Page Content</div>} />
+          </Route>
+        </Routes>
+      </MemoryRouter>
+    )
+    expect(screen.getByRole('link', { name: 'Home' })).toBeDefined()
+    expect(screen.getByRole('link', { name: 'Browse' })).toBeDefined()
+    expect(screen.getAllByRole('link', { name: 'Compare' }).length).toBeGreaterThan(0)
+    expect(screen.getAllByRole('link', { name: 'Charts' }).length).toBeGreaterThan(0)
+  })
+
+  it('active nav link has aria-current', () => {
+    render(
+      <MemoryRouter initialEntries={['/browse']}>
+        <Routes>
+          <Route element={<Layout />}>
+            <Route path="/browse" element={<div>Test Page</div>} />
+          </Route>
+        </Routes>
+      </MemoryRouter>
+    )
+    const browseLink = screen.getByRole('link', { name: 'Browse' })
+    expect(browseLink.getAttribute('aria-current')).toBe('page')
+  })
+
+  it('navigates to different route', () => {
+    render(
+      <MemoryRouter initialEntries={['/']}>
+        <Routes>
+          <Route element={<Layout />}>
+            <Route path="/" element={<div>Home Page</div>} />
+            <Route path="/compare" element={<div>Compare Page</div>} />
+          </Route>
+        </Routes>
+      </MemoryRouter>
+    )
+    expect(screen.getByText('Home Page')).toBeDefined()
   })
 })

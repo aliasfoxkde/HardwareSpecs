@@ -235,6 +235,7 @@ export function StudioPage() {
     return result
   }, [data, advFilters])
 
+  // eslint-disable-next-line react-hooks/incompatible-library -- TanStack Table returns functions that can't be memoized
   const table = useReactTable({
     data: filteredByAdvData,
     columns,
