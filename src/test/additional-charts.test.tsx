@@ -3,7 +3,6 @@ import { render, screen } from '@testing-library/react'
 import { PriceTdpHeatmap, VendorPerfHeatmap } from '@/components/charts/HeatmapChart'
 import { VendorDistributionPie, CategoryDistributionPie, PriceBandPie } from '@/components/charts/MarketPieCharts'
 import { MultiMetricComparison, PricePerfStacked } from '@/components/charts/StackedMetrics'
-import type { DeviceCategory } from '@/types'
 
 // Mock API
 vi.mock('@/lib/api', () => ({

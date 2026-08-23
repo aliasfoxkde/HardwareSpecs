@@ -2,7 +2,6 @@ import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import { RadarComparisonChart, TopDevicesRadar } from '@/components/charts/RadarComparison'
 import { PerfVsPriceChart, TopsVsPriceChart } from '@/components/charts/ScatterWithRegression'
-import type { DeviceCategory } from '@/types'
 
 // Mock recharts
 vi.mock('recharts', () => ({
