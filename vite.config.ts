@@ -34,6 +34,7 @@ export default defineConfig({
     css: true,
     testTimeout: 30000,
     hookTimeout: 30000,
+    exclude: ['e2e/**', 'node_modules/**'],
     coverage: {
       provider: 'v8',
       thresholds: {
