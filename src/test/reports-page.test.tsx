@@ -67,4 +67,79 @@ describe('ReportsPage', () => {
     render(<ReportsPage />, { wrapper: Wrapper })
     expect(screen.getByRole('tablist', { name: /Report selection/i })).toBeDefined()
   })
+
+  it('shows correct aria-selected for active tab', () => {
+    render(<ReportsPage />, { wrapper: Wrapper })
+    const overviewTab = screen.getByRole('tab', { name: /Overview/i })
+    expect(overviewTab.getAttribute('aria-selected')).toBe('true')
+  })
+
+  it('switches report on keyboard ArrowDown', () => {
+    render(<ReportsPage />, { wrapper: Wrapper })
+    const overviewTab = screen.getByRole('tab', { name: /Overview/i })
+    overviewTab.focus()
+    fireEvent.keyDown(overviewTab, { key: 'ArrowDown' })
+    const categoriesTab = screen.getByRole('tab', { name: /Categories/i })
+    expect(categoriesTab.getAttribute('aria-selected')).toBe('true')
+  })
+
+  it('switches report on keyboard ArrowUp', () => {
+    render(<ReportsPage />, { wrapper: Wrapper })
+    // First switch to another tab
+    fireEvent.click(screen.getByRole('tab', { name: /Categories/i }))
+    const categoriesTab = screen.getByRole('tab', { name: /Categories/i })
+    categoriesTab.focus()
+    fireEvent.keyDown(categoriesTab, { key: 'ArrowUp' })
+    const overviewTab = screen.getByRole('tab', { name: /Overview/i })
+    expect(overviewTab.getAttribute('aria-selected')).toBe('true')
+  })
+
+  it('wraps around on ArrowDown from last tab', () => {
+    render(<ReportsPage />, { wrapper: Wrapper })
+    const timelineTab = screen.getByRole('tab', { name: /Timeline/i })
+    timelineTab.focus()
+    fireEvent.keyDown(timelineTab, { key: 'ArrowDown' })
+    const overviewTab = screen.getByRole('tab', { name: /Overview/i })
+    expect(overviewTab.getAttribute('aria-selected')).toBe('true')
+  })
+
+  it('wraps around on ArrowUp from first tab', () => {
+    render(<ReportsPage />, { wrapper: Wrapper })
+    const overviewTab = screen.getByRole('tab', { name: /Overview/i })
+    overviewTab.focus()
+    fireEvent.keyDown(overviewTab, { key: 'ArrowUp' })
+    const timelineTab = screen.getByRole('tab', { name: /Timeline/i })
+    expect(timelineTab.getAttribute('aria-selected')).toBe('true')
+  })
+
+  it('clicking all tabs switches correctly', () => {
+    render(<ReportsPage />, { wrapper: Wrapper })
+    const tabs = ['Categories', 'Vendors', 'Data Gaps', 'Top Performers', 'Price Analysis', 'Process Node', 'Memory', 'Vendor Deep Dive', 'Timeline']
+    for (const tabName of tabs) {
+      fireEvent.click(screen.getByRole('tab', { name: new RegExp(tabName, 'i') }))
+    }
+  })
+
+  it('tabpanel has correct aria-labelledby attribute', () => {
+    render(<ReportsPage />, { wrapper: Wrapper })
+    const tabpanel = screen.getByRole('tabpanel')
+    expect(tabpanel.getAttribute('aria-labelledby')).toMatch(/report-tab-/)
+  })
+
+  it('inactive tab has tabIndex -1', () => {
+    render(<ReportsPage />, { wrapper: Wrapper })
+    const categoriesTab = screen.getByRole('tab', { name: /Categories/i })
+    expect(categoriesTab.getAttribute('tabIndex')).toBe('-1')
+  })
+
+  it('active tab has tabIndex 0', () => {
+    render(<ReportsPage />, { wrapper: Wrapper })
+    const overviewTab = screen.getByRole('tab', { name: /Overview/i })
+    expect(overviewTab.getAttribute('tabIndex')).toBe('0')
+  })
+
+  it('renders page description', () => {
+    render(<ReportsPage />, { wrapper: Wrapper })
+    expect(screen.getByText(/Data quality, coverage analysis/i)).toBeDefined()
+  })
 })

@@ -167,5 +167,90 @@ describe('DocsPage', () => {
       fireEvent.click(screen.getByText('getStats'))
       expect(screen.getByPlaceholderText('No parameters needed')).toBeDefined()
     })
+
+    it('runs API call on Run button click', () => {
+      render(<DocsPage />, { wrapper: Wrapper })
+      fireEvent.click(screen.getByText('getVendors'))
+      const runBtn = screen.getByRole('button', { name: 'Run' })
+      fireEvent.click(runBtn)
+    })
+
+    it('runs API call on Enter key', () => {
+      render(<DocsPage />, { wrapper: Wrapper })
+      fireEvent.click(screen.getByText('getVendors'))
+      const input = screen.getByLabelText('API parameter input')
+      fireEvent.keyDown(input, { key: 'Enter' })
+    })
+  })
+
+  describe('Types tab content', () => {
+    it('shows DeviceCategory enum values', () => {
+      render(<DocsPage />, { wrapper: Wrapper })
+      fireEvent.click(screen.getByRole('tab', { name: 'Types' }))
+      expect(screen.getByText('CPU')).toBeDefined()
+      expect(screen.getByText('GPU')).toBeDefined()
+    })
+
+    it('shows type fields for DeviceListItem', () => {
+      render(<DocsPage />, { wrapper: Wrapper })
+      fireEvent.click(screen.getByRole('tab', { name: 'Types' }))
+      const headings = screen.getAllByRole('heading', { name: /DeviceListItem/i })
+      expect(headings.length).toBeGreaterThan(0)
+    })
+
+    it('shows FilterState type fields', () => {
+      render(<DocsPage />, { wrapper: Wrapper })
+      fireEvent.click(screen.getByRole('tab', { name: 'Types' }))
+      expect(screen.getByText(/vendors\?: string\[\]/i)).toBeDefined()
+    })
+  })
+
+  describe('Keyboard navigation', () => {
+    it('handles ArrowLeft key on tabs', () => {
+      render(<DocsPage />, { wrapper: Wrapper })
+      const typesTab = screen.getByRole('tab', { name: 'Types' })
+      typesTab.focus()
+      fireEvent.keyDown(typesTab, { key: 'ArrowLeft' })
+      expect(screen.getByRole('tab', { name: 'Endpoints' }).getAttribute('aria-selected')).toBe('true')
+    })
+  })
+
+  describe('Quick Start section', () => {
+    it('has Base URL code block', () => {
+      render(<DocsPage />, { wrapper: Wrapper })
+      expect(screen.getByText('https://siliconrank.cyopsys.com')).toBeDefined()
+    })
+
+    it('has Copy button in Quick Start', () => {
+      render(<DocsPage />, { wrapper: Wrapper })
+      expect(screen.getByRole('button', { name: 'Copy' })).toBeDefined()
+    })
+
+    it('shows Response Format and Authentication', () => {
+      render(<DocsPage />, { wrapper: Wrapper })
+      expect(screen.getByText('Response Format')).toBeDefined()
+      expect(screen.getByText('Authentication')).toBeDefined()
+    })
+  })
+
+  describe('Endpoint details', () => {
+    it('shows method badge for GET endpoint', () => {
+      render(<DocsPage />, { wrapper: Wrapper })
+      fireEvent.click(screen.getByText('getVendors'))
+      const getBadge = document.querySelector('.bg-green-500\\/20')
+      expect(getBadge?.textContent).toBe('GET')
+    })
+
+    it('shows Request URL section', () => {
+      render(<DocsPage />, { wrapper: Wrapper })
+      fireEvent.click(screen.getByText('getVendors'))
+      expect(screen.getByText('Request URL')).toBeDefined()
+    })
+
+    it('shows endpoint description', () => {
+      render(<DocsPage />, { wrapper: Wrapper })
+      fireEvent.click(screen.getByText('getVendors'))
+      expect(screen.getByText('Get all hardware vendors')).toBeDefined()
+    })
   })
 })

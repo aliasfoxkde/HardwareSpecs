@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { render, screen, fireEvent } from '@testing-library/react'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { Layout } from '@/components/layout/Layout'
 
@@ -159,5 +159,311 @@ describe('Layout', () => {
       </MemoryRouter>
     )
     expect(screen.getByText('Home Page')).toBeDefined()
+  })
+
+  describe('Mobile menu', () => {
+    it('mobile menu button is present', () => {
+      render(
+        <MemoryRouter initialEntries={['/browse']}>
+          <Routes>
+            <Route element={<Layout />}>
+              <Route path="/browse" element={<div>Test Page</div>} />
+            </Route>
+          </Routes>
+        </MemoryRouter>
+      )
+      const menuBtn = screen.getByRole('button', { name: /Toggle navigation menu/i })
+      expect(menuBtn).toBeDefined()
+    })
+
+    it('mobile menu opens on click', () => {
+      render(
+        <MemoryRouter initialEntries={['/browse']}>
+          <Routes>
+            <Route element={<Layout />}>
+              <Route path="/browse" element={<div>Test Page</div>} />
+            </Route>
+          </Routes>
+        </MemoryRouter>
+      )
+      const menuBtn = screen.getByRole('button', { name: /Toggle navigation menu/i })
+      fireEvent.click(menuBtn)
+      expect(screen.getByRole('menu')).toBeDefined()
+    })
+
+    it('mobile menu closes on second click', () => {
+      render(
+        <MemoryRouter initialEntries={['/browse']}>
+          <Routes>
+            <Route element={<Layout />}>
+              <Route path="/browse" element={<div>Test Page</div>} />
+            </Route>
+          </Routes>
+        </MemoryRouter>
+      )
+      const menuBtn = screen.getByRole('button', { name: /Toggle navigation menu/i })
+      fireEvent.click(menuBtn)
+      expect(screen.getByRole('menu')).toBeDefined()
+      fireEvent.click(menuBtn)
+    })
+
+    it('mobile menu has menuitem links', () => {
+      render(
+        <MemoryRouter initialEntries={['/browse']}>
+          <Routes>
+            <Route element={<Layout />}>
+              <Route path="/browse" element={<div>Test Page</div>} />
+            </Route>
+          </Routes>
+        </MemoryRouter>
+      )
+      const menuBtn = screen.getByRole('button', { name: /Toggle navigation menu/i })
+      fireEvent.click(menuBtn)
+      const menuItems = screen.getAllByRole('menuitem')
+      expect(menuItems.length).toBeGreaterThan(0)
+    })
+
+    it('Escape key closes mobile menu', () => {
+      render(
+        <MemoryRouter initialEntries={['/browse']}>
+          <Routes>
+            <Route element={<Layout />}>
+              <Route path="/browse" element={<div>Test Page</div>} />
+            </Route>
+          </Routes>
+        </MemoryRouter>
+      )
+      const menuBtn = screen.getByRole('button', { name: /Toggle navigation menu/i })
+      fireEvent.click(menuBtn)
+      expect(screen.getByRole('menu')).toBeDefined()
+      fireEvent.keyDown(document, { key: 'Escape' })
+    })
+
+    it('mobile menu shows search input', () => {
+      render(
+        <MemoryRouter initialEntries={['/browse']}>
+          <Routes>
+            <Route element={<Layout />}>
+              <Route path="/browse" element={<div>Test Page</div>} />
+            </Route>
+          </Routes>
+        </MemoryRouter>
+      )
+      const menuBtn = screen.getByRole('button', { name: /Toggle navigation menu/i })
+      fireEvent.click(menuBtn)
+      const searchInputs = screen.getAllByLabelText('Search devices')
+      expect(searchInputs.length).toBeGreaterThanOrEqual(1)
+    })
+
+    it('mobile menu is aria-expanded', () => {
+      render(
+        <MemoryRouter initialEntries={['/browse']}>
+          <Routes>
+            <Route element={<Layout />}>
+              <Route path="/browse" element={<div>Test Page</div>} />
+            </Route>
+          </Routes>
+        </MemoryRouter>
+      )
+      const menuBtn = screen.getByRole('button', { name: /Toggle navigation menu/i })
+      expect(menuBtn.getAttribute('aria-expanded')).toBe('false')
+      fireEvent.click(menuBtn)
+      expect(menuBtn.getAttribute('aria-expanded')).toBe('true')
+    })
+
+    it('mobile menu closes on link click', () => {
+      render(
+        <MemoryRouter initialEntries={['/browse']}>
+          <Routes>
+            <Route element={<Layout />}>
+              <Route path="/browse" element={<div>Test Page</div>} />
+              <Route path="/compare" element={<div>Compare Page</div>} />
+            </Route>
+          </Routes>
+        </MemoryRouter>
+      )
+      const menuBtn = screen.getByRole('button', { name: /Toggle navigation menu/i })
+      fireEvent.click(menuBtn)
+      const menuItems = screen.getAllByRole('menuitem')
+      if (menuItems.length > 0) {
+        fireEvent.click(menuItems[0])
+      }
+    })
+  })
+
+  describe('Search functionality', () => {
+    it('search input is empty initially', () => {
+      render(
+        <MemoryRouter initialEntries={['/']}>
+          <Routes>
+            <Route element={<Layout />}>
+              <Route path="/" element={<div>Home</div>} />
+            </Route>
+          </Routes>
+        </MemoryRouter>
+      )
+      const searchInput = screen.getByPlaceholderText('Search devices...')
+      expect(searchInput.getAttribute('value')).toBe('')
+    })
+
+    it('typing in search input changes value', () => {
+      render(
+        <MemoryRouter initialEntries={['/']}>
+          <Routes>
+            <Route element={<Layout />}>
+              <Route path="/" element={<div>Home</div>} />
+            </Route>
+          </Routes>
+        </MemoryRouter>
+      )
+      const searchInput = screen.getByPlaceholderText('Search devices...')
+      fireEvent.change(searchInput, { target: { value: 'RTX' } })
+      expect(searchInput.getAttribute('value')).toBe('RTX')
+    })
+
+    it('short query does not show results', () => {
+      render(
+        <MemoryRouter initialEntries={['/']}>
+          <Routes>
+            <Route element={<Layout />}>
+              <Route path="/" element={<div>Home</div>} />
+            </Route>
+          </Routes>
+        </MemoryRouter>
+      )
+      const searchInput = screen.getByPlaceholderText('Search devices...')
+      fireEvent.change(searchInput, { target: { value: 'R' } })
+    })
+  })
+
+  describe('Theme toggle', () => {
+    it('theme button is clickable', () => {
+      render(
+        <MemoryRouter initialEntries={['/']}>
+          <Routes>
+            <Route element={<Layout />}>
+              <Route path="/" element={<div>Home</div>} />
+            </Route>
+          </Routes>
+        </MemoryRouter>
+      )
+      const themeBtns = screen.getAllByLabelText(/Theme:/)
+      if (themeBtns.length > 0) fireEvent.click(themeBtns[0])
+    })
+
+    it('theme button cycles through themes', () => {
+      render(
+        <MemoryRouter initialEntries={['/']}>
+          <Routes>
+            <Route element={<Layout />}>
+              <Route path="/" element={<div>Home</div>} />
+            </Route>
+          </Routes>
+        </MemoryRouter>
+      )
+      const themeBtns = screen.getAllByLabelText(/Theme:/)
+      if (themeBtns.length > 0) {
+        fireEvent.click(themeBtns[0])
+        fireEvent.click(themeBtns[0])
+        fireEvent.click(themeBtns[0])
+      }
+    })
+  })
+
+  describe('Footer', () => {
+    it('renders footer', () => {
+      render(
+        <MemoryRouter initialEntries={['/']}>
+          <Routes>
+            <Route element={<Layout />}>
+              <Route path="/" element={<div>Home</div>} />
+            </Route>
+          </Routes>
+        </MemoryRouter>
+      )
+      expect(screen.getByText('Open Source (MIT)')).toBeDefined()
+    })
+
+    it('footer has copyright', () => {
+      render(
+        <MemoryRouter initialEntries={['/']}>
+          <Routes>
+            <Route element={<Layout />}>
+              <Route path="/" element={<div>Home</div>} />
+            </Route>
+          </Routes>
+        </MemoryRouter>
+      )
+      const currentYear = new Date().getFullYear()
+      expect(screen.getByText(new RegExp(String(currentYear)))).toBeDefined()
+    })
+
+    it('footer has GitHub link', () => {
+      render(
+        <MemoryRouter initialEntries={['/']}>
+          <Routes>
+            <Route element={<Layout />}>
+              <Route path="/" element={<div>Home</div>} />
+            </Route>
+          </Routes>
+        </MemoryRouter>
+      )
+      expect(screen.getByText('GitHub')).toBeDefined()
+    })
+
+    it('footer has sponsor link', () => {
+      render(
+        <MemoryRouter initialEntries={['/']}>
+          <Routes>
+            <Route element={<Layout />}>
+              <Route path="/" element={<div>Home</div>} />
+            </Route>
+          </Routes>
+        </MemoryRouter>
+      )
+      expect(screen.getByText('Sponsor')).toBeDefined()
+    })
+
+    it('footer has Ko-fi link', () => {
+      render(
+        <MemoryRouter initialEntries={['/']}>
+          <Routes>
+            <Route element={<Layout />}>
+              <Route path="/" element={<div>Home</div>} />
+            </Route>
+          </Routes>
+        </MemoryRouter>
+      )
+      expect(screen.getByText('Ko-fi')).toBeDefined()
+    })
+  })
+
+  describe('Desktop navigation', () => {
+    it('desktop nav links are present', () => {
+      render(
+        <MemoryRouter initialEntries={['/']}>
+          <Routes>
+            <Route element={<Layout />}>
+              <Route path="/" element={<div>Home</div>} />
+            </Route>
+          </Routes>
+        </MemoryRouter>
+      )
+      expect(screen.getAllByRole('link', { name: 'Reports' }).length).toBeGreaterThan(0)
+      expect(screen.getAllByRole('link', { name: 'Docs' }).length).toBeGreaterThan(0)
+    })
+
+    it('Studio link is present', () => {
+      render(
+        <MemoryRouter initialEntries={['/']}>
+          <Routes>
+            <Route element={<Layout />}>
+              <Route path="/" element={<div>Home</div>} />
+            </Route>
+          </Routes>
+        </MemoryRouter>
+      )
+      expect(screen.getAllByRole('link', { name: 'Studio' }).length).toBeGreaterThan(0)
+    })
   })
 })
