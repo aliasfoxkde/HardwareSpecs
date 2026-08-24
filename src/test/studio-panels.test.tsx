@@ -155,4 +155,49 @@ describe('CorrelationPanel', () => {
     render(<CorrelationPanel data={[mockRow]} />)
     expect(screen.getByText(/Insufficient data/i)).toBeDefined()
   })
+
+  it('renders chart container with sufficient data', () => {
+    render(<CorrelationPanel data={mockData} />)
+    const charts = screen.getAllByTestId('composedchart')
+    expect(charts.length).toBeGreaterThan(0)
+  })
+})
+
+describe('RankingPanel extended', () => {
+  it('renders with single device', () => {
+    render(<RankingPanel data={[mockRow]} />)
+    expect(screen.getByText('Top 10 by TOPS')).toBeDefined()
+  })
+
+  it('renders with many devices', () => {
+    const manyDevices = Array.from({ length: 20 }, (_, i) => ({
+      ...mockRow,
+      deviceId: `gpu-${i}`,
+      modelName: `Device ${i}`,
+      effectiveInt8Tops: 500 - i * 10,
+    }))
+    render(<RankingPanel data={manyDevices} />)
+    expect(screen.getByText('Top 10 by TOPS')).toBeDefined()
+  })
+})
+
+describe('ScatterPanel extended', () => {
+  it('renders scatter chart with data', () => {
+    render(<ScatterPanel data={mockData} />)
+    expect(screen.getByTestId('scatterchart')).toBeDefined()
+  })
+})
+
+describe('DataQualityPanel extended', () => {
+  it('renders with perfect completeness', () => {
+    const perfectData = [{ ...mockRow, dataCompleteness: 1.0 }]
+    render(<DataQualityPanel data={perfectData} />)
+    expect(screen.getByText(/High/i)).toBeDefined()
+  })
+
+  it('renders with low completeness', () => {
+    const lowData = [{ ...mockRow, dataCompleteness: 0.3 }]
+    render(<DataQualityPanel data={lowData} />)
+    expect(screen.getByText(/Low/i)).toBeDefined()
+  })
 })

@@ -5,7 +5,7 @@ import { TopTopsBarChart, TopTopsPerDollarChart, TopTopsPerWattChart } from '@/c
 // Mock recharts to avoid canvas issues in tests
 vi.mock('recharts', () => ({
   BarChart: ({ children, data }: { children: React.ReactNode; data: unknown[] }) => (
-    <div data-testid="barchart" data-count={data.length}>{children}</div>
+    <div data-testid="barchart" data-count={data?.length ?? 0}>{children}</div>
   ),
   Bar: () => <div data-testid="bar" />,
   XAxis: () => <div data-testid="x-axis" />,

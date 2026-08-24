@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { describe, it, expect, vi } from 'vitest'
+import { render, screen, fireEvent } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { BrowsePage } from '@/pages/BrowsePage'
 
@@ -72,5 +72,25 @@ describe('BrowsePage', () => {
     const meta = document.querySelector('meta[name="description"]')
     expect(meta).toBeTruthy()
     expect(meta?.getAttribute('content')).toContain('Browse and filter')
+  })
+
+  it('renders all category options', () => {
+    render(
+      <MemoryRouter>
+        <BrowsePage />
+      </MemoryRouter>
+    )
+    expect(screen.getByText('NPU')).toBeDefined()
+    expect(screen.getByText('GPU')).toBeDefined()
+    expect(screen.getByText('ASIC')).toBeDefined()
+  })
+
+  it('has results count display', () => {
+    render(
+      <MemoryRouter>
+        <BrowsePage />
+      </MemoryRouter>
+    )
+    expect(screen.getByText(/Showing/i)).toBeDefined()
   })
 })
