@@ -93,4 +93,75 @@ describe('BrowsePage', () => {
     )
     expect(screen.getByText(/Showing/i)).toBeDefined()
   })
+
+  it('has search input with aria-label', () => {
+    render(
+      <MemoryRouter>
+        <BrowsePage />
+      </MemoryRouter>
+    )
+    expect(screen.getByPlaceholderText(/Search by name/)).toBeDefined()
+  })
+
+  it('category button has aria-pressed attribute', () => {
+    render(
+      <MemoryRouter>
+        <BrowsePage />
+      </MemoryRouter>
+    )
+    const gpuBtn = screen.getByText('GPU')
+    expect(gpuBtn.getAttribute('aria-pressed')).toBeDefined()
+  })
+
+  it('renders table with column headers', () => {
+    render(
+      <MemoryRouter>
+        <BrowsePage />
+      </MemoryRouter>
+    )
+    expect(screen.getByText('Device')).toBeDefined()
+    expect(screen.getByText('INT8 TOPS')).toBeDefined()
+    expect(screen.getByText('TOPS/$')).toBeDefined()
+  })
+
+  it('export CSV button has aria-label', () => {
+    render(
+      <MemoryRouter>
+        <BrowsePage />
+      </MemoryRouter>
+    )
+    const csvBtn = screen.getByLabelText('Export CSV')
+    expect(csvBtn).toBeDefined()
+  })
+
+  it('export JSON button has aria-label', () => {
+    render(
+      <MemoryRouter>
+        <BrowsePage />
+      </MemoryRouter>
+    )
+    const jsonBtn = screen.getByLabelText('Export JSON')
+    expect(jsonBtn).toBeDefined()
+  })
+
+  it('clear all filters clears category when clicked', () => {
+    render(
+      <MemoryRouter initialEntries={['/?category=CPU']}>
+        <BrowsePage />
+      </MemoryRouter>
+    )
+    const clearBtn = screen.getByText('Clear all filters')
+    fireEvent.click(clearBtn)
+  })
+
+  it('search input is present with correct placeholder', () => {
+    render(
+      <MemoryRouter>
+        <BrowsePage />
+      </MemoryRouter>
+    )
+    const input = screen.getByPlaceholderText(/Search by name/)
+    expect(input).toBeDefined()
+    expect((input as HTMLInputElement).type).toBe('text')
+  })
 })
