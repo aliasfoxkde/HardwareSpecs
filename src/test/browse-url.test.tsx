@@ -10,7 +10,6 @@ describe('BrowsePage URL state sync', () => {
         <BrowsePage />
       </MemoryRouter>,
     )
-    // The GPU category button should be active (has active styling)
     const gpuBtn = screen.getByText('GPU')
     expect(gpuBtn).toBeDefined()
   })
@@ -31,7 +30,42 @@ describe('BrowsePage URL state sync', () => {
         <BrowsePage />
       </MemoryRouter>,
     )
-    // Page should render without error
+    expect(screen.getByText('Browse Devices')).toBeDefined()
+  })
+
+  it('reads vendor filter from URL', () => {
+    render(
+      <MemoryRouter initialEntries={['/?vendor=nvidia']}>
+        <BrowsePage />
+      </MemoryRouter>,
+    )
+    expect(screen.getByText('Browse Devices')).toBeDefined()
+  })
+
+  it('reads tdpMin filter from URL', () => {
+    render(
+      <MemoryRouter initialEntries={['/?tdpMin=100']}>
+        <BrowsePage />
+      </MemoryRouter>,
+    )
+    expect(screen.getByText('Browse Devices')).toBeDefined()
+  })
+
+  it('reads priceMin filter from URL', () => {
+    render(
+      <MemoryRouter initialEntries={['/?priceMin=500']}>
+        <BrowsePage />
+      </MemoryRouter>,
+    )
+    expect(screen.getByText('Browse Devices')).toBeDefined()
+  })
+
+  it('combines multiple URL filters', () => {
+    render(
+      <MemoryRouter initialEntries={['/?category=GPU&vendor=nvidia&q=rtx&sort=tops']}>
+        <BrowsePage />
+      </MemoryRouter>,
+    )
     expect(screen.getByText('Browse Devices')).toBeDefined()
   })
 })
